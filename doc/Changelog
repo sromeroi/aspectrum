@@ -1,0 +1,70 @@
+V 0.1.5
+-------
+graphics.c
+	some stuff to enable flash blinking
+	rewrite of DisplayScreen
+
+v_allegro.c
+	add a dummy stupid ghline callback for allegro's routine hline.
+ 	the initmouse routine 
+
+v_allegro.h
+	add a dummy stupid ghline callback for allegro's routine hline.
+ 	avoid loop call by #include
+ 	declare initmouse();
+
+contrib/getopt.c
+	stuff for win compiling
+
+Makefile
+ 	now manage all the depends
+	stuff for win compiling
+
+makedeps.bat
+	stuff for win compiling
+
+main.c
+	stuff for compiling with allegro <3.9.38
+	stuff for calling general options from F1 menu
+	bug fixed -d only work the first args and --debug never
+	backspace key work as shift+0, tab key as shift+symb (extra mode)
+	stuff for not search in /usr/share/aspectrum in machines where no 
+	  has sense (DOS/Windows)
+        emuopt is now a extern struct
+ 	call de initmouse();
+ 	some strings translates to english (no more spanglish)
+  	add code to use optget
+
+main.h (new)
+ 	define the struct emuopt
+
+menu.c
+	stuff for compiling with allegro <3.9.38
+	the general options menu called by F7 with Gunstick Option
+
+z80.c
+	a bug that causes gunstick emulation always on.
+ 	add gunstick emulation at Z80InPort
+ 	add code int Z80InPort to only scan keyboard is bit #2 is 0
+  	Z80InPort now need regs in the call args.
+
+z80.h
+        Z80InPort now need regs in the call args.
+
+snap.c
+	add a check for buggy Z80 (need a lot more)
+
+macros.c
+        Z80InPort now need regs in the call args.
+opcodes.c
+        Z80InPort now need regs in the call args.
+op_ed.c
+        Z80InPort now need regs in the call args.
+
+doc/README
+	modify info about gunstick
+	some instructions about the changes
+
+doc/Changelog (new)
+	First use of changelog.
+

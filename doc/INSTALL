@@ -1,0 +1,34 @@
+    _                        _                        
+   / \   ___ _ __   ___  ___| |_ _ __ _   _ _ __ ___  
+  / _ \ / __| '_ \ / _ \/ __| __| '__| | | | '_ ` _ \ 
+ / ___ \\__ \ |_) |  __/ (__| |_| |  | |_| | | | | | |
+/_/   \_\___/ .__/ \___|\___|\__|_|   \__,_|_| |_| |_|
+            |_|                                       
+                   POWERED BY Linux
+
+  Copyright (c) 2000
+  Santiago Romero Iglesias  -  sromero@escomposlinux.org
+
+
+
+  HOW TO INSTALL THIS PROGRAM
+=======================================================================
+
+ Just type the following (as root):
+
+    make clean
+    make
+
+ You can execute directly the emulator by running the aspectrum
+ binary as ./aspectrum. At this moment it only runs on the same
+ directory that has been compiled, that's because this program
+ is still in a full development stage and it's not for the
+ end-user...
+
+ There is no make install nor make uninstall...
+
+
+  CU!
+
+  Santiago Romero AkA NoP/Compiler.
+  sromero@escomposlinux.org

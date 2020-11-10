@@ -1,0 +1,60 @@
+
+ ASPECTRUM EMULATOR TO-DO 
+============================================================================
+
+ BUGS:
+----------------------------------------------------------------------------
+
+ - Some games blink when playing them, as Ghould And Ghosts. It's maybe
+   something related with the video interruption or maybe the timing I'm
+   using, no idea :(
+
+ - TAP loading routine is not working right for some games, maybe it's due
+   to z80core emulation bugs :(
+
+ - Look for badly implemented Z80 opcodes.
+ 
+
+ EMULATOR:
+----------------------------------------------------------------------------
+
+ - Modify disasm.c and create a good disassemble routine
+   Finish disassembler (@ simbols)
+ 
+ - Function DrawScanLine(int linea);
+   Update screen each scanline, not each screen (224 tstates, 321 lines).
+ - Add undocumented opcodes.
+
+ - Improve TAP loading routine to detect errors and so on...
+ - Add real-time TAP loading routine.
+ - Add TZX loading routine.
+
+
+ - Implement menu option for changing the TAPFILE and Rewind.
+   By default make tapfile = NULL. On a LOAD "" , if tapfile == NULL
+   ask for a tapfile, else load the opened tapfile.
+   On the tapfile menu put the following:
+
+    - Select tapfile
+    - rewind tapfile
+   
+
+ - Implement frameskip correctly so that older computers can use Aspectrum.
+
+ - fix some scare_mouse and unscare_mouse that Alea put very happyly.
+
+ - Eliminate al machine depend code (main.c, NO_GETOPTLONG ) and allegro version
+   depend. (menu.c and vallegro.c)
+
+ - See what happends with (my) mouse in Linux Console
+ 
+ DOCUMENTATION:
+----------------------------------------------------------------------------
+ - Good README and INSTALL files.
+
+
+
+ INTERNACIONALIZATION:
+----------------------------------------------------------------------------
+
+ 

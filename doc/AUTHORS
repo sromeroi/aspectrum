@@ -1,0 +1,71 @@
+
+====================================================================
+ Those are the main contributors to Aspectrum:
+====================================================================
+
+
+ MetalBrain:
+--------------------------------------------------------------------
+ - 14-05-2001: Big patch implementing IND, INDR, INIR, OUTI, OTIR,
+               INI, OUTD and OTDR. 
+ - 12-05-2001: Fixed LD L, [HL] timing bug. 
+
+
+ Alvaro Alea:
+--------------------------------------------------------------------
+ - 11-05-2001: Nice patch allowing the load of Z80 snapshot files.
+ - 13-05-2001: OUTI implementation.
+ - 22-09-2001: Add comand line parameters.
+ - 15-10-2001: Add Gunstick emulation.
+    
+
+
+ Kak-
+--------------------------------------------------------------------
+ - 07-03-2001: He found a bug in the DEC macro (0x79 -> 0x7F).
+ - 15-05-2001: Kak- has submitted a patch wrapping all the Allegro
+               graphical functions on a separate C file in order
+               to make easier to port to non-allegro platforms.
+
+
+ Raúl Gómez:
+--------------------------------------------------------------------
+ - 10-05-2001: Raúl found a small bug on op_dd_fd.c in the default:
+               case, as I was not decrementing the R register on it.
+
+ - Help on tap loading routines.
+ - He helped me a lot in the firsts steps of my emulator with
+   some ROM routines and the first bugs on some opcodes...
+ - He gave me lots of ideas about the emulation.
+
+
+ Ignacio Burgueño:
+--------------------------------------------------------------------
+ - He tested my emulator against his GLECK Spectrum Emulator to
+   help me on finding bad implemented opcodes. This helped a lot.
+ 
+
+ Philip Kendall:
+--------------------------------------------------------------------
+ - He allowed me to use his flags code from his Fuse Spectrum
+   emulator. This accelerated the development a lot, as I had
+   some errors emulating flags in some opcodes...
+
+
+ Marat Fayzullin:
+--------------------------------------------------------------------
+ - He released the source code for his Z80 core emulator, and I
+   learnt a lot from it. It's "How to program an emulator" HOWTO
+   is also quite interesting.
+
+
+ Tony Brazil:
+--------------------------------------------------------------------
+ - Game testing & reports for the WORKING and NOT_WORKING files.
+ 
+
+ Santiago Romero:
+--------------------------------------------------------------------
+ - That's me, the author :-)
+
+  
