@@ -91,12 +91,12 @@
 #define FLAG_Z  0x40
 #define FLAG_S  0x80
 
-
-#endif
+#endif // ifndef _DISASM_
 
 
 /*--- Memory Read from the A address on no bank machines -------------*/
-#define Z80ReadMem(A)   ((regs->RAM[(A)]))
+//#define Z80ReadMem(A)   ((regs->RAM[(A)]))
+#define Z80ReadMem(A) readmem(A)
 
 //  return( regs->RAM[A] );
 

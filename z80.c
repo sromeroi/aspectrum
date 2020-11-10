@@ -33,16 +33,20 @@
 
 #include "tables.h"
 #include <stdio.h>
-#include "aspec.h"
 
+#include "z80.h"
 #include "graphics.h"
 #include "monofnt.h"
 #include "menu.h"
 #include "main.h"
+#include "sound.h"
+#include "snaps.h"
+#include "mem.h"
+#include "macros.c"
 
 /* RAM variable, debug toggle variable, pressed key and
    row variables for keyboard emulation                   */
-extern byte *RAM;
+//extern byte *RAM;
 extern int debug, main_tecla, scanl;
 extern char *msg_log;
 extern int fila[5][5];
@@ -84,14 +88,19 @@ byte ioblock_dec1_table[64];
 byte ioblock_2_table[0x100];
 
 /*--- Memory Write on the A address on no bank machines -------------*/
-void
-Z80WriteMem (word where, word A, Z80Regs * regs)
+void Z80WriteMem (word where, word A, Z80Regs * regs)
 {
-  if (where >= 16384)
-    regs->RAM[where] = A;
+//  if (where >= 16384)
+//    regs->RAM[where] = A;
+	writemem(where, (byte)A);
 }
-
-#endif
+/*
+int Z80ReadMem(word where)
+{   
+	return readmem(where);
+}
+*/
+#endif // #ifndef _DISASM_
 
 /*====================================================================
   void Z80Reset( Z80Regs *regs, int cycles )
@@ -252,19 +261,20 @@ Z80Run (Z80Regs * regs, int numcycles)
 	Z80Patch (regs);
 
       /* check if it's time to do other hardware emulation */
-      if (regs->ICount <= 0)
-	{
-	  tmpreg.W = Z80Hardware (regs);
+      if (regs->ICount <= 0) {
+//	if (regs->petint==1) {
+	  regs->petint=0;
+/*	  tmpreg.W = Z80Hardware (regs); */ //Z80Hardware alwais return INT_NOINT
 	  regs->ICount += regs->IPeriod;
 	  loop = regs->ICount + loop;
 
 	  /* check if we must exit the emulation or there is an INT */
-	  if (tmpreg.W == INT_QUIT)
+/*	  if (tmpreg.W == INT_QUIT)
 	    return (regs->PC.W);
-	  if (tmpreg.W != INT_NOINT)
+	  if (tmpreg.W != INT_NOINT) */   
 	    Z80Interrupt (regs, tmpreg.W);
 	}
-    }
+  }
 
   return (regs->PC.W);
 }
@@ -342,8 +352,9 @@ Z80Hardware (register Z80Regs * regs)
 void
 Z80Patch (register Z80Regs * regs)
 {
+// QUE ALGUIEN ME EXPLIQUE por que hay dos tapfile ???
 	extern FILE *tapfile;  
-	extern struct tipo_emuopt emuopt;
+	extern tipo_emuopt emuopt;
   	if (emuopt.tapefile[0] != 0)
     {
 	  //	AS_printf("Z80patch:%x\n",tapfile);
@@ -406,12 +417,12 @@ Z80MemWrite (register word address, register byte value, Z80Regs * regs)
 byte
 Z80InPort (register Z80Regs * regs, register word port)
 {
-  int cur_tstate, tmp;
+//  int cur_tstate, tmp;
   int code = 0xFF;
   byte valor;
   int x, y;
-  extern struct tipo_emuopt emuopt;
-  extern struct tipo_hwopt hwopt;
+  extern tipo_emuopt emuopt;
+  extern tipo_hwopt hwopt;
   extern int v_border;
 
   /* El teclado */
@@ -463,19 +474,15 @@ Z80InPort (register Z80Regs * regs, register word port)
        */
       code &= 0xbf;
     }
-  if ((port & 0xFF) == 0xFF)
-
-    {
+  if ((port & 0xFF) == 0xFF) {
       if (hwopt.port_ff == 0xFF)
-	code = 0xFF;
-      else
-	{
-	  code = rand ();
-	  if (code == 0xFF)
-	    code = 0x00;
-	}
+	     code = 0xFF;
+      else {
+	     code = rand ();
+	     if (code == 0xFF) code = 0x00;
+	 }
 
-    }
+  }
 /*
   {
       cur_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
@@ -514,18 +521,27 @@ Z80InPort (register Z80Regs * regs, register word port)
 void
 Z80OutPort (register Z80Regs * regs, register word port, register byte value)
 {
-  /* change border colour */
-  if (!(port & 0x01))
-    {
+  extern tipo_mem mem;
+  extern tipo_hwopt hwopt;
+
+/* INVES "Feature" emulation 
+ * basicamente cuando se escribe un puerto tambien se lee de la pagina 0 de ram
+ * ante el comflicto se hace un and logico entre ellas
+ */
+  if (hwopt.hw_model== SPECMDL_INVES ) value &= mem.p[0x10000+(port & 0x3FFF)] ;
+
+/* paginacion del 128K 
+ * 0xc002 = 1100 0000 0000 0010 */
+
+  if ((hwopt.hw_model== SPECMDL_128K) && (port==0x7ffd) ) outbankm_128k(value);   
+  if ((hwopt.hw_model== SPECMDL_PLUS2) && (port==0x7ffd) ) outbankm_128k(value);   
+
+
+/* change border colour */
+  if (!(port & 0x01)) {
       regs->BorderColor = (value & 0x07);
       logSound (value & 0x10);
     }
-  /* sound logging
-     if ((port&0xff)==0xfe)
-     {
-     logSound (value&0x10);
-     }
-   */
 }
 
 

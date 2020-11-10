@@ -7,10 +7,7 @@
 #define GS_HAYMOUSE 0x01
 #define GS_GUNSTICK 0x02
 #define GS_INACTIVE 0x04
-static DATAFILE *datafile = NULL;
-
-struct tipo_emuopt
-{
+typedef struct {
 	char romfile[256];
 	char snapfile[256];
 	char tapefile[256];
@@ -18,13 +15,14 @@ struct tipo_emuopt
 	BITMAP * raton_bmp;
 	char joytype;
 	char joy1key[5];
-};
+} tipo_emuopt ;
 
+enum models_enum { SPECMDL_16K=1, SPECMDL_48K, SPECMDL_INVES, SPECMDL_128K, SPECMDL_PLUS2, 
+       SPECMDL_PLUS3, SPECMDL_48KIF1, SPECMDL_48KTRANSTAPE };
+enum inttypes_enum { NORMAL=1, INVES }; 
 
-struct tipo_hwopt
-{
-  
-int port_ff;			// 0xff = emulate the port,  0x00 alwais 0xFF
+typedef struct {
+  int port_ff;			// 0xff = emulate the port,  0x00 alwais 0xFF
   int ts_lebo;			// left border t states
   int ts_grap;			// graphic zone t states
   int ts_ribo;			// right border t states
@@ -35,27 +33,21 @@ int port_ff;			// 0xff = emulate the port,  0x00 alwais 0xFF
   int line_grap;		// lines of graphic zone = 192
   int line_bobo;		// lines of bottom border
   int line_retr;		// lines of the retrace
-   
-int TSTATES_PER_LINE;
-   
-int TOP_BORDER_LINES;
-   
-int SCANLINES;
-   
-int BOTTOM_BORDER_LINES;
-   
-int tstate_border_left;
-   
-int tstate_graphic_zone;
-   
-int tstate_border_right;
+  int TSTATES_PER_LINE;
+  int TOP_BORDER_LINES;
+  int SCANLINES;
+  int BOTTOM_BORDER_LINES;
+  int tstate_border_left;
+  int tstate_graphic_zone;
+  int tstate_border_right;
+  int hw_model;
+  int int_type;
+  int videopage;
+  int BANKM;
+ } tipo_hwopt ;
  
-};
-
-
-int emuMain (int argc, char *argv[]);
-
-int Z80Initialization (void);
+int emuMain (int argc, char *argv[]);
+int Z80Initialization (void);
 
 /* Esto permite suprimir CASI TODOS los mensajes en aquellos sistemas que
 no dispongan de STDOUT o esta corrompa la pantalla como en MacOS o MS-Dos

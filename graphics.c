@@ -26,24 +26,29 @@
 #endif
 
 #include <stdio.h>
-#include "aspec.h"
-#include "graphics.h"
+#include <string.h>
+
+#include "v_alleg.h"
 #include "z80.h"
+#include "mem.h"
+#include "main.h"
 
+#include "graphics.h"
 
-extern void ExitEmulator (void);
-extern byte *RAM;
 extern Z80Regs spectrumZ80;
-extern unsigned short int Pixeles[192];
-extern unsigned short int Atributos[192];
-extern int cycle;
+extern tipo_mem mem;
+//extern void ExitEmulator (void);
+//extern byte *RAM;
+//extern unsigned short int Pixeles[192];
+//extern unsigned short int Atributos[192];
+///extern int cycle;
 //extern volatile int frame_counter;
 //extern volatile int target_cycle;
 //extern volatile int last_fps;
-extern void target_incrementor ();
-extern void count_frames ();
+//extern void target_incrementor ();
+//extern void count_frames ();
 
-unsigned int colors[256];
+//unsigned int colors[256];
 
 /*-----------------------------------------------------------------
  Redraw the entire screen from the speccy's VRAM.
@@ -96,6 +101,8 @@ displayscanline2 (int y, int f_flash, Z80Regs * regs)
 {
   int x, row, col, dir_p, dir_a, pixeles, tinta, papel, atributos;
   extern int v_border;
+  extern tipo_hwopt hwopt;
+
 
   row = y + v_border;		// 4 & 32 = graphical screen offset
   col = 32;			// 32+256+32=320  4+192+4=200  (res=320x200)
@@ -130,13 +137,15 @@ displayscanline2 (int y, int f_flash, Z80Regs * regs)
 
 #else
 
-  dir_p = 0x4000 + ((y & 0xC0) << 5) + ((y & 0x7) << 8) + ((y & 0x38) << 2);
-  dir_a = 0x5800 + (32 * (y >> 3));
-
+  dir_p = ((y & 0xC0) << 5) + ((y & 0x07) << 8) + ((y & 0x38) << 2);
+  dir_a = 0x1800 + (32 * (y >> 3));
+  
   for (x = 0; x < 32; x++)
     {
-      pixeles = regs->RAM[dir_p++];
-      atributos = regs->RAM[dir_a++];
+      pixeles=  readvmem(dir_p++,hwopt.videopage);  // el valor de 0 debe variar en los modos 128K
+      atributos=readvmem(dir_a++,hwopt.videopage);
+//      pixeles=  *(mem.p+mem.vo[0]+dir_p++);  // el valor de 0 debe variar en los modos 128K
+//      atributos=*(mem.p+mem.vo[0]+dir_a++);
 
 #endif
 

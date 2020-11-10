@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "z80.h"
+#include "mem.h"
 #include "disasm.h"
 
 #define _DISASM_

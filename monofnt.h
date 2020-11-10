@@ -18,13 +18,9 @@
  Copyright (c) 2000 Santiago Romero Iglesias.
  Email: sromero@escomposlinux.org
  ======================================================================*/  
-
-void PutChar8x16 (int, int, unsigned char, char *, unsigned long,
+void PutChar8x16 (int, int, unsigned char, char *, unsigned long,
 		   unsigned long);
-
-void GFXprintf (int, int, char *, char *, char, char, char);
-
-void GFXprintf_tovideo (int, int, char *, char *, char, char, char);
-
-int GFXgets (int, int, char *, char *, int, int, int);
+void GFXprintf (int, int, char *, char *, char, char, char);
+void GFXprintf_tovideo (int, int, char *, char *, char, char, char);
+int GFXgets (int, int, char *, char *, int, int, int);
 

@@ -1,9 +1,7 @@
 /* This is teoricaly created by the configure script, but as this are
    stoled from another project, I define here some ¿used? definitions
 */
-
 #include <string.h>
-
 
 /* Define if you have a working `mmap' system call.  */
 #define HAVE_MMAP 1
@@ -54,5 +52,5 @@
 #define HAVE_LIBM 1
 
 /* This is a Linux system */
-// #define LINUX 1
+//#define LINUX 1
 

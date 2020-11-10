@@ -36,10 +36,13 @@
 #include <getopt.h>
 #endif // NO_GETOPTLONG
 
-#include "aspec.h"
+#include "main.h"
+#include "sound.h"
+
 #include "langs.h"
 #include "z80.h"
 #include "snaps.h"
+#include "mem.h"
 
 #include "monofnt.h"
 #include "graphics.h"
@@ -47,13 +50,11 @@
 #include "menu.h"
 
 
-struct tipo_emuopt emuopt =
-  { "\0", "\0", "\0", GS_INACTIVE, NULL, 'n', {'o', 'p', 'q', 'a', ' '} };
+tipo_emuopt emuopt = {"\0","\0","\0",GS_INACTIVE, NULL,'n',{'o', 'p', 'q', 'a', ' '} };
 
 // hardware definitions for spectrum 48K
-struct tipo_hwopt hwopt = { 0xFF, 24, 128, 24, 48, 224, 16, 48, 192, 48, 8,
-  224, 64, 192, 56, 24, 128, 72
-};
+tipo_hwopt hwopt = { 0xFF, 24, 128, 24, 48, 224, 16, 48, 192, 48, 8,
+  224, 64, 192, 56, 24, 128, 72, SPECMDL_48K };
 
 int v_res = 240;
 int v_border = 24;
@@ -95,93 +96,48 @@ char tfont[4096];
 // to know if sound is ok
 extern int gSoundInited;
 
+extern tipo_mem mem;
+
+#define STANDAR_COPYRIGHT  "ASpectrum GNU pure C Z80 / Spectrum Emulator V " VERSION "\n" \
+	  "(C) 2000-2004 Santiago Romero (NoP/Compiler), Kak & Alvaro Alea.\n" \
+	  "http://aspectrum.sf.net\n" \
+	  "Powered by Allegro 4 - http://alleg.sf.net\n" \
+	  "Distributed under the terms of GNU Public License V2\n\n" \
+
 
 int
 Z80Initialization (void)
 {
   FILE *fp;
-  int i;
   /* we get memory and load font, spectrum ROM and
      possible snapshots selected in the command line */
 
+/*
   printf("ASpectrum GNU pure C Z80 / Spectrum Emulator V " VERSION "\n"
-	  "(C) 2000-2003 Santiago Romero (NoP/Compiler), Kak & Alvaro Alea.\n"
+	  "(C) 2000-2004 Santiago Romero (NoP/Compiler), Kak & Alvaro Alea.\n"
 	  "http://aspectrum.sf.net\n"
 	  "Powered by Allegro 4 - http://alleg.sf.net\n"
 	  "Distributed under the terms of GNU Public License V2\n\n");
-  spectrumZ80.RAM = (byte *) malloc (65536);
-  if (spectrumZ80.RAM == NULL)
-    {
-      printf("\n Z80: Error allocating RAM memory, exiting...\n\n");
-      return (0);
-    }
+*/
 
-  init_wrapper ();
+  printf( STANDAR_COPYRIGHT );
 
-  // Open the FONT.FNT file
-/*
-	#ifdef DESTDAT
-  if ((fp = fopen (DESTDAT "/font.fnt", "rb")) != NULL)
-    printf("using " DESTDAT "/font.fnt\n");
-  else
-#endif
-  if ((fp = fopen ("font.fnt", "rb")) != NULL){
-    printf("using  ./font.fnt\n");
-  }
-  else
-    {
-      printf("File font.fnt does not exist...\n");
-      return (0);
-    };
+  fp=findopen_file("font.fnt");
   fread (tfont, 4096, 1, fp);
   fclose (fp);
-*/
-	fp=findopen_file("font.fnt");
-	fread (tfont, 4096, 1, fp);
-  	fclose (fp);
 
-
-  i = 0;
-
-  // Open the rom file
-  if (emuopt.romfile[0] != 0)
-    {
-      if ((fp = fopen (emuopt.romfile, "rb")) != NULL)
-	  { 
-		  printf ("Using ROM file %s\n", emuopt.romfile);
-	  }
-      else
-	{
-	  printf("The ROM file does not exists.\n");
-	  return (0);
-	}
-    }
-/*
-	
-	#ifdef DESTDAT
-  else if ((fp = fopen (DESTDAT "/spectrum.rom", "rb")) != NULL) {
-    printf("using " DESTDAT "/spectrum.rom\n");
+  if (init_spectrum(hwopt.hw_model,emuopt.romfile)!=0){ 
+  printf("Error al inicializar el Hardware Spectrum\n");
+  exit (1);
   }
-#endif
-  else if ((fp = fopen ("spectrum.rom", "rb")) != NULL){
-    printf("using spectrum.rom\n");
-  }
-  else
-    {
-      printf("File spectrum.rom does not exist ...\n");
-      return (0);
-    };
-*/
-  fp=findopen_file("spectrum.rom");	
-  while (!feof (fp))
-    spectrumZ80.RAM[i++] = fgetc (fp);
-  fclose (fp);
+  spectrumZ80.RAM=mem.p; // por compatibilidad
+  
+  init_wrapper ();
 
   // COMMENT: Is this needed? -> CreateVideoTables();
   Z80Reset (&spectrumZ80, 69888);
   Z80FlagTables ();
   return 1;
-
 }
 
 
@@ -204,14 +160,7 @@ keyboardHandler_forZXDEB (void)
 }
 #endif
 
-/*
-#ifndef ZXDEBUG_MFC
-int main (int argc, char *argv[])
-{
-  return emuMain (argc, argv);
-}
-#endif
-*/
+
 /*----------------------------------------------------------------
  Main function. It inits all the emulator stuff and executes it.
 ----------------------------------------------------------------*/
@@ -239,6 +188,7 @@ int emuMain (int argc, char *argv[])
     {"version", 0, NULL, 'V'},
     {"debug", 0, NULL, 'd'},
     {"joy", 1, NULL, 'j'},
+    {"model",1, NULL,'m'},
     {0, 0, 0, 0}
   };
 
@@ -252,10 +202,10 @@ int emuMain (int argc, char *argv[])
 #ifndef ZXDEB
 
 #ifdef NO_GETOPTLONG
-  while ((c = getopt (argc, argv, "r:s:t:hVdj:")) != -1)
+  while ((c = getopt (argc, argv, "r:s:t:hVdj:m:")) != -1)
 #else
   while ((c =
-	  getopt_long (argc, argv, "r:s:t:hVdj:", long_options, NULL)) != -1)
+	  getopt_long (argc, argv, "r:s:t:hVdj:m:", long_options, NULL)) != -1)
 #endif
     {
       switch (c)
@@ -282,16 +232,14 @@ int emuMain (int argc, char *argv[])
 	  if (strstr (optarg, "k") != NULL)
 	    ;
 	  break;
+	case 'm':
+	  hwopt.hw_model=optarg[0] -0x30 ;
+	  break;
 	case ':':
 	  printf("Lack of parameters\n");
 	case 'h':
 	case '?':
-	  printf("ASpectrum GNU pure C Z80 / Spectrum Emulator V " VERSION
-		  "\n"
-		  "(C) 2000-2003 Santiago Romero (NoP/Compiler), Kak & Alvaro Alea\n"
-	  	  "http://aspectrum.sf.net\n"
-	  	  "Powered by Allegro 4 - http://alleg.sf.net\n"
-		  "Distribuited under the terms of GNU Public License V2\n\n"
+	  printf( STANDAR_COPYRIGHT 
 		  "Use of Aspectrum:\n"
 		  "   aspectrum [options] [snapshot or tape file]\n\n"
 		  "Options can be:\n"
@@ -303,7 +251,17 @@ int emuMain (int argc, char *argv[])
 		  "   -V --version      echo the version of the emulator.\n"
 		  "   -h --help         this help.\n"
 		  "   -j --joy def      enable joystick, def is a string of caracter\n"
-		  "	                for each joystick, see doc for more help.\n");
+		  "	                 for each joystick, see doc for more help.\n"
+		  "   -m --model num    select the model of spectrum to emulate:\n"
+		  "                     num=1 => ZX Spectrum 16K\n"
+		  "                     num=2 => ZX Spectrum 48K\n"
+		  "                     num=3 => Inves ZX Spectrum+ 48K\n"
+		  "                     num=4 => ZX Spectrum 128K\n"
+		  "                     num=5 => ZX Spectrum +2\n"
+		  "                     num=6 => ZX Spectrum +3 (NO YET)\n"
+		  "                     num=7 => ZX Spectrum 48K w/ Interface I (NO YET)\n"
+		  "                     num=8 => ZX Spectrum 48K w/ Multiface (NO YET)\n"
+		  "");
 	  done = 1;
 	  break;
 	};
@@ -448,7 +406,12 @@ int emuMain (int argc, char *argv[])
 	    case DIALOG_OPEN_TAPE:
 	      tecla = gKEY_F6 << 8;
 	      break;
-	      //   case 7 : tecla = gKEY_F7  << 8 ; break;
+	    case DIALOG_OPTIONS:
+		  tecla = gKEY_F7  << 8 ; 
+		  break;
+		case DIALOG_HARDWARE:
+		  tecla = gKEY_F9 << 8 ;
+		  break;		
 	    case DIALOG_CHANGE_LANG:
 	      tecla = gKEY_F8 << 8;
 	      break;
@@ -486,6 +449,7 @@ int emuMain (int argc, char *argv[])
 	  break;
 
 	case gKEY_F5:
+	  reset_spectrum();
 	  Z80Reset (&spectrumZ80, 69888);
 	  tecla = gKEY_ESC << 8;
 	  //debug = 1 - debug;
@@ -522,6 +486,13 @@ int emuMain (int argc, char *argv[])
 	  //debug = 1 - debug;
 	  break;
 
+	case gKEY_F9:
+	  tecla = gKEY_ESC << 8;
+	  menuhardware();
+	  //debug = 1 - debug;
+	  break;
+
+	  
 	case gKEY_F12:
 	  DebuggerHelp (tfont);
 	  tecla = gKEY_ESC << 8;
@@ -548,8 +519,7 @@ int emuMain (int argc, char *argv[])
 
       if ((tecla >> 8) == gKEY_F1)
 	{
-	  if (debug == 0)
-	    {
+	  if (debug == 0) {
 	      ClearScreen (0);
 	      gclear ();
 	      Z80Dump (&spectrumZ80, tfont);
@@ -558,9 +528,7 @@ int emuMain (int argc, char *argv[])
 	      DrawHelp (tfont);
 	      tecla = '.';
 	      debug = 1;
-	    }
-	  else
-	    {
+	    } else {
 	      debug = target_cycle = 0;
 	      ClearScreen (0);
 	      DisplayScreen (&spectrumZ80);
@@ -568,10 +536,9 @@ int emuMain (int argc, char *argv[])
 	}
 
       // the meaning of the keyb depends on being or not in debug mode:
-      switch (debug)
+    switch (debug)
 	{
-	  // emulation mode;
-	case 0:
+	case 0: 	  // emulation mode
 	  f_flash2++;
 	  if (f_flash2 >= 32)
 	    f_flash2 = 0;
@@ -582,55 +549,51 @@ int emuMain (int argc, char *argv[])
 	    {
 	      // no visible upper border
 	      target_tstate =
-		(hwopt.ts_line *
-		 (hwopt.line_upbo + hwopt.line_poin - v_border)) -
-		hwopt.ts_lebo;
+		      (hwopt.ts_line * (hwopt.line_upbo + hwopt.line_poin - v_border)) - hwopt.ts_lebo;
 	      current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-	      hwopt.port_ff = 0xFF;
+	      hwopt.port_ff &= 0xF0;
+          if (hwopt.int_type==NORMAL) spectrumZ80.petint=1;
 	      Z80Run (&spectrumZ80, target_tstate - current_tstate);
-
 	      // visible upper border         
-	      for (scanl = 0; scanl < v_border; scanl++)
-		{
-		  target_tstate += hwopt.ts_line;
-		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
-		  displayborderscanline (scanl);
-		}
+	      for (scanl = 0; scanl < v_border; scanl++) {
+		     target_tstate += hwopt.ts_line;
+		     current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
+		     Z80Run (&spectrumZ80, target_tstate - current_tstate);
+		     displayborderscanline (scanl);
+		  }
 
 	      // Now run the emulator for all the real screen (192 lines)
-	      for (scanl = 0; scanl < 192; scanl++)
-		{
-		  // left border
-		  target_tstate += hwopt.ts_lebo;
-		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-		  hwopt.port_ff = 0xFF;
-		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
+          if (hwopt.int_type==INVES) spectrumZ80.petint=1;
+	      for (scanl = 0; scanl < 192; scanl++) {
+		     // left border
+		     target_tstate += hwopt.ts_lebo;
+		     current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
+		     hwopt.port_ff &= 0xF0;
+		     Z80Run (&spectrumZ80, target_tstate - current_tstate);
 
-		  // screen
-		  target_tstate += hwopt.ts_grap;
-		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-		  hwopt.port_ff = 0x00;
-		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
+		     // screen
+		     target_tstate += hwopt.ts_grap;
+		     current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
+		     hwopt.port_ff |= 0x0F;
+		     Z80Run (&spectrumZ80, target_tstate - current_tstate);
 
-		  // right border
-		  target_tstate += (hwopt.ts_ribo + hwopt.ts_hore);
-		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-		  hwopt.port_ff = 0xFF;
-		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
+   		  // right border
+		     target_tstate += (hwopt.ts_ribo + hwopt.ts_hore);
+		     current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
+		     hwopt.port_ff &= 0xF0;
+		     Z80Run (&spectrumZ80, target_tstate - current_tstate);
 
-		  displayscanline2 (scanl, f_flash, &spectrumZ80);
-		}
+   		  displayscanline2 (scanl, f_flash, &spectrumZ80);
+		  }
 
 	      // visible bottom border
-	      hwopt.port_ff = 0xFF;
-	      for (scanl = 192 + v_border; scanl < v_res; scanl++)
-		{
+	      hwopt.port_ff &= 0xF0;
+	      for (scanl = 192 + v_border; scanl < v_res; scanl++) {
 		  target_tstate += hwopt.ts_line;
 		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
 		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
 		  displayborderscanline (scanl);
-		}
+		  }
 
 	      // the last lines (56+16 lines - border)
 	      // Run it for 56 lines covering bottom border and ray return
@@ -654,7 +617,7 @@ int emuMain (int argc, char *argv[])
 		(hwopt.ts_line * (hwopt.line_upbo + hwopt.line_poin)) -
 		hwopt.ts_lebo;
 	      current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-	      hwopt.port_ff = 0xFF;
+	      hwopt.port_ff &= 0xF0;
 	      Z80Run (&spectrumZ80, target_tstate - current_tstate);
 
 	      // Now run the emulator for all the real screen (192 lines)
@@ -663,23 +626,23 @@ int emuMain (int argc, char *argv[])
 		  // left border
 		  target_tstate += hwopt.ts_lebo;
 		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-		  hwopt.port_ff = 0xFF;
+		  hwopt.port_ff &= 0xF0;
 		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
 
 		  // Screen
 		  target_tstate += hwopt.ts_grap;
 		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-		  hwopt.port_ff = 0x00;
+		  hwopt.port_ff |= 0x0F;
 		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
 
 		  // right border 
 		  target_tstate += (hwopt.ts_ribo + hwopt.ts_hore);
 		  current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
-		  hwopt.port_ff = 0xFF;
+		  hwopt.port_ff &= 0xF0;
 		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
 		}
 	      // visible bottom border
-	      hwopt.port_ff = 0xFF;
+	      hwopt.port_ff &= 0xF0;
 	      Z80Run (&spectrumZ80, spectrumZ80.ICount);
 	    }
 
@@ -901,8 +864,7 @@ void CreateVideoTables ( void )
  UpdateKeyboard( void );
  Updates the keyboard variables used on the return of IN function.
 ------------------------------------------------------------------*/
-void
-UpdateKeyboard (void)
+void UpdateKeyboard (void)
 {
 
 /*=== This adds the row/column/data value for each key on spectrum kerb ===*/
@@ -948,7 +910,7 @@ UpdateKeyboard (void)
 
   /* change row and column signals according to pressed key */
   /* HEY THIS DONT USE V_ALLEGRO.H DEF use ALLEGRO.H
-     but by "motivos personales" I DONT CHANGE THIS X'D */
+     but by "motivos personales" I DONT CHANGE THIS X'D aka I'm tired (I supous)*/
 
   if (gkey[KEY_Z])
     fila[4][1] &= (0xFD);
@@ -1065,7 +1027,7 @@ UpdateKeyboard (void)
    *  etc...
    * 
    * This would allow to emulate OPQA<SPACE> or INTERF1 or 2
-   * or define custom keys for the cursor.
+   * or define custom keys for the cursor of the pc.
    */
 #define CUP    SPECKEY_9
 #define CDOWN  SPECKEY_8

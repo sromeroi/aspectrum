@@ -2,63 +2,14 @@
 #define _V_ALLEG_H 1
 
 #include <allegro.h>
-
-typedef struct gRGB 
+typedef struct gRGB 
 {
-  
-unsigned char r, g, b;
-   
-unsigned char filler;
- 
-}
-gRGB;
+  unsigned char r, g, b;
+   unsigned char filler;
+ }
+gRGB; 
 
-
-
-static gRGB colores[17] = { 
-    {0 / 4, 0 / 4, 0 / 4}, 
-  {0 / 4, 0 / 4, 192 / 4}, 
-  {192 / 4, 0 / 4, 0 / 4}, 
-  {192 / 4, 0 / 4, 192 / 4}, 
-  {0 / 4, 192 / 4, 0 / 4}, 
-  {0 / 4, 192 / 4, 192 / 4}, 
-  {192 / 4, 192 / 4, 0 / 4}, 
-  {192 / 4, 192 / 4, 192 / 4}, 
-  {0 / 4, 0 / 4, 0 / 4}, 
-  {0 / 4, 0 / 4, 255 / 4}, 
-  {255 / 4, 0 / 4, 0 / 4}, 
-  {255 / 4, 0 / 4, 255 / 4}, 
-  {0 / 4, 255 / 4, 0 / 4}, 
-  {0 / 4, 255 / 4, 255 / 4}, 
-  {255 / 4, 255 / 4, 0 / 4}, 
-  {255 / 4, 255 / 4, 255 / 4}, 
-{255 / 4, 0 / 4, 0 / 4} 
-
-/*
-  Old colour palette:
-  
-  {   0/4,   0/4, 205/4},
-  { 205/4,   0/4,   0/4},
-  { 205/4,   0/4, 205/4},
-  {   0/4, 205/4,   0/4},
-  {   0/4, 205/4, 205/4},
-  { 205/4, 205/4,   0/4},
-  { 212/4, 212/4, 212/4},
-  {   0/4,   0/4,   0/4},
-  {   0/4,   0/4, 255/4},
-  { 255/4,   0/4,   0/4},
-  { 255/4,   0/4, 255/4},
-  {   0/4, 255/4,   0/4},
-  {   0/4, 255/4, 255/4},
-  { 255/4, 255/4,   0/4},
-  { 255/4, 255/4, 255/4}
-*/ 
-};
-
-
-
-
-
+
 // "borrowed" from allegro
   
 #define gKEY_A KEY_A
@@ -131,63 +82,33 @@ static gRGB colores[17] = {
 #define gKEY_RIGHT KEY_RIGHT
 #define gKEY_RCONTROL KEY_RCONTROL
 #define gKEY_BACKSPACE KEY_BACKSPACE
-#define gKEY_SLASH KEY_SLASH
-
-
-void gExitEmulator (void);
-
-void gset_color (int index, gRGB * p);
-
-void gclear (void);
-
-void dumpVirtualToScreen (void);
-
-void gtextout (char *b, int x, int y, int color);
-
-void gtextoutb (char *b, int x, int y, int color, FONT * tfont);
-
-void init_wrapper (void);
-
-void gacquire_bitmap (void);
-
-void grelease_bitmap (void);
-
-void InitGraphics (void);
-
-void gclear_to_color (int color);
-
-void gUpdateRect (int x, int y, int sizeX, int sizeY);
-
-void gPutPixel (int x, int y, int col);
-
-void gbox (int x1, int y1, int x2, int y2, int color);
-
-void grectangle (int x1, int y1, int x2, int y2, int color);
-
-void ghline (int x1, int y1, int x2, int color);
-
-void InitSystem (void);
-
-void v_initmouse (void);
-
-int galert (const char *s1, const char *s2, const char *s3, const char 
-*b1,
+#define gKEY_SLASH KEY_SLASHvoid gExitEmulator (void);
+void gset_color (int index, gRGB * p);
+void gclear (void);
+void dumpVirtualToScreen (void);
+void gtextout (char *b, int x, int y, int color);
+void gtextoutb (char *b, int x, int y, int color, FONT * tfont);
+void init_wrapper (void);
+void gacquire_bitmap (void);
+void grelease_bitmap (void);
+void InitGraphics (void);
+void gclear_to_color (int color);
+void gUpdateRect (int x, int y, int sizeX, int sizeY);
+void gPutPixel (int x, int y, int col);
+void gbox (int x1, int y1, int x2, int y2, int color);
+void grectangle (int x1, int y1, int x2, int y2, int color);
+void ghline (int x1, int y1, int x2, int color);
+void InitSystem (void);
+void v_initmouse (void);
+int galert (const char *s1, const char *s2, const char *s3, const char *b1,
 	     const char *b2, int c1, int c2);
-
-
+
 // sound functions 
 void gInitSound (void);
-
-unsigned char *gGetSampleBuffer (void);
-
-void gPlaySound (void);
-
-volatile int getVoicePos (void);
-
-void playMainSample (void);
-
-void gSoundSync (void);
-
-
-
+unsigned char *gGetSampleBuffer (void);
+void gPlaySound (void);
+volatile int getVoicePos (void);
+void playMainSample (void);
+void gSoundSync (void);
+
 #endif	/* v_alleg.h */ 

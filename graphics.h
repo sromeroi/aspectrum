@@ -21,32 +21,18 @@
   
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
-
-
 void InitGraphics (void);
-
 void DisplayScreen (Z80Regs * regs);
-
 void DisplayScanLine (int linea, Z80Regs * regs);
-
 void displayscanline2 (int y, int f_flash, Z80Regs * regs);
-
 void displayborderscanline (int y);
-
-
-void GFXprintf (int x, int y, char *sentence, char *font, 
-char fg_color,
+void GFXprintf (int x, int y, char *sentence, char *font, char fg_color,
 		  char bg_color, char incr);
-
-int GFXgets (int x, int y, char *cadena, char *font, 
-int fg_color,
+int GFXgets (int x, int y, char *cadena, char *font, int fg_color,
 	      int bg_color, int max);
-
 void GFXprintf_tovideo (int x, int y, char *sentence, char *font,
-			 
-char fg_color, char bg_color, char incr);
-
-
+			 char fg_color, char bg_color, char incr);
+
 /* Speccy colours */ 
 /*
 static RGB colores[16] = {
@@ -69,5 +55,4 @@ static RGB colores[16] = {
 };
 */ 
 #define PutPixel(dst,x,y,color) (dst->line[y])[x]=colors[color]
-#endif	/* 
- */
+#endif	/*  */

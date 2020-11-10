@@ -38,7 +38,7 @@
  To a resume of aspectrum command line args use "./aspectrum --help"
 
  You'll need Allegro 4.x to run this program.
- The font.fnt file MUST be located at the same directory where you
+ The font.* files MUST be located at the same directory where you
  run the aspectrum binary, or in /usr/share/aspectrum
 
  spectrum.rom MUST be in the same directory, in /usr/share/aspectrum
@@ -53,6 +53,10 @@
  One time you start the gunstick emulation can avoid the "888"s locating
  the mouse in the border of the screen.
 
+ You can emulate several version of Spectrum using de -m param, but
+ the snapshots feature is only full functional on 48K.  see the help message
+ to more information about what versions are avalible.
+
  NOTE THAT THIS EMULATOR IT'S NOT USER-FRIENDLY AS IT'S STILL IN
  FULL DEVELOPMENT STAGE. IT WON'T BE PACKAGED ON BINARY DEB/RPM
  FORMATS AND WON'T HAVE INSTALLATION OPTIONS WHILE DEVELOPING IT.
@@ -65,36 +69,33 @@
   ABOUT THIS PROGRAM
 =======================================================================
 
- o Currently it just emulates the 48K spectrum, until I fix all
-   the wrong Z80 opcodes (bugs, bugs, bugs :) and until all the
+ o Currently it emulates several of  the Siclair/Investronica/Amstrad 
+   spectrums, at least for memory and z80 (no disk or 128K Sound) until 
+   I fix all the wrong Z80 opcodes (bugs, bugs, bugs :) and until all the
    undocumented opcodes are implemented. Then I'll add support for
-   128K spectrums.
+   other features.
 
  o There are not implemented opcodes (although almost all games work,
    so they are not used very often) and ___at least one bug___ in the
    Z80 emulation that makes some games to fail (see WORKING file).
 
- o I finally added a simple GUI that I'll update soon with a simple
-   file selection interface...
-
  o The emulator has a built-in debugger (very simple) that I use to
    search bugs (I usually comparte the output of my emulation with
    the real spectrum or another emulators).
 
- o It can load .SNA, .SP and .Z80 snapshot files.
+ o It can load and save .SNA, .SP and .Z80 snapshot files.
 
  o It can load .TAP and .TZX files at "zero" speed (I've still not implemented
    the real-time loading routines), by using LOAD "" on the emulator.
    It still does not load protected games nor games launched by
    non-standard loaders. LOAD "" is writen pressing J and ALT+P and ALT+P.
-   To delete on the spectrum keyboard use SHIFT+0.
 
  o I've tested the emulator with more than 100 games, and almost
-   all were working right. Read the WORKING file to know which
-   games have been tested.
+   all were working right. If you found a game that don't work or refuse to
+   load, and if you think that it not use any of the unsupported features,
+   please, fell free to send it to the autors, to examine it.
 
  o All the coding style, documentation, etc. sucks :).
-
 
 
  LICENSE
@@ -114,7 +115,6 @@
  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
  (...Read the file License on the emulator package...)
-
 
 
   THANKS TO...
@@ -149,8 +149,8 @@
    a nice programming library. Read the allegro's AUTHORS file for
    all the people who has contributed to Shawn Hargreaves' initial Allegro.
 
+ o Aspectrum use AGUP library, see http://agup.sourceforge.net and the source 
+   code of Aspectrum for more information.
 
   Santiago Romero AkA NoP/Compiler.
   sromero@escomposlinux.org
-
-

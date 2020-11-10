@@ -1,18 +1,26 @@
 # linux
+
+# agup is a cosmetic mod of allegro gui, if you [ don't want | can't ] use
+# eliminate from CFLAGS in Makefile.arquitecture
+AGUPDIR=agup-0.99.7
+AGUPLIB=$(AGUPDIR)/lib/release/libagup.a
+
+
 DESTDATPATH = /usr/share/$(EXE)
 LFLAGS = `allegro-config --libs`
 #CFLAGS = -Wall -O3 -mcpu=i686 `allegro-config --cflags` 
-CFLAGS = -Wall -g `allegro-config --cflags` \
+CFLAGS = -W -Wall -O2 -g `allegro-config --cflags` \
         -DVERSION=\"$(VERSION)\" -DDESTDAT=\"$(DESTDATPATH)\" \
         -DSOUND_BY_STREAM -DENABLE_LOGS -DI_HAVE_AGUP -I$(AGUPDIR)
-RM = rm
+RM =rm -f
 EXT=
+MAKE=make
 
 # fuentes y objetos para linux. 
 files = sound.c v_alleg.c snaps.c graphics.c menu.c debugger.c \
-main.c z80.c disasm.c 
+main.c z80.c disasm.c mem.c langs.c 
 objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \
-main.o z80.o disasm.o 
+main.o z80.o disasm.o mem.o langs.o
 
 #linux dep
 dep:

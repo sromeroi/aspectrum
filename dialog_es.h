@@ -26,8 +26,8 @@ MENU options_menu_ES[] = {
   {"&Cinta", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Video", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Audio", dummy_proc, NULL, D_DISABLED, NULL},
-  {"&Opcioness", dummy_proc, NULL, D_DISABLED, NULL},
-  {"&Hardware", dummy_proc, NULL, D_DISABLED, NULL},
+  {"&Opciones\tF7", opciones_proc, NULL, 0, NULL},
+  {"&Hardware", hardware_proc, NULL, 0, NULL},
   {"&Grabaciones", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Cambiar lenguaje\tF8", changelang_proc, NULL, 0, NULL},
   {0}

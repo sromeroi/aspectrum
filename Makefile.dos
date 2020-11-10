@@ -2,14 +2,16 @@
 
 # agup is a cosmetic mod of allegro gui, if you [ don't want | can't ] use
 # eliminate from CFLAGS in Makefile.arquitecture
-AGUPDIR=agup-0~1.2
-AGUPLIB=$(AGUPDIR)/agup.a
+# I need to put this here due that djgpp dont like long filenames note the ~
+AGUPDIR=agup-0~1.7
+AGUPLIB=$(AGUPDIR)/lib/release/libagup.a
 
 LFLAGS = -lalleg 
-CFLAGS = -DVERSION=\"$(VERSION)\" -DNO_GETOPTLONG -Wall -g \
-         -DSOUND_BY_STREAM -DI_HAVE_AGUP -I$(AGUPDIR) -DDOSSEP="'/'"
-RM= del
+CFLAGS = -W -Wall -O2 -DVERSION=\"$(VERSION)\" -DNO_GETOPTLONG \
+         -DSOUND_BY_STREAM -DI_HAVE_AGUP -I$(AGUPDIR) -DDOSSEP="'/'" 
+RM=del
 EXT=.exe
+MAKE=make
 
 # objetos para msdos las fuentes no hacen falta por que se usa makedeps.bat
 objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \

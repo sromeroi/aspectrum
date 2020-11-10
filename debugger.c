@@ -26,10 +26,15 @@
 #endif
 
 #include <stdio.h>
-#include "aspec.h"
+#include <string.h>
+
 #include "z80.h"
-#include "debugger.h"
 #include "langs.h"
+#include "v_alleg.h"
+#include "graphics.h"
+#include "disasm.h"
+
+#include "debugger.h"
 
 extern int language;
 

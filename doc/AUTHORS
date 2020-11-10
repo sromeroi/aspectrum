@@ -14,11 +14,7 @@
  Alvaro Alea:
 --------------------------------------------------------------------
  - 11-05-2001: Nice patch allowing the load of Z80 snapshot files.
- - 13-05-2001: OUTI implementation.
- - 22-09-2001: Add comand line parameters.
- - 15-10-2001: Add Gunstick emulation.
- - 01-01-2002: Border and Flash Emulation.    
- - 14-02-2003: Support for Loading TZX files.
+ Several More, see CHANGES file.
 
 
  Kak

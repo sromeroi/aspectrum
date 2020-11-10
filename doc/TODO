@@ -4,35 +4,37 @@ Anexo de alea:
 + = Interesante
 - = Pijada
 
-Para la version 0.1.6.3
+Para la version 0.1.8
 
-* Ver por que falla cuando se arrastra al ejecutable desde WIN y probar
-  en los otros
+- Mejorar la ayuda del teclado, ocultar raton, pintar fondo negro, bitl, 
+  mostrar raton.
+- Añadir opcion de salvar PCX, BMP, PNG y GIFs animados con 2 frames para los 
+  atributos.
+- Añadir la opcion de cargar y grabar bloques de bytes. 
++ Paquete Debian
+
+Para la version 0.1.9
+
+* Arreglar la generacion magica de INT
+* Hacer que se puedan hacer NMI
 * Comprobar que se buscan los archivos en $(DESTDIR)/share/$(EXE) y no
   en /usr/share/aspectrum de manera fija.
-* No aparece el dialogo al pulsar F7, no funciona AGUP y en el menu
-  no se llama a opcionsi (MS DOS)
 + Los acentos salen mal (Windows)
-+ Investigar gettext para msdos/djgpp, y ver si se puede cambiar compilar
++ Investigar gettext para msdos/djgpp, y ver si se puede cambiar, compilar
   sin el y comprobar como van las rutas en win32.
 * Mover las rutinas de ficheros a main.c, y dejar snaps.c para las cosas 
   de carga/grabacion parecido a libspectrum del de fuse
-+ Que grabe .sp y .sna y .z80
 + Que grabe cintas .tap y .tzx
 + Investigar si se puede utilizar una sola funcion para todos los menus.
   aprobechando que solo activa una variable.
-* eliminar el font ese que no hace falta ¿y el debuger?
-* Erase font.fnt and it's loading code and file.
-* Comprobar que se busca el nuevo font en los sitios estandar.
-- Hay que poner una escala de grises para mejorar el aspecto de agup
+* eliminar el font ese que no hace falta ¿y el debuger? (tb su codigo de carga)
 - Acabar de traducir la instalacion bajo windows, que instale icono de doc.
-- Grabar PNG
-- Cargar SCR como si fuesen snapshots
+- cargar PNG y otros a men.
 * Que el sonido se pueda desactivar y que pause al llamar al gui.
+- Que el theme del GUI sea cambiable.
 
-Para la 0.7
+Para la 0.1.10
 
-+ cambiar el numero de version a 0.7
 + Que Make me haga automagicamente los aspectrum_[bin|src]_version.zip
 * Actualizar las WEB
 * Anunciar en todos los lados la nueva version:
@@ -47,20 +49,25 @@ Para la 0.7
 - Icono para Windows.
 - Pakete debian.
 - Replace debugger by Allegro dialog functions.
-- Si un archivo no es valido volver al cuadro de dialogo
+- Si un archivo no es valido volver al cuadro de dialogo (verificar si todas 
+  las rutinas devuelve 1 si funciona, 0 si falla, comprobar si 1==1 es 1 o es 
+   0 y actuailizar las rutinas)
 + limpiar la selecion antes de llamar a un cuadro de dialogo, para que al pulsar
   cancelar no carge el ultimo archivo.
 
-Para la 1.0:
+Para la 0.2.0:
 
+Emulacion del IF1 y Microdrives.
 Memoria contenida (requiere rescribir el z80 core)
-Paginacion de memoria, esto es todos los modelos
 El chip de sonido
 
-Para la 2.0:
+Para la 0.3.0:
 
 Emulacion de la unidad de disco del +3
 Soporte de ZX Printer, RS 232 y Centronics
+Si la pantalla es de al menos  320x320 poner un teclado en pantalla utilizable
+con el raton (modo PalmOS)
+Rutina para buscar e introducir pokes.
 
                           
  ASPECTRUM EMULATOR TO-DO 
@@ -81,7 +88,6 @@ Soporte de ZX Printer, RS 232 y Centronics
    also try to load a tape in his end hang the emulator
 
  - Look for badly implemented Z80 opcodes.
-
 
  - Some stuff related to debuger that kak email santiago
 
@@ -110,7 +116,7 @@ Soporte de ZX Printer, RS 232 y Centronics
    On the tapfile menu put the following:
 
  - rewind tapfile
-   
+   DONE
 
  - Implement frameskip correctly so that older computers can use Aspectrum.
    ¿DONE?
@@ -127,11 +133,9 @@ Soporte de ZX Printer, RS 232 y Centronics
 ----------------------------------------------------------------------------
  - Good README and INSTALL files.
 
-
-
  INTERNACIONALIZATION:
 ----------------------------------------------------------------------------
 
  - Perhaps detect the Language based on enviroment VARs, and optionaly select
    default language in compilation time/Config file.
-
+   Use gettext for internacionalitation, due is a fact standart.

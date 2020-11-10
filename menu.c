@@ -32,17 +32,20 @@
 #include "monofnt.h"
 #include "main.h"
 #include "snaps.h"
+#include "mem.h"
 
 
 #ifdef I_HAVE_AGUP
 #include <agup.h>
-#include <agtk.h>
-#include <aphoton.h>
-#include <awin95.h>
-#include <aase.h>
+//#include <agtk.h>
+//#include <aphoton.h>
+//#include <awin95.h>
+//#include <aase.h>
 #define GUI_check_proc d_agup_check_proc
+#define GUI_radio_proc d_agup_radio_proc
 #else
 #define GUI_check_proc d_check_proc
+#define GUI_radio_proc d_radio_proc
 #endif
 
 
@@ -107,6 +110,16 @@ int rewindtape_proc (void)
   selected_opt = DIALOG_REWIND_TAPE;
   return D_CLOSE;
 }
+int opciones_proc (void)
+{
+  selected_opt = DIALOG_OPTIONS;
+  return D_CLOSE;
+}
+int hardware_proc (void)
+{
+  selected_opt = DIALOG_HARDWARE;
+  return D_CLOSE;
+}
 
 int changelang_proc (void)
 {
@@ -133,13 +146,30 @@ int referencehelp_proc(void)
   return D_CLOSE;
 }
 
-about_proc (void)
+int about_proc (void)
 {
-  alert("Aspectrum Version: "VERSION,"(C) 2000-2003 Santiago Romero, Kak y Alvaro Alea",
+   DIALOG dlg[] ={
+      { d_agup_window_proc, 0, 0, 250, 100, 0, 0, 0, 0, 0, 0,(void *)"Acerca de...", NULL, NULL },
+      { d_ctext_proc, 125, 30, 0, 0, agup_fg_color, agup_bg_color, 0, 0, 0, 0, (void *)"Aspectrum Version: "VERSION, NULL, NULL },
+      { d_ctext_proc, 125, 40, 0, 0, agup_fg_color, agup_bg_color, 0, 0, 0, 0, (void *)"(C) 2000-2003 Santiago Romero, Kak y Alvaro Alea", NULL, NULL },
+      { d_ctext_proc, 125, 50, 0, 0, agup_fg_color, agup_bg_color, 0, 0, 0, 0, (void *)"Distribuido bajo licencia GPL V2", NULL, NULL },
+      {gui_button_proc, 85, 75, 70, 16, 0, 0, 13, D_EXIT, 0, 0, "OK", NULL, NULL},
+      { NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL }
+
+    };
+
+   centre_dialog(dlg);
+   do_dialog(dlg, -1);
+   return D_CLOSE;
+
+/*  alert("Aspectrum Version: "VERSION,"(C) 2000-2003 Santiago Romero, Kak y Alvaro Alea",
 	"Distribuido bajo licencia GPL V2","OK",NULL,13,27);
   selected_opt = DIALOG_ABOUT;
-  return D_CLOSE;
+  return D_REDRAW;
+*/
+
 }
+
 
 
 /*-----------------------------------------------------------------
@@ -149,12 +179,13 @@ int
 MainMenu (Z80Regs * regs, char *tfont)
 {
 
-  int i, end = 0, selected = 0, keypress;
-  int fonth = 12;
-  int menux = 20, menuy = 15, menuw = 280, menuh = 170;
-  int bgcolor = 15, titlecolor = 14;
-  int bgselcolor = 11, textbgselcolor = 13;
-  int fgcolor = 0;
+//  int i, end = 0, keypress;
+  int selected = 0;
+//  int fonth = 12;
+//  int menux = 20, menuy = 15, menuw = 280, menuh = 170;
+//  int bgcolor = 15, titlecolor = 14;
+//  int bgselcolor = 11, textbgselcolor = 13;
+//  int fgcolor = 0;
 
 #include "dialog_en.h"
 #include "dialog_es.h"
@@ -255,7 +286,7 @@ DrawSelected (int x1, int y1, int x2, int y2, char *text, int fgcolor,
 int
 FileMenu (char *tfont, char type, char *filename)
 {
-  extern struct tipo_emuopt emuopt;
+  extern tipo_emuopt emuopt;
 //    int i, current=0, end = 0, selected = 0, keypress;
 //    int fontw = 8, fonth=12;
 //    int menux = 18, menuy = 70, menuw = 284, menuh = 50;
@@ -266,10 +297,10 @@ FileMenu (char *tfont, char type, char *filename)
   int ret;
 
   char extensions[FILEBOX_TYPES][80] = {
-    "SNA;SP;Z80",
-    "SNA",
+    "SNA;SP;Z80;SCR",  //carga
+    "SNA;SP;Z80;SCR",  //graba
     "SCR",
-    "TAP;TZX"
+    "TAP;TZX"          //cintas
   };
 
   gui_fg_color = 0;
@@ -327,19 +358,15 @@ char *lista_joys(int index int *list_size)
 int
 menuopciones (void)
 {
-  extern struct tipo_emuopt emuopt;
+  extern tipo_emuopt emuopt;
   DIALOG dialogo[] = {
-    {gui_shadow_box_proc, 0, 0, 195, 90, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL},
-    {d_text_proc, 25, 5, 100, 16, 0, 0, 0, 0, 0, 0,
-     lang_generaloptions[language], NULL, NULL},
-    {GUI_check_proc, 10, 20, 50, 8, 0, 0, 'G', 0, 1, 0,
-     lang_emulagunstick[language], NULL, NULL},
-    {gui_button_proc, 40, 70, 70, 16, 0, 0, 13, D_EXIT, 0, 0, "OK", NULL,
-     NULL},
-    {gui_button_proc, 120, 70, 70, 16, 0, 0, 27, D_EXIT, 0, 0, "Cancel", NULL,
-     NULL},
-    {GUI_check_proc, 10, 35, 50, 8, 0, 0, 'S', 0, 1, 0,
-     lang_soundactive[language], NULL, NULL},
+    { d_agup_window_proc, 0, 0, 195, 90, 0, 0, 0, 0, 0, 0,(void *)lang_generaloptions[language], NULL, NULL },
+//  {gui_shadow_box_proc, 0, 0, 195, 90, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL},
+//  {d_text_proc, 25, 5, 100, 16, 0, 0, 0, 0, 0, 0, lang_generaloptions[language], NULL, NULL},
+    {GUI_check_proc, 10, 30, 50, 8, 0, 0, 'G', 0, 1, 0,lang_emulagunstick[language], NULL, NULL},
+    {GUI_check_proc, 10, 45, 50, 8, 0, 0, 'S', 0, 1, 0,lang_soundactive[language], NULL, NULL},
+    {gui_button_proc, 40, 70, 70, 16, 0, 0, 13, D_EXIT, 0, 0, "OK", NULL, NULL},
+    {gui_button_proc, 120, 70, 70, 16, 0, 0, 27, D_EXIT, 0, 0, "Cancel", NULL, NULL},
 //     {d_list_proc,10,30,50,16, 0,0,NULL,d1,d2,lista_joys,*dp1,*dp2},
     {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL}
   };
@@ -348,10 +375,10 @@ menuopciones (void)
      opciones 
    */
   if (!(emuopt.gunstick & GS_HAYMOUSE))
-    dialogo[2].flags |= D_DISABLED;
+    dialogo[1].flags |= D_DISABLED;
   if (emuopt.gunstick & GS_GUNSTICK)
     {
-      dialogo[2].flags |= D_SELECTED;
+      dialogo[1].flags |= D_SELECTED;
       set_mouse_sprite (NULL);
     }
   /* centramos el cuadro de dialogo y si se pulsa aceptar ocultamos
@@ -361,7 +388,7 @@ menuopciones (void)
   set_dialog_color (dialogo, gui_fg_color, gui_bg_color);
   if (popup_dialog (dialogo, 2) == 3)	//2 del que lleva el foco, 3 del boton de aceptar.
     {
-      if (dialogo[2].flags & D_SELECTED)
+      if (dialogo[1].flags & D_SELECTED)
 	{
 	  emuopt.gunstick |= GS_GUNSTICK;
 	  show_mouse (screen);
@@ -380,6 +407,46 @@ menuopciones (void)
     {
       set_mouse_sprite (emuopt.raton_bmp);
       set_mouse_sprite_focus (8, 8);
+    }
+  return (0);
+}
+
+
+int
+menuhardware (void)
+{
+  extern tipo_hwopt hwopt;
+  extern Z80Regs spectrumZ80;	
+  int c;
+  DIALOG dialogo[] = {
+    {d_agup_window_proc, 0, 0, 195, 140, 0, 0, 0, 0, 0, 0,"Seleccion de Hardware", NULL, NULL },
+    {gui_button_proc, 30, 115, 70, 16, 0, 0, 13, D_EXIT, 0, 0, "OK", NULL, NULL},
+    {gui_button_proc, 110, 115, 70, 16, 0, 0, 27, D_EXIT, 0, 0, "Cancel", NULL, NULL},
+    {GUI_radio_proc, 10, 30, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum 16K", (void *)1,(void *)0},
+    {GUI_radio_proc, 10, 45, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum 48K", (void *)1,(void *)0},
+    {GUI_radio_proc, 10, 60, 50, 8, 0, 0, 0, 0, 1, 0,"Inves Spectrum+ 48K", (void *)1,(void *)0},
+    {GUI_radio_proc, 10, 75, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum 128K Espanol", (void *)1,(void *)0},
+    {GUI_radio_proc, 10, 90, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum +2 (128K)", (void *)1,(void *)0},
+    {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL}
+  };
+
+  /* Selecionamos el tipo de arquitetura actual.
+   */
+  dialogo[hwopt.hw_model+2].flags |= D_SELECTED;
+       
+   /* centramos el cuadro de dialogo y si se pulsa aceptar ocultamos
+     o mostramos el raton segun sea necesario
+   */
+  centre_dialog (dialogo);
+  set_dialog_color (dialogo, gui_fg_color, gui_bg_color);
+  if (popup_dialog (dialogo, 2) == 1)	//2 del que lleva el foco, 1 del boton de aceptar.
+    {
+     for(c=3;c<8;c++) if ((dialogo[c].flags & D_SELECTED)==D_SELECTED) break ;
+	 printf("Sale %i\n",c-2);
+	 end_spectrum();
+	 init_spectrum(c-2,"");
+	 printf("Inicio %i\n",c-2);
+	 Z80Reset (&spectrumZ80, 69888);
     }
   return (0);
 }

@@ -21,8 +21,10 @@
 #define MAXSOUNDBUFFER 68192
 
 #include <stdio.h>
-#include "aspec.h"
+#include "z80.h"
+#include "v_alleg.h"
 
+#include "sound.h"
 
 extern Z80Regs spectrumZ80;
 extern int gSoundInited;
@@ -84,7 +86,7 @@ soundDump (void)
   int cur_sound, tgt;
   int i, j, cur;
   float tmp;
-  u8 *beeperSound;
+  byte *beeperSound;
 //FILE *f;
 
   if (!gSoundInited)
@@ -134,7 +136,7 @@ soundDump (void)
 void
 clearSoundBuffer (void)
 {
-  u8 *ptr;
+  byte *ptr;
   int i, j;
 
   for (j = 0; j < 1; j++)

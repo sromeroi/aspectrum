@@ -1,9 +1,14 @@
 #include "stdafx.h"
 /*=====================================================================
-	"platform dependant" file, used to port the source code to
-   other platforms / libraries , just "translate" all the
-	funcions in this file to the target platform / library.
-=====================================================================*/
+ *	"platform dependant" file, used to port the source code to
+ *      other platforms / libraries , just "translate" all the
+ *	funcions in this file to the target platform / library.
+ *
+ *	To be a really portable emulator none of de *.[ch] must have a
+ *      #include <allegro.h> or any related to allegro.
+ *      so be posible create a v_alleg.[ch] that depend of sdl p.e. and
+ *      not of allegro.
+ *=====================================================================*/
 
 #ifdef _DEBUG_
 #include <mss.h>
@@ -15,24 +20,26 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "aspec.h"
+
+#include <allegro.h>
+
+#include "v_alleg.h"
 #include "z80.h"
 #include "snaps.h"
 #include "main.h"
-
-#include <allegro.h>
 #include "monofnt.h"
 #include "graphics.h"
 #include "debugger.h"
-#include "v_alleg.h"
 #include "main.h"
+#include "sound.h"
+#include "mem.h"
 
 #ifdef I_HAVE_AGUP
 #include <agup.h>
-#include <agtk.h>
-#include <aphoton.h>
-#include <awin95.h>
-#include <aase.h>
+//#include <agtk.h>
+//#include <aphoton.h>
+//#include <awin95.h>
+//#include <aase.h>
 #endif
 
 extern void target_incrementor (void);
@@ -47,8 +54,46 @@ volatile char *gkey;
 // allegro virtual screen
 BITMAP *vscreen;
 extern Z80Regs spectrumZ80;
-extern unsigned int colors[256];
+unsigned int colors[256];
+static DATAFILE *datafile = NULL;
 
+static gRGB colores[17] = { 
+    {0 / 4, 0 / 4, 0 / 4}, 
+  {0 / 4, 0 / 4, 192 / 4}, 
+  {192 / 4, 0 / 4, 0 / 4}, 
+  {192 / 4, 0 / 4, 192 / 4}, 
+  {0 / 4, 192 / 4, 0 / 4}, 
+  {0 / 4, 192 / 4, 192 / 4}, 
+  {192 / 4, 192 / 4, 0 / 4}, 
+  {192 / 4, 192 / 4, 192 / 4}, 
+  {0 / 4, 0 / 4, 0 / 4}, 
+  {0 / 4, 0 / 4, 255 / 4}, 
+  {255 / 4, 0 / 4, 0 / 4}, 
+  {255 / 4, 0 / 4, 255 / 4}, 
+  {0 / 4, 255 / 4, 0 / 4}, 
+  {0 / 4, 255 / 4, 255 / 4}, 
+  {255 / 4, 255 / 4, 0 / 4}, 
+  {255 / 4, 255 / 4, 255 / 4}, {255 / 4, 0 / 4, 0 / 4} 
+/*
+  Old colour palette:
+  
+  {   0/4,   0/4, 205/4},
+  { 205/4,   0/4,   0/4},
+  { 205/4,   0/4, 205/4},
+  {   0/4, 205/4,   0/4},
+  {   0/4, 205/4, 205/4},
+  { 205/4, 205/4,   0/4},
+  { 212/4, 212/4, 212/4},
+  {   0/4,   0/4,   0/4},
+  {   0/4,   0/4, 255/4},
+  { 255/4,   0/4,   0/4},
+  { 255/4,   0/4, 255/4},
+  {   0/4, 255/4,   0/4},
+  {   0/4, 255/4, 255/4},
+  { 255/4, 255/4,   0/4},
+  { 255/4, 255/4, 255/4}
+*/ 
+};
 
 /*-----------------------------------------------------------------
  ExitEmulator( void );
@@ -67,9 +112,9 @@ ExitEmulator (void)
   agup_shutdown ();
 #endif
 
+  end_spectrum();
   allegro_exit ();
-//   fcloseall();
-  free (spectrumZ80.RAM);	/* free RAM */
+//  fcloseall();
   exit (0);
 }
 
@@ -165,8 +210,8 @@ void
 InitGraphics (void)
 {
   int i, depth;
-	FILE *archivo;
-//   PALETTE specpal;
+//  FILE *archivo;
+//  PALETTE specpal;
   extern int v_res;
   extern int v_border;
 //ASprintf("antes allegro \n");
@@ -195,7 +240,7 @@ InitGraphics (void)
 
   if ((depth = desktop_color_depth ()) > 8)
     {
-      ASprintf("Vale, al final salen mas de 8bit por pixel\n");
+      ASprintf("desktop_color_depth y bitmap_color_depth devuelve diferente valor ?????\n");
       for (i = 0; i < 16; i++)
 	colors[i] =
 	  makecol (colores[i].r * 4, colores[i].g * 4, colores[i].b * 4);
@@ -218,22 +263,9 @@ InitGraphics (void)
       }
    set_pallete(specpal);   
 */
-//ASprintf("primer uso de find_file\n");
-  archivo=find_file("font.dat");
-  datafile = load_datafile ("font.dat");
-//ASprintf("usadofind_file\n");
-  free(archivo);
-//ASprintf("liberado\n");
 
-/* lo comento por que find_file termina el programa si no lo encuentra.
-	if (!datafile)
-    {
-      set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
-      allegro_message ("File font.dat does not exist...\n");
-      ExitEmulator ();
-    };
-*/
- font = datafile[0].dat;
+  datafile = load_datafile (find_file("font.dat"));
+  font = datafile[0].dat;
 
   LOCK_VARIABLE (last_fps);
   LOCK_VARIABLE (frame_counter);
@@ -334,7 +366,7 @@ gUpdateRect (int x, int y, int w, int h)
 void
 v_initmouse (void)
 {
-  extern struct tipo_emuopt emuopt;
+  extern tipo_emuopt emuopt;
   int color_b, color_n;
 
   if (install_mouse () != -1)
@@ -402,16 +434,16 @@ gInitSound (void)
 
 }
 
-u8 *
+byte *
 gGetSampleBuffer (void)
 {
-  u8 *ptr;
+  byte *ptr;
   if (!gSoundInited)
     return NULL;
 
   while (1)
     {
-      ptr = (u8 *) get_audio_stream_buffer (audioStream);
+      ptr = (byte *) get_audio_stream_buffer (audioStream);
       if (ptr != NULL)
 	break;
     }
@@ -465,7 +497,7 @@ gInitSound (void)
   for (j = 0; j < NSAMPS; j++)
     for (i = 0; i < SAMPLE_SIZE; i++)
       {
-	((u8 *) (smp[j]->data))[i] = 128;
+	((byte *) (smp[j]->data))[i] = 128;
       }
   playMainSample ();
 
@@ -483,8 +515,7 @@ getVoicePos (void)
   return voice_get_position (smpvoice);
 }
 
-u8 *
-gGetSampleBuffer (void)
+byte * gGetSampleBuffer (void)
 {
   int pos;
   if (!gSoundInited)
@@ -492,9 +523,9 @@ gGetSampleBuffer (void)
 
   pos = getVoicePos ();
   if (pos >= 882)
-    return (u8 *) smp[0]->data;
+    return (byte *) smp[0]->data;
   else
-    return ((u8 *) smp[0]->data) + 882;
+    return ((byte *) smp[0]->data) + 882;
 }
 
 void
@@ -563,20 +594,19 @@ gInitSound (void)
   for (j = 0; j < NSAMPS; j++)
     for (i = 0; i < SAMPLE_SIZE; i++)
       {
-	((u8 *) (smp[j]->data))[i] = 128;
+	((byte *) (smp[j]->data))[i] = 128;
       }
 
 
 }
 
-u8 *
-gGetSampleBuffer (void)
+byte * gGetSampleBuffer (void)
 {
-  u8 *ptr;
+  byte *ptr;
   if (!gSoundInited)
     return NULL;
 
-  ptr = (u8 *) smp[cursamp]->data;
+  ptr = (byte *) smp[cursamp]->data;
   return ptr;
 
 }

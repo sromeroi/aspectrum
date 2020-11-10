@@ -279,9 +279,7 @@
 #define  PREFIX_FD     253
 #define  CP_N          254
 #define  RST_38        255
-  
-
-
+  
 /*--- CB Prefix opcodes: ---------------------------------------------*/ 
 #define  RLC_B         0
 #define  RLC_C         1
@@ -539,8 +537,7 @@
 #define  SET_7_L       253
 #define  SET_7_xHL     254
 #define  SET_7_A       255
-  
-
+  
 /*--- ED opcodes: ----------------------------------------------------*/ 
 #define  IN_B_xC       64
 #define  OUT_xC_B      65
@@ -623,8 +620,7 @@
 #define  INDR          186
 #define  OTDR          187
 #define  ED_FE         254
-  
-
+  
 /*--- DD xx opcodes: -------------------------------------------------*/ 
 /* Those are the DD xx opcodes where HL is treated as IX + a
    signed byte displacement n when required:  DD opcode n:            */ 
@@ -718,10 +714,7 @@
 #define  PUSH_IXY       229
 #define  JP_IXY         233
 #define  LD_SP_IXY      249
-  
-
-
-
+  
 /*--- DD CB Prefix opcodes: ------------------------------------------*/ 
 /* Those are the CB xx opcodes where HL is treated as IX + a
    signed byte displacement n:  DD CB n opcode:                       */ 

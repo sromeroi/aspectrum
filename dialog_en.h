@@ -27,8 +27,8 @@ MENU options_menu_EN[] = {
   {"&Tape", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Video", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Audio", dummy_proc, NULL, D_DISABLED, NULL},
-  {"&Options", dummy_proc, NULL, D_DISABLED, NULL},
-  {"&Hardware", dummy_proc, NULL, D_DISABLED, NULL},
+  {"&Options\tF7", opciones_proc, NULL, 0, NULL},
+  {"&Hardware", hardware_proc, NULL, 0, NULL},
   {"&Recording", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Change Language\tF8", changelang_proc, NULL, 0, NULL},
   {0}
