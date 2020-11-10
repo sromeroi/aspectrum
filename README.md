@@ -1,17 +1,13 @@
-    _    ____                  _                        
-   / \  / ___| _ __   ___  ___| |_ _ __ _   _ _ __ ___  
-  / _ \ \___ \| '_ \ / _ \/ __| __| '__| | | | '_ ` _ \ 
- / ___ \ ___) | |_) |  __/ (__| |_| |  | |_| | | | | | |
-/_/   \_\____/| .__/ \___|\___|\__|_|   \__,_|_| |_| |_|
-              |_|                                       
-                    POWERED BY Linux
+ASPECTRUM
+=========
+*POWERED BY Linux*
 
   Copyright (c) 2000
   Santiago Romero Iglesias  -  sromero@escomposlinux.org
 
 
   WHAT IS THIS PROGRAM FOR
-=======================================================================
+-----------------------------------------------------------------------
 
  ASpectrum Emulator: This is our contribution to the Spectrum World.
  We're trying to release our simple, useable and portable Spectrum
@@ -19,7 +15,7 @@
 
 
   HOW TO USE THIS PROGRAM
-=======================================================================
+-----------------------------------------------------------------------
 
  By the moment, just run it without arguments to run the 48K spectrum
  ROM, or give it a filename to load snapshots  or tape files...
@@ -34,7 +30,7 @@
  Also even the .tzx files are supported any kind of custom or turbo
  loading squeme is not supporting and don't work by now.
  
- To a resume of aspectrum command line args use "./aspectrum --help"
+ For a resume of aspectrum command line args use "./aspectrum --help"
 
  You'll need Allegro 4.x to run this program.
  The font.* files MUST be located at the same directory where you
@@ -47,7 +43,7 @@
 
  To use Gunstick Emulation you must have a working mouse and call
  the emulator with "./aspectrum -j G" (CASE SENSITIVE), or activate
- the gunstick emulation by General Options menu (F7).
+ the gunstick emulation in General Options menu (F7).
 
  One time you start the gunstick emulation can avoid the "888"s locating
  the mouse in the border of the screen.
@@ -57,8 +53,7 @@
  to more information about what versions are avalible.
 
  NOTE THAT THIS EMULATOR IT'S NOT USER-FRIENDLY AS IT'S STILL IN
- FULL DEVELOPMENT STAGE. IT WON'T BE PACKAGED ON BINARY DEB/RPM
- FORMATS AND WON'T HAVE INSTALLATION OPTIONS WHILE DEVELOPING IT.
+ FULL DEVELOPMENT STAGE.
 
  To compile the debug version you'll need to install MSS (Memory
  Supervision System) that generates .log files reporting memory
@@ -66,39 +61,39 @@
 
 
   ABOUT THIS PROGRAM
-=======================================================================
+-----------------------------------------------------------------------
 
- o Currently it emulates several of  the Sinclair/Investronica/Amstrad 
+ * Currently it emulates several of the Sinclair/Investronica/Amstrad 
    spectrums, at least for memory and z80 (no disk or 128K Sound) until 
    I fix all the wrong Z80 opcodes (bugs, bugs, bugs :) and until all the
    undocumented opcodes are implemented. Then I'll add support for
    other features.
 
- o There are not implemented opcodes (although almost all games work,
+ * There are not implemented opcodes (although almost all games work,
    so they are not used very often) and ___at least one bug___ in the
    Z80 emulation that makes some games to fail (see WORKING file).
 
- o The emulator has a built-in debugger (very simple) that I use to
+ * The emulator has a built-in debugger (very simple) that I use to
    search bugs (I usually comparte the output of my emulation with
    the real spectrum or another emulators).
 
- o It can load and save .SNA, .SP and .Z80 snapshot files.
+ * It can load and save .SNA, .SP and .Z80 snapshot files.
 
- o It can load .TAP and .TZX files at "zero" speed (I've still not implemented
+ * It can load .TAP and .TZX files at "zero" speed (I've still not implemented
    the real-time loading routines), by using LOAD "" on the emulator.
    It still does not load protected games nor games launched by
    non-standard loaders. LOAD "" is writen pressing J and ALT+P and ALT+P.
 
- o I've tested the emulator with more than 100 games, and almost
+ * I've tested the emulator with more than 100 games, and almost
    all were working right. If you found a game that don't work or refuse to
    load, and if you think that it not use any of the unsupported features,
    please, fell free to send it to the autors, to examine it.
 
- o All the coding style, documentation, etc. sucks :).
+ * All the coding style, documentation, etc. sucks :).
 
 
  LICENSE
-=======================================================================
+-----------------------------------------------------------------------
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
@@ -117,9 +112,9 @@
 
 
   THANKS TO...
-=======================================================================
+-----------------------------------------------------------------------
 
- o Marat Fayzullin, Raúl Gómez, Philip Kendall and Ignacio Burgueño:
+ * Marat Fayzullin, Raul Glez, Philip Kendall and Ignacio Burguer:
    These people helped me a lot with the emulator: he explained me about
    Z80 emulation, pointed me to the right documentation, and so on.
    Ignacio tested my emulator against their own emulator to tell me
@@ -129,26 +124,26 @@
    them on any search engine:
 
      Marat Fayzullin : z80 emulator (Z80 microprocessor).
-     Raúl Gómez: R80 emulator (Spectrum).
+     Raul Glez: R80 emulator (Spectrum).
      Philip Kendall: Fuse emulator (Spectrum).
-     Ignacio Burgueño: GLECK emulator (Spectrum).
+     Ignacio Burguer: GLECK emulator (Spectrum).
      Z80user, Kak, Hylian, Kel: From #spectrum on IRC-Hispano.
 
- o Alvaro Alea, for submitting the first Aspectrum patch giving support
+ * Alvaro Alea, for submitting the first Aspectrum patch giving support
    to load Z80 snapshot files on the emulator.
 
- o Ginés Flores, for trying to help me on the emulator.
+ * Gines Flores, for trying to help me on the emulator.
 
- o Jose Manuel Claros, for the help on all the spectrum stuff.
+ * Jose Manuel Claros, for the help on all the spectrum stuff.
 
- o Pedro Gimeno, for creating his Spectrum emulator (and for the readme!).
+ * Pedro Gimeno, for creating his Spectrum emulator (and for the readme!).
 
- o Grzegorz Adam Hankiewicz, for helping me on learning Allegro...
+ * Grzegorz Adam Hankiewicz, for helping me on learning Allegro...
    and of course all the Allegro Development Team, for creating such
    a nice programming library. Read the allegro's AUTHORS file for
    all the people who has contributed to Shawn Hargreaves' initial Allegro.
 
- o Aspectrum use AGUP library, see http://agup.sourceforge.net and the source 
+ * Aspectrum use AGUP library, see http://agup.sourceforge.net and the source 
    code of Aspectrum for more information.
 
   Santiago Romero AkA NoP/Compiler.
