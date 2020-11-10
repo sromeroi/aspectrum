@@ -40,7 +40,7 @@ $(objects): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(AGUPLIB):
-	$(MAKE) -C $(AGUPDIR) agup_lib
+#	$(MAKE) -C $(AGUPDIR) agup_lib
 
 docs:
 	$(MAKE) -C doc

@@ -21,7 +21,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <allegro.h>
+#include <allegro5/allegro5.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/keyboard.h>
+
 
 #include "v_alleg.h"
 #include "z80.h"
@@ -50,9 +54,10 @@ extern volatile int target_cycle;
 extern volatile int last_fps;
 
 // generic key handler ( = key using allegro)
-volatile char *gkey;
+//volatile char *gkey;
 // allegro virtual screen
-BITMAP *vscreen;
+ALLEGRO_BITMAP *vscreen;
+ALLEGRO_BITMAP *mouseicon;
 extern Z80Regs spectrumZ80;
 unsigned int colors[256];
 static DATAFILE *datafile = NULL;
@@ -145,7 +150,7 @@ gtextout (char *b, int x, int y, int color)
 
 // draws text in the virtual screen with no background
 void
-gtextoutb (char *b, int x, int y, int color, FONT * tfont)
+gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont)
 {
   text_mode (-1);
   textout (vscreen, tfont, b, x, y, color);
@@ -217,7 +222,7 @@ InitGraphics (void)
 //ASprintf("antes allegro \n");
   allegro_init ();
 //ASprintf("antes keyboards \n");
-  install_keyboard ();
+  al_install_keyboard ();
 //ASprintf("antes timer \n");
   install_timer ();
 
@@ -357,40 +362,37 @@ gUpdateRect (int x, int y, int w, int h)
   blit (vscreen, screen, x, y, x, y, w, h);
 }
 
-#if ALLEGRO_WIP_VERSION >= 38
-#define CLEARBITMAP clear_bitmap
-#else
-#define CLEARBITMAP clear
-#endif
 
+ALLEGRO_MOUSE_CURSOR *mousecursor;
 void
 v_initmouse (void)
 {
   extern tipo_emuopt emuopt;
   int color_b, color_n;
 
-  if (install_mouse () != -1)
+  if (al_install_mouse ())
     {
       emuopt.gunstick |= GS_HAYMOUSE;
 
       // dibujar puntero 
-      emuopt.raton_bmp = create_bitmap (16, 16);
-      CLEARBITMAP (emuopt.raton_bmp);
-      color_b = makecol (255, 255, 255);
-      color_n = makecol (0, 0, 0);
-      circle (emuopt.raton_bmp, 8, 8, 7, color_n);
-      circle (emuopt.raton_bmp, 8, 8, 6, color_b);
-      putpixel (emuopt.raton_bmp, 8, 8, color_b);
-      putpixel (emuopt.raton_bmp, 7, 8, color_n);
-      putpixel (emuopt.raton_bmp, 9, 8, color_n);
-      putpixel (emuopt.raton_bmp, 8, 7, color_n);
-      putpixel (emuopt.raton_bmp, 8, 9, color_n);
+      mouseicon = al_create_bitmap (16, 16);
+      al_clear_bitmap (mouseicon);
+      color_b = al_makecol (255, 255, 255);
+      color_n = al_makecol (0, 0, 0);
+      al_circle (mouseicon, 8, 8, 7, color_n);
+      al_circle (mouseicon, 8, 8, 6, color_b);
+      al_putpixel (mouseicon, 8, 8, color_b);
+      al_putpixel (mouseicon, 7, 8, color_n);
+      al_putpixel (mouseicon, 9, 8, color_n);
+      al_putpixel (mouseicon, 8, 7, color_n);
+      al_putpixel (mouseicon, 8, 9, color_n);
 
       if ((emuopt.gunstick & GS_GUNSTICK) != 0)
 	{
-	  set_mouse_sprite (emuopt.raton_bmp);
-	  set_mouse_sprite_focus (8, 8);
-	  show_mouse (screen);
+	  mousecursor = al_create_mouse_cursor(mouseicon,8,8);
+	  //set_mouse_sprite (emuopt.raton_bmp);
+	  //set_mouse_sprite_focus (8, 8);
+	  al_show_mouse_cursor (screen);
 	}
     }
 
@@ -403,7 +405,7 @@ galert (const char *s1, const char *s2, const char *s3, const char *b1,
   int a;
 //    gui_fg_color = 0;
 //    gui_bg_color = 7;
-  a = alert (s1, s2, s3, b1, b2, c1, c2);
+//PENDING  a = alert (s1, s2, s3, b1, b2, c1, c2);
   return a;
 }
 
@@ -427,8 +429,8 @@ void init_keyboard(void){
 void UpdateKeyboard (void)
 {
 /*=== This adds the row/column/data value for each key on spectrum kerb ===*/
+  ALLEGRO_KEYBOARD_STATE estadoteclas;
 #define NUM_KEYB_KEYS 256
-
   enum SpecKeys
   {
     SPECKEY_0, SPECKEY_1, SPECKEY_2, SPECKEY_3, SPECKEY_4, SPECKEY_5,
@@ -440,25 +442,25 @@ void UpdateKeyboard (void)
     SPECKEY_SPACE, SPECKEY_ENTER,
     SPECKEY_SHIFT, SPECKEY_ALT, SPECKEY_CTRL
   };
-
-  static unsigned char teclas_fila[NUM_KEYB_KEYS][3] = {
-    {1, 2, 0xFE}, /* 0 */ {1, 1, 0xFE}, /* 1 */ {1, 1, 0xFD},	/* 2 */
-    {1, 1, 0xFB}, /* 3 */ {1, 1, 0xF7}, /* 4 */ {1, 1, 0xEF},	/* 5 */
-    {1, 2, 0xEF}, /* 6 */ {1, 2, 0xF7}, /* 7 */ {1, 2, 0xFB},	/* 8 */
-    {1, 2, 0xFD},		/* 9 */
-    {3, 1, 0xFE}, /* a */ {4, 2, 0xEF}, /* b */ {4, 1, 0xF7},	/* c */
-    {3, 1, 0xFB}, /* d */ {2, 1, 0xFB}, /* e */ {3, 1, 0xF7},	/* f */
-    {3, 1, 0xEF}, /* g */ {3, 2, 0xEF}, /* h */ {2, 2, 0xFB},	/* i */
-    {3, 2, 0xF7}, /* j */ {3, 2, 0xFB}, /* k */ {3, 2, 0xFD},	/* l */
-    {4, 2, 0xFB}, /* m */ {4, 2, 0xF7}, /* n */ {2, 2, 0xFD},	/* o */
-    {2, 2, 0xFE}, /* p */ {2, 1, 0xFE}, /* q */ {2, 1, 0xF7},	/* r */
-    {3, 1, 0xFD}, /* s */ {2, 1, 0xEF}, /* t */ {2, 2, 0xF7},	/* u */
-    {4, 1, 0xEF}, /* v */ {2, 1, 0xFD}, /* w */ {4, 1, 0xFB},	/* x */
-    {2, 2, 0xEF}, /* y */ {4, 1, 0xFD},	/* z */
-    {4, 2, 0xFE}, /*SPACE*/
-      {3, 2, 0xFE}, /*ENTER*/
-      {4, 1, 0xFE}, /*RSHIFT*/ {4, 2, 0xFD}, /*ALT*/ {1, 2, 0xEF}, /*CTRL*/
-  };
+// UNUSED ??
+//  static unsigned char teclas_fila[NUM_KEYB_KEYS][3] = {
+//    {1, 2, 0xFE}, /* 0 */ {1, 1, 0xFE}, /* 1 */ {1, 1, 0xFD},	/* 2 */
+//    {1, 1, 0xFB}, /* 3 */ {1, 1, 0xF7}, /* 4 */ {1, 1, 0xEF},	/* 5 */
+//    {1, 2, 0xEF}, /* 6 */ {1, 2, 0xF7}, /* 7 */ {1, 2, 0xFB},	/* 8 */
+//    {1, 2, 0xFD},		/* 9 */
+//    {3, 1, 0xFE}, /* a */ {4, 2, 0xEF}, /* b */ {4, 1, 0xF7},	/* c */
+//    {3, 1, 0xFB}, /* d */ {2, 1, 0xFB}, /* e */ {3, 1, 0xF7},	/* f */
+//    {3, 1, 0xEF}, /* g */ {3, 2, 0xEF}, /* h */ {2, 2, 0xFB},	/* i */
+//    {3, 2, 0xF7}, /* j */ {3, 2, 0xFB}, /* k */ {3, 2, 0xFD},	/* l */
+//    {4, 2, 0xFB}, /* m */ {4, 2, 0xF7}, /* n */ {2, 2, 0xFD},	/* o */
+//    {2, 2, 0xFE}, /* p */ {2, 1, 0xFE}, /* q */ {2, 1, 0xF7},	/* r */
+//    {3, 1, 0xFD}, /* s */ {2, 1, 0xEF}, /* t */ {2, 2, 0xF7},	/* u */
+//    {4, 1, 0xEF}, /* v */ {2, 1, 0xFD}, /* w */ {4, 1, 0xFB},	/* x */
+//    {2, 2, 0xEF}, /* y */ {4, 1, 0xFD},	/* z */
+//    {4, 2, 0xFE}, /*SPACE*/
+//      {3, 2, 0xFE}, /*ENTER*/
+//      {4, 1, 0xFE}, /*RSHIFT*/ {4, 2, 0xFD}, /*ALT*/ {1, 2, 0xEF}, /*CTRL*/
+//  };
 
 
   /* reset the spectrum row and column keyboard signals */
@@ -468,127 +470,129 @@ void UpdateKeyboard (void)
 
 
   /* change row and column signals according to pressed key */
+  al_get_keyboard_state(&estadoteclas);
+  
 
-  if (gkey[KEY_Z])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_Z))
     fila[4][1] &= (0xFD);
-  if (gkey[KEY_X])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_X))
     fila[4][1] &= (0xFB);
-  if (gkey[KEY_C])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_C))
     fila[4][1] &= (0xF7);
-  if (gkey[KEY_V])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_V))
     fila[4][1] &= (0xEF);
-  if (gkey[KEY_RSHIFT] || key[KEY_LSHIFT])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_RSHIFT) || al_key_down(&estadoteclas,ALLEGRO_KEY_LSHIFT))
     fila[4][1] &= (0xFE);
 
-  if (gkey[KEY_A])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_A))
     fila[3][1] &= (0xFE);
-  if (gkey[KEY_S])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_S))
     fila[3][1] &= (0xFD);
-  if (gkey[KEY_D])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_D))
     fila[3][1] &= (0xFB);
-  if (gkey[KEY_F])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_F))
     fila[3][1] &= (0xF7);
-  if (gkey[KEY_G])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_G))
     fila[3][1] &= (0xEF);
 
-  if (gkey[KEY_Q])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_Q))
     fila[2][1] &= (0xFE);
-  if (gkey[KEY_W])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_W))
     fila[2][1] &= (0xFD);
-  if (gkey[KEY_E])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_E))
     fila[2][1] &= (0xFB);
-  if (gkey[KEY_R])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_R))
     fila[2][1] &= (0xF7);
-  if (gkey[KEY_T])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_T))
     fila[2][1] &= (0xEF);
 
-  if (gkey[KEY_1])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_1))
     fila[1][1] &= (0xFE);
-  if (gkey[KEY_2])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_2))
     fila[1][1] &= (0xFD);
-  if (gkey[KEY_3])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_3))
     fila[1][1] &= (0xFB);
-  if (gkey[KEY_4])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_4))
     fila[1][1] &= (0xF7);
-  if (gkey[KEY_5])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_5))
     fila[1][1] &= (0xEF);
 
-  if (gkey[KEY_0])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_0))
     fila[1][2] &= (0xFE);
-  if (gkey[KEY_9])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_9))
     fila[1][2] &= (0xFD);
-  if (gkey[KEY_8])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_8))
     fila[1][2] &= (0xFB);
-  if (gkey[KEY_7])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_7))
     fila[1][2] &= (0xF7);
-  if (gkey[KEY_6])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_6))
     fila[1][2] &= (0xEF);
 
-  if (gkey[KEY_P])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_P))
     fila[2][2] &= (0xFE);
-  if (gkey[KEY_O])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_O))
     fila[2][2] &= (0xFD);
-  if (gkey[KEY_I])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_I))
     fila[2][2] &= (0xFB);
-  if (gkey[KEY_U])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_U))
     fila[2][2] &= (0xF7);
-  if (gkey[KEY_Y])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_Y))
     fila[2][2] &= (0xEF);
 
-  if (gkey[KEY_ENTER])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_ENTER))
     fila[3][2] &= (0xFE);
-  if (gkey[KEY_L])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_L))
     fila[3][2] &= (0xFD);
-  if (gkey[KEY_K])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_K))
     fila[3][2] &= (0xFB);
-  if (gkey[KEY_J])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_J))
     fila[3][2] &= (0xF7);
-  if (gkey[KEY_H])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_H))
     fila[3][2] &= (0xEF);
 
-  if (gkey[KEY_SPACE])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_SPACE))
     fila[4][2] &= (0xFE);
-  if (gkey[KEY_ALT] || key[KEY_ALT])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_ALT) || al_key_down(&estadoteclas,ALLEGRO_KEY_ALT))
     fila[4][2] &= (0xFD);
-  if (gkey[KEY_M])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_M))
     fila[4][2] &= (0xFB);
-  if (gkey[KEY_N])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_N))
     fila[4][2] &= (0xF7);
-  if (gkey[KEY_B])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_B))
     fila[4][2] &= (0xEF);
 
-  if (gkey[KEY_BACKSPACE])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_BACKSPACE))
     {
       fila[4][1] &= (0xFE);
       fila[1][2] &= (0xFE);
     }
-  if (gkey[KEY_TAB])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_TAB))
     {
       fila[4][1] &= (0xFE);
       fila[4][2] &= (0xFD);
     }
-  if (gkey[KEY_CAPSLOCK])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_CAPSLOCK))
 	{
 		fila[1][1] &= (0xFD);
 		fila[4][1] &= (0xFE);
 	}
 
-  if (gkey[KEY_UP])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_UP))
 	{
 		fila[1][2] &= (0xF7);
 		fila[4][1] &= (0xFE);
 	}	  
-  if (gkey[KEY_DOWN])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_DOWN))
 	{
 		fila[1][2] &= (0xEF);
 		fila[4][1] &= (0xFE);
 	}	  
-  if (gkey[KEY_LEFT])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_LEFT))
 	{
 		fila[1][1] &= (0xEF);
 		fila[4][1] &= (0xFE);
 	}	  
-  if (gkey[KEY_RIGHT])
+  if (al_key_down(&estadoteclas,ALLEGRO_KEY_RIGHT))
 	{
 		fila[1][2] &= (0xFB);
 		fila[4][1] &= (0xFE);
@@ -638,22 +642,23 @@ void UpdateKeyboard (void)
 // audiostreams
 
 int gSoundInited = 0;
-AUDIOSTREAM *audioStream;
+ALLEGRO_AUDIO_STREAM *audioStream;
 
 void
 gInitSound (void)
 {
-  initSoundLog ();
+// PENDING  initSoundLog ();
 
-  reserve_voices (3, -1);
-  if (install_sound (DIGI_AUTODETECT, MIDI_NONE, NULL) < 0)
+// PENDING reserve_voices (3, -1);
+//  if (install_sound (DIGI_AUTODETECT, MIDI_NONE, NULL) < 0)
+  if (!al_install_audio ())
     {
       printf("Sound error\n");
       return;
     }
-
+  al_reserve_samples(0);
   printf("Sonido Iniciado correctamente\n");
-  audioStream = play_audio_stream (882, 8, 0, 44100, 255, 128);
+  audioStream = al_create_audio_stream (2,882, 44100, ALLEGRO_AUDIO_DEPTH_INT8, ALLEGRO_CHANNEL_CONF_1);
   gSoundInited = 1;
 
 
@@ -663,12 +668,12 @@ byte *
 gGetSampleBuffer (void)
 {
   byte *ptr;
-  if (!gSoundInited)
+  if (!al_is_audio_installed())
     return NULL;
 
   while (1)
     {
-      ptr = (byte *) get_audio_stream_buffer (audioStream);
+ // PENDING     ptr = (byte *) get_audio_stream_buffer (audioStream);
       if (ptr != NULL)
 	break;
     }
@@ -681,7 +686,7 @@ gPlaySound (void)
 {
   if (!gSoundInited)
     return;
-  free_audio_stream_buffer (audioStream);
+// PENDING  free_audio_stream_buffer (audioStream);
 
 }
 
