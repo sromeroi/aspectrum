@@ -252,8 +252,8 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
 {
   int f, tam, ini, sig, pag, ver = 0, hwmodel=SPECMDL_48K, np=0;
   extern tipo_hwopt hwopt;
-  byte buffer[86];
-  fread (buffer, 86, 1, fp);
+  byte buffer[87];
+  fread (buffer, 87, 1, fp);
   if (buffer[12]==255) buffer[12]=1; /*as told in CSS FAQ / .z80 section */
   
   // Check file version
@@ -332,25 +332,23 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
     case 7:
 	    if ((buffer[37] & 0x80) == 0x80 ){
 		   ASprintf("Hardware +2A 128K (D)\n");
-        	np=8;
-		   return (-1);
+        	   hwmodel=SPECMDL_PLUS3;
+		   np=8;
 	    } else {
            ASprintf ("Hardware Spectrum +3 (E)\n");
-           hwmodel=SPECMDL_PLUS3;
-			np=8;
-		   return (-1);
+                   hwmodel=SPECMDL_PLUS3;
+		   np=8;
 		}
 	    break;
     case 8:
 	     if ((buffer[37] & 0x80) == 0x80 ){
 		    ASprintf("Hardware +2A 128K (F)\n");
-			np=8;
-		    return (-1);
+                    hwmodel=SPECMDL_PLUS3;
+		    np=8;
 	     } else {
-            ASprintf ("Hardware Spectrum +3 (xzx deprecated)(10)\n");
-            hwmodel=SPECMDL_PLUS3;
-			np=8;
-			return (-1);
+                   ASprintf ("Hardware Spectrum +3 (xzx deprecated)(10)\n");
+                   hwmodel=SPECMDL_PLUS3;
+		   np=8;
 	     }
 		 break;
     case 9:
@@ -373,9 +371,9 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
      np=8;
 	 break;
     case 13:
-      ASprintf ("Hardware Spectrum +2A 128K (15)\n");
-    	np=8;
-      return (-1);
+          ASprintf ("Hardware Spectrum +2A 128K (15)\n");
+	  hwmodel=SPECMDL_PLUS3;
+  	  np=8;
 	  break;
     case 14:
       ASprintf ("Hardware Timex TC2048 (16)\n");
@@ -504,14 +502,22 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
     }
     regs->PC.B.l = buffer[32];
     regs->PC.B.h = buffer[33];
-    if ((hwmodel==SPECMDL_128K) || (hwmodel==SPECMDL_PLUS2))
+    if ((hwmodel==SPECMDL_128K) || (hwmodel==SPECMDL_PLUS2)) {
+	hwopt.BANKM=0x00; /* need to clear lock latch or next dont work. */
         outbankm_128k(buffer[35]);
+    }
+    if (hwmodel==SPECMDL_PLUS3) {
+	hwopt.BANKM=0x00; /* need to clear lock latch or next dont work. */
+        outbankm_p37(buffer[35]);
+        outbankm_p31(buffer[86]);
+    }
+    
     // aki abria que añadir lo del sonido claro.
     
   } else {
     ASprintf ("Fichero Z80: Version 1.0\n");
 
-    if ( hwopt.hw_model != SPECMDL_48K ) { // V1 es siempre 48K camb. arquit.  si no es correcta.
+    if ( hwopt.hw_model != SPECMDL_48K ) { // V1 es siempre 48K camb. arquit. si no es correcta.
         end_spectrum ();
         init_spectrum (SPECMDL_48K, "");
     }
@@ -1011,7 +1017,8 @@ if (hwopt.hw_model==SPECMDL_48K) {
 	//  fwrite (regs->RAM + 16384, 48 * 1024, 1, fp);
    fwrite (mem.p + 16384, 0x4000 * 3, 1, fp);
 } else { // aki viene la parte de los 128K y demas
-    fputc(54,fp) ; fputc(0,fp);
+	fputc( (hwopt.hw_model==SPECMDL_PLUS3 ? 55:54 ),fp);
+	fputc(0,fp);
   	fputc (regs->PC.B.l, fp);
   	fputc (regs->PC.B.h, fp);
 	switch (hwopt.hw_model) {
@@ -1031,6 +1038,9 @@ if (hwopt.hw_model==SPECMDL_48K) {
 			fputc(12,fp);
             		fputc(hwopt.BANKM,fp);
      			break;
+		case SPECMDL_PLUS3: // as there is no disk emuation, alwais save as +2A
+			fputc(13,fp);
+			fputc(hwopt.BANKM,fp);
 		default:
 			ASprintf("ERROR: HW Type Desconocido, nunca deberias ver esto.\n");
 			fputc(0,fp);
@@ -1043,6 +1053,8 @@ if (hwopt.hw_model==SPECMDL_48K) {
     else fputc(1,fp); //siempre emulamos el registro R (al menos que yo sepa)
 		    
     for (c=0;c<(1+16+3+1+4+20+3);c++) fputc(0,fp);
+   
+    if (hwopt.hw_model==SPECMDL_PLUS3) fputc(hwopt.BANK678,fp);
     
     switch (hwopt.hw_model) {
 		case SPECMDL_16K:
@@ -1216,13 +1228,11 @@ RewindTAP (Z80Regs * regs, FILE * fp)
 char
 TAP_loadblock (Z80Regs * regs, FILE * fp)
 {
-  int blow, bhi, bytes, f, howmany;
+  int blow, bhi, bytes, f, howmany,load;
   unsigned int where;
   ASprintf ("Llamada TAP_loadblock\n");
-  ASprintf ("\n--- Trying to load from tape: reached %04Xh ---\n",
-	    regs->PC.W);
-  ASprintf ("On enter:  A=%d, IX=%d, DE=%d\n", regs->AF.B.h, regs->IX.W,
-	    regs->DE.W);
+  ASprintf ("\n--- Trying to load from tape: reached %04Xh ---\n", regs->PC.W);
+  ASprintf ("On enter:  A=%d, IX=%d, DE=%d\n", regs->AF.B.h, regs->IX.W, regs->DE.W);
 /*
   // auto tape-rewind function on end-of-file
   if( feof(fp) )
@@ -1235,11 +1245,11 @@ TAP_loadblock (Z80Regs * regs, FILE * fp)
   blow = fgetc (fp);
   bhi = fgetc (fp);
   bytes = (bhi << 8) | blow;
-  ASprintf ("%d bytes to read on file, DE=%d requested.\n", bytes - 2,
-	    regs->DE.W);
+  ASprintf ("%d bytes to read on file, DE=%d requested.\n", bytes - 2, regs->DE.W);
   where = regs->IX.W;
+  load=   (regs->AF.B.l) & C_FLAG ;
   fgetc (fp);			/* read flag type and ignore it */
-
+	/* FIXME No deberiamos ignorarlo ¿saltar al siguiente? */
   /* determine how many bytes to read. If there are less bytes in
      the tap block than the requested DE bytes, generate the read
      error by setting the C_FLAG on F... */
@@ -1249,11 +1259,20 @@ TAP_loadblock (Z80Regs * regs, FILE * fp)
     (regs->AF.B.l &= ~(C_FLAG));
     ASprintf ("Generating a tape load error (tapbytes < DE)...\n");
     regs->IX.W += bytes - 2;
-  } else
+  } else  /* FIXME Deberia cambiarse la memoria hasta el momento en que se genera el error */
     regs->IX.W += regs->DE.W;
 
   for (f = 0; f < howmany; f++) {
-    Z80MemWrite (where + f, fgetc (fp), regs);
+    switch (load)
+    {
+	    case 0x00: // verificando, si en algun momento no coincide, flag arriba.
+		  if (fgetc(fp)!=Z80MemRead(where+f,regs))
+			  (regs->AF.B.l &= ~(C_FLAG));
+		break;
+	    case C_FLAG : // cargando
+		  Z80MemWrite (where + f, fgetc (fp), regs);
+		  break;
+    }
     if (howmany == 17 && f <= 10)
       putchar (Z80MemRead (where + f, regs));
   }

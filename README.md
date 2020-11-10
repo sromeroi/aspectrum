@@ -22,8 +22,7 @@
 =======================================================================
 
  By the moment, just run it without arguments to run the 48K spectrum
- ROM, or give it a .sna, .sp, .z80 or .tap filename to load snapshots
- or tap files...
+ ROM, or give it a filename to load snapshots  or tape files...
 
     ./aspectrum file.sna     (or .sp, or .tap, .tzx or .z80).
 
@@ -69,7 +68,7 @@
   ABOUT THIS PROGRAM
 =======================================================================
 
- o Currently it emulates several of  the Siclair/Investronica/Amstrad 
+ o Currently it emulates several of  the Sinclair/Investronica/Amstrad 
    spectrums, at least for memory and z80 (no disk or 128K Sound) until 
    I fix all the wrong Z80 opcodes (bugs, bugs, bugs :) and until all the
    undocumented opcodes are implemented. Then I'll add support for

@@ -278,9 +278,9 @@ switch (opcode)
     r_DE++;
     r_BC--;
     r_meml += r_A;
-    r_F = (r_F & (FLAG_C | FLAG_Z | FLAG_S)) |
-      (r_BC ? FLAG_V : 0) | (r_meml & FLAG_3) |
-      ((r_meml & 0x02) ? FLAG_5 : 0);
+    r_F = (r_F & (FLAG_C | FLAG_Z | FLAG_S)) 
+      	| (r_meml & FLAG_3) | ((r_meml & 0x02) ? FLAG_5 : 0) ;
+//      | (r_BC ? FLAG_V : 0) ;
     AddCycles (4 + 4 + 4 + 4);
     if (r_BC)
       {
@@ -288,7 +288,6 @@ switch (opcode)
 	AddCycles (5);
       }
     break;
-
   case LDD:
     r_meml = Z80ReadMem (r_HL);
     r_HL--;
@@ -310,9 +309,9 @@ switch (opcode)
     r_DE--;
     r_BC--;
     r_meml += r_A;
-    r_F = (r_F & (FLAG_C | FLAG_Z | FLAG_S)) |
-      (r_BC ? FLAG_V : 0) | (r_meml & FLAG_3) |
-      ((r_meml & 0x02) ? FLAG_5 : 0);
+    r_F = (r_F & (FLAG_C | FLAG_Z | FLAG_S)) 
+      	|  (r_meml & FLAG_3) | ((r_meml & 0x02) ? FLAG_5 : 0) ;
+//      | (r_BC ? FLAG_V : 0) ; 
     AddCycles (4 + 4 + 4 + 4 + 1);
     if (r_BC)
       {

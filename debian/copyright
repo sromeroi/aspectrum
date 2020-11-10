@@ -1,0 +1,18 @@
+This package was debianized by Alvaro Alea <alvaro@asturlinux.org> on
+Wed,  5 Feb 2003 17:05:14 +0100.
+
+It was downloaded from http://aspectrum.sf.net
+
+Upstream Authors:
+The source code of the emulator is (C) 2000-2005 of:
+- Santiago Romero
+- Alvaro Alea
+- Kak
+see /usr/share/doc/aspectrum/AUTHORS for other contributors.
+
+Licensed under the terms of GNU GPL.
+See /usr/share/common-licenses/GPL for details.
+
+Includes binaries files (C) 1982 Amstrad Plc.
+With permision of free (as beer) distribution with a emulator grants 
+by Amstrad Plc.

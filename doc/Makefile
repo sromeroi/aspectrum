@@ -13,6 +13,7 @@ make-txt : $(DOCS)
 
 $(DOCS): %.txt : %
 	copy $< $<.txt
+	unix2dos $<.txt
 else
 RM=rm -f
 make-txt:

@@ -57,7 +57,7 @@ ifdef MINGDIR
     INSTALL_PATH := $(MINGDIR)
     EXAMP_LDFLAGS += -mwindows
     RM := del
-    RMDIR := del
+    RMDIR := del /s
     INSTALL := copy
     MKDIR := mkdir
     CFLAGS += -DMINGW
@@ -99,12 +99,12 @@ uninstall:
 	$(RM) $(INSTALL_PATH)$/include/agup.h
 else
 make_dirs:
-	mkdir obj
-	mkdir obj\release
-	mkdir obj\debug
-	mkdir lib
-	mkdir lib\release
-	mkdir lib\debug
+	-mkdir obj
+	-mkdir obj\release
+	-mkdir obj\debug
+	-mkdir lib
+	-mkdir lib\release
+	-mkdir lib\debug
 
 install:
 	$(INSTALL) lib\release\libagup.a $(INSTALL_PATH)\lib

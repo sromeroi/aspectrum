@@ -3,7 +3,7 @@
 
 
 
-#include "v_alleg.h"
+#include "v_alleg.h"  // esto no deberia estar aqui.
 #define GS_HAYMOUSE 0x01
 #define GS_GUNSTICK 0x02
 #define GS_INACTIVE 0x04
@@ -44,6 +44,7 @@ typedef struct {
   int int_type;
   int videopage;
   int BANKM;
+  int BANK678;
  } tipo_hwopt ;
  
 int emuMain (int argc, char *argv[]);

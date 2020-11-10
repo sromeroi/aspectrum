@@ -27,7 +27,6 @@ MENU options_menu_ES[] = {
   {"&Video", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Audio", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Opciones\tF7", opciones_proc, NULL, 0, NULL},
-  {"&Hardware", hardware_proc, NULL, 0, NULL},
   {"&Grabaciones", dummy_proc, NULL, D_DISABLED, NULL},
   {"&Cambiar lenguaje\tF8", changelang_proc, NULL, 0, NULL},
   {0}
@@ -56,7 +55,7 @@ MENU machine_menu_ES[] = {
   {"&Ejecutar debugger\tF1", debugger_proc, NULL, 0, NULL},
   {"&Reset\tF5", reset_proc, NULL, 0, NULL},
   {"&NMI", dummy_proc, NULL, D_DISABLED, NULL},
-  {"&Elegir hardware", dummy_proc, NULL, 0, NULL},
+  {"&Elegir hardware\tF9", hardware_proc, NULL, 0, NULL},
   {0}
 };
 
@@ -86,6 +85,7 @@ DIALOG menu_dlg_ES[] = {
   {d_keyboard_proc, 0, 0, 0, 0, 0, 0, gKEY_F5 << 8, 0, 0, 0, reset_proc},
   {d_keyboard_proc, 0, 0, 0, 0, 0, 0, gKEY_F6 << 8, 0, 0, 0, opentape_proc},
   {d_keyboard_proc, 0, 0, 0, 0, 0, 0, gKEY_F8 << 8, 0, 0, 0, changelang_proc},
+  {d_keyboard_proc, 0, 0, 0, 0, 0, 0, gKEY_F9 << 8, 0, 0, 0, hardware_proc},
   {d_keyboard_proc, 0, 0, 0, 0, 0, 0, gKEY_F10 << 8, 0, 0, 0, quit_proc},
   {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL}
 };

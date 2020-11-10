@@ -110,5 +110,9 @@ void gInitSound (void);
 volatile int getVoicePos (void);
 void playMainSample (void);
 void gSoundSync (void);
-
+
+// keyboard functions
+void init_keyboard(void);
+void UpdateKeyboard (void);
+
 #endif	/* v_alleg.h */ 

@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Aspectrum"
-!define PRODUCT_VERSION "0.1.6.4"
+!define PRODUCT_VERSION "0.1.8"
 !define PRODUCT_PUBLISHER "Aspectrum Team"
 !define PRODUCT_WEB_SITE "http://aspectrum.sf.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\aspectrum.exe"
@@ -81,6 +81,7 @@ Section "Principal" SEC01
   File "128spanish.rom"
   File "spectrum.rom"
   File "plus2.rom"
+  File "plus3.rom"
   File "inves.rom"
   File "..\allegro\lib\mingw32\alleg41.dll"
   SetOutPath "$INSTDIR\doc"
@@ -162,6 +163,7 @@ Section Uninstall
   Delete "$INSTDIR\alleg41.dll"
   Delete "$INSTDIR\inves.rom"
   Delete "$INSTDIR\plus2.rom"
+  Delete "$INSTDIR\plus3.rom"
   Delete "$INSTDIR\spectrum.rom"
   Delete "$INSTDIR\128spanish.rom"
   Delete "$INSTDIR\keys.pcx"

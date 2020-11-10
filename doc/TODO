@@ -4,17 +4,31 @@ Anexo de alea:
 + = Interesante
 - = Pijada
 
+Antes de Publicar:
+
+* Crear paquete debian.
+* Crear instalacion de Windows
+* Crear .tgz de los sources
++ Crear .zip de Windows
++ Crear .tgz para linux
++ Crear .zip de los sources
+- Crear binarios de msdos
+* Anunciar en todos los lados la nueva version:
+  WOS emulatronia speeccy.org allegro.cc freshmeat eccs lista aspectrum.
+
+
 Para la version 0.1.8
 
-- Mejorar la ayuda del teclado, ocultar raton, pintar fondo negro, bitl, 
-  mostrar raton.
-- Añadir opcion de salvar PCX, BMP, PNG y GIFs animados con 2 frames para los 
-  atributos.
-- Añadir la opcion de cargar y grabar bloques de bytes. 
-+ Paquete Debian
+* Poner la bandera a las nuevas web, Subir las nuevas webs.
 
 Para la version 0.1.9
 
++ hay variables de timing redundantes, eliminarlas.
++ Limpiar el codigo, para empezar los "unused parameter"
+- Añadir opcion de salvar PCX, BMP, PNG y GIFs animados con 2 frames para los 
+  atributos.
+- Añadir la opcion de cargar y grabar bloques de bytes. 
+* UTILIZAR las rutinas de paginacion, que para eso esta, en lugar de ir a pelo.
 * Arreglar la generacion magica de INT
 * Hacer que se puedan hacer NMI
 * Comprobar que se buscan los archivos en $(DESTDIR)/share/$(EXE) y no
@@ -37,15 +51,14 @@ Para la 0.1.10
 
 + Que Make me haga automagicamente los aspectrum_[bin|src]_version.zip
 * Actualizar las WEB
-* Anunciar en todos los lados la nueva version:
-  WOS emulatronia speeccy.org allegro.cc freshmeat eccs lista aspectrum.
 * Tape GUI
 + Hacer que soporte joystick hardware
 + Soporte Completo de TZX ¿Que grabe? HAY MUCHO QUE HACER AQUI!!!
 * Pasar toda la parte de lectura de teclado a v_alleg.c
+* Pasar toda la parte del debugger a debuger.c
 - ¿PLugins de video? quiero ver como se veria a 160x160, o con scanlines.
 + Quitar codigo imnecesario u obsoleto
-+ Soporte para archivos .pok y buscador de pokes.
++ Soporte para archivos .pok y buscador de pokes. el buscapokes de vnes esta bien.
 - Icono para Windows.
 - Pakete debian.
 - Replace debugger by Allegro dialog functions.
@@ -65,7 +78,7 @@ Para la 0.3.0:
 
 Emulacion de la unidad de disco del +3
 Soporte de ZX Printer, RS 232 y Centronics
-Si la pantalla es de al menos  320x320 poner un teclado en pantalla utilizable
+Si la pantalla es de al menos 320x320 poner un teclado en pantalla utilizable
 con el raton (modo PalmOS)
 Rutina para buscar e introducir pokes.
 

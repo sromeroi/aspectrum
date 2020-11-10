@@ -474,7 +474,10 @@ Z80InPort (register Z80Regs * regs, register word port)
        */
       code &= 0xbf;
     }
-  if ((port & 0xFF) == 0xFF) {
+
+  /* in the main ula loop I change higest bit of hwopt.port_ff in function of scanline
+ * so the port FF is emulate only when need (change betwen 0xFF y 0xEF) */
+  if ((port & 0xFF) == 0xFF) {  
       if (hwopt.port_ff == 0xFF)
 	     code = 0xFF;
       else {
@@ -530,12 +533,18 @@ Z80OutPort (register Z80Regs * regs, register word port, register byte value)
  */
   if (hwopt.hw_model== SPECMDL_INVES ) value &= mem.p[0x10000+(port & 0x3FFF)] ;
 
-/* paginacion del 128K 
- * 0xc002 = 1100 0000 0000 0010 */
-
-  if ((hwopt.hw_model== SPECMDL_128K) && (port==0x7ffd) ) outbankm_128k(value);   
-  if ((hwopt.hw_model== SPECMDL_PLUS2) && (port==0x7ffd) ) outbankm_128k(value);   
-
+/* paginacion del 128K */ 
+ 
+switch (hwopt.hw_model){
+	case SPECMDL_128K:
+	case SPECMDL_PLUS2:
+		if ((port & 0x8002)==0x0000) outbankm_128k(value); // 0x7ffd
+		break;
+	case SPECMDL_PLUS3:
+		if ((port & 0xC002)==0x4000) outbankm_p37(value); // 0x7ffd
+		if ((port & 0xF002)==0x1000) outbankm_p31(value); // 0x1ffd
+		break;
+	}
 
 /* change border colour */
   if (!(port & 0x01)) {

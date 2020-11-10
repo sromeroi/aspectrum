@@ -3,13 +3,16 @@
 
 CC = gcc
 EXE = aspectrum
-VERSION = 0.1.7
+VERSION = 0.1.8
 
 default : aspectrum
 
 # lugar donde se instalan las cosas y donde se buscan por defecto.
 #DESTDIR = /usr
 DESTDIR = /usr/local
+DOCS= doc/AUTHORS doc/CHANGES doc/INSTALL doc/README doc/WORKING \
+      doc/License doc/NOT_WORKING doc/TODO ChangeLog
+ROMS= 128spanish.rom  48spanish.rom  inves.rom  plus2.rom  spectrum.rom plus3.rom
 
 # Autodetection de la arquitectura thanks to agup makefile
 ifdef DJDIR
@@ -58,8 +61,8 @@ install: aspectrum
 	install -d $(DESTDIR)/share/$(EXE)
 	install -d $(DESTDIR)/share/doc/$(EXE)
 	install -s $(EXE)$(EXT) $(DESTDIR)/bin/
-	install font.dat font.fnt spectrum.rom $(DESTDIR)/share/$(EXE)/
-	install doc/* $(DESTDIR)/share/doc/$(EXE)/
+	install -m 644 font.dat font.fnt keys.pcx $(ROMS) $(DESTDIR)/share/$(EXE)/
+	install -m 644 $(DOCS) $(DESTDIR)/share/doc/$(EXE)/
 
 uninstall:
 	rm -rf $(DESTDIR)/share/doc/$(EXE)

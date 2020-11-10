@@ -407,6 +407,231 @@ galert (const char *s1, const char *s2, const char *s3, const char *b1,
   return a;
 }
 
+/*-------------------------------------------------------------------
+ Keyboard Routines
+ Move from main.c to v_alleg.c due portability, is much depend of
+ allegro and some architectures hasn't keyboard at all :-)
+ -------------------------------------------------------------------*/
+
+/* al principio no habia teclas pulsadas... */
+int fila[5][5];
+void init_keyboard(void){
+  fila[1][1] = fila[1][2] = fila[2][2] = fila[3][2] = fila[4][2] =
+    fila[4][1] = fila[3][1] = fila[2][1] = 0xFF;
+}
+
+/*-----------------------------------------------------------------
+ UpdateKeyboard( void );
+ Updates the keyboard variables used on the return of IN function.
+------------------------------------------------------------------*/
+void UpdateKeyboard (void)
+{
+/*=== This adds the row/column/data value for each key on spectrum kerb ===*/
+#define NUM_KEYB_KEYS 256
+
+  enum SpecKeys
+  {
+    SPECKEY_0, SPECKEY_1, SPECKEY_2, SPECKEY_3, SPECKEY_4, SPECKEY_5,
+    SPECKEY_6, SPECKEY_7, SPECKEY_8, SPECKEY_9, SPECKEY_A, SPECKEY_B,
+    SPECKEY_C, SPECKEY_D, SPECKEY_E, SPECKEY_F, SPECKEY_G, SPECKEY_H,
+    SPECKEY_I, SPECKEY_J, SPECKEY_K, SPECKEY_L, SPECKEY_M, SPECKEY_N,
+    SPECKEY_O, SPECKEY_P, SPECKEY_Q, SPECKEY_R, SPECKEY_S, SPECKEY_T,
+    SPECKEY_U, SPECKEY_V, SPECKEY_W, SPECKEY_X, SPECKEY_Y, SPECKEY_Z,
+    SPECKEY_SPACE, SPECKEY_ENTER,
+    SPECKEY_SHIFT, SPECKEY_ALT, SPECKEY_CTRL
+  };
+
+  static unsigned char teclas_fila[NUM_KEYB_KEYS][3] = {
+    {1, 2, 0xFE}, /* 0 */ {1, 1, 0xFE}, /* 1 */ {1, 1, 0xFD},	/* 2 */
+    {1, 1, 0xFB}, /* 3 */ {1, 1, 0xF7}, /* 4 */ {1, 1, 0xEF},	/* 5 */
+    {1, 2, 0xEF}, /* 6 */ {1, 2, 0xF7}, /* 7 */ {1, 2, 0xFB},	/* 8 */
+    {1, 2, 0xFD},		/* 9 */
+    {3, 1, 0xFE}, /* a */ {4, 2, 0xEF}, /* b */ {4, 1, 0xF7},	/* c */
+    {3, 1, 0xFB}, /* d */ {2, 1, 0xFB}, /* e */ {3, 1, 0xF7},	/* f */
+    {3, 1, 0xEF}, /* g */ {3, 2, 0xEF}, /* h */ {2, 2, 0xFB},	/* i */
+    {3, 2, 0xF7}, /* j */ {3, 2, 0xFB}, /* k */ {3, 2, 0xFD},	/* l */
+    {4, 2, 0xFB}, /* m */ {4, 2, 0xF7}, /* n */ {2, 2, 0xFD},	/* o */
+    {2, 2, 0xFE}, /* p */ {2, 1, 0xFE}, /* q */ {2, 1, 0xF7},	/* r */
+    {3, 1, 0xFD}, /* s */ {2, 1, 0xEF}, /* t */ {2, 2, 0xF7},	/* u */
+    {4, 1, 0xEF}, /* v */ {2, 1, 0xFD}, /* w */ {4, 1, 0xFB},	/* x */
+    {2, 2, 0xEF}, /* y */ {4, 1, 0xFD},	/* z */
+    {4, 2, 0xFE}, /*SPACE*/
+      {3, 2, 0xFE}, /*ENTER*/
+      {4, 1, 0xFE}, /*RSHIFT*/ {4, 2, 0xFD}, /*ALT*/ {1, 2, 0xEF}, /*CTRL*/
+  };
+
+
+  /* reset the spectrum row and column keyboard signals */
+
+  fila[1][1] = fila[1][2] = fila[2][2] = fila[3][2] =
+    fila[4][2] = fila[4][1] = fila[3][1] = fila[2][1] = 0xFF;
+
+
+  /* change row and column signals according to pressed key */
+
+  if (gkey[KEY_Z])
+    fila[4][1] &= (0xFD);
+  if (gkey[KEY_X])
+    fila[4][1] &= (0xFB);
+  if (gkey[KEY_C])
+    fila[4][1] &= (0xF7);
+  if (gkey[KEY_V])
+    fila[4][1] &= (0xEF);
+  if (gkey[KEY_RSHIFT] || key[KEY_LSHIFT])
+    fila[4][1] &= (0xFE);
+
+  if (gkey[KEY_A])
+    fila[3][1] &= (0xFE);
+  if (gkey[KEY_S])
+    fila[3][1] &= (0xFD);
+  if (gkey[KEY_D])
+    fila[3][1] &= (0xFB);
+  if (gkey[KEY_F])
+    fila[3][1] &= (0xF7);
+  if (gkey[KEY_G])
+    fila[3][1] &= (0xEF);
+
+  if (gkey[KEY_Q])
+    fila[2][1] &= (0xFE);
+  if (gkey[KEY_W])
+    fila[2][1] &= (0xFD);
+  if (gkey[KEY_E])
+    fila[2][1] &= (0xFB);
+  if (gkey[KEY_R])
+    fila[2][1] &= (0xF7);
+  if (gkey[KEY_T])
+    fila[2][1] &= (0xEF);
+
+  if (gkey[KEY_1])
+    fila[1][1] &= (0xFE);
+  if (gkey[KEY_2])
+    fila[1][1] &= (0xFD);
+  if (gkey[KEY_3])
+    fila[1][1] &= (0xFB);
+  if (gkey[KEY_4])
+    fila[1][1] &= (0xF7);
+  if (gkey[KEY_5])
+    fila[1][1] &= (0xEF);
+
+  if (gkey[KEY_0])
+    fila[1][2] &= (0xFE);
+  if (gkey[KEY_9])
+    fila[1][2] &= (0xFD);
+  if (gkey[KEY_8])
+    fila[1][2] &= (0xFB);
+  if (gkey[KEY_7])
+    fila[1][2] &= (0xF7);
+  if (gkey[KEY_6])
+    fila[1][2] &= (0xEF);
+
+  if (gkey[KEY_P])
+    fila[2][2] &= (0xFE);
+  if (gkey[KEY_O])
+    fila[2][2] &= (0xFD);
+  if (gkey[KEY_I])
+    fila[2][2] &= (0xFB);
+  if (gkey[KEY_U])
+    fila[2][2] &= (0xF7);
+  if (gkey[KEY_Y])
+    fila[2][2] &= (0xEF);
+
+  if (gkey[KEY_ENTER])
+    fila[3][2] &= (0xFE);
+  if (gkey[KEY_L])
+    fila[3][2] &= (0xFD);
+  if (gkey[KEY_K])
+    fila[3][2] &= (0xFB);
+  if (gkey[KEY_J])
+    fila[3][2] &= (0xF7);
+  if (gkey[KEY_H])
+    fila[3][2] &= (0xEF);
+
+  if (gkey[KEY_SPACE])
+    fila[4][2] &= (0xFE);
+  if (gkey[KEY_ALT] || key[KEY_ALT])
+    fila[4][2] &= (0xFD);
+  if (gkey[KEY_M])
+    fila[4][2] &= (0xFB);
+  if (gkey[KEY_N])
+    fila[4][2] &= (0xF7);
+  if (gkey[KEY_B])
+    fila[4][2] &= (0xEF);
+
+  if (gkey[KEY_BACKSPACE])
+    {
+      fila[4][1] &= (0xFE);
+      fila[1][2] &= (0xFE);
+    }
+  if (gkey[KEY_TAB])
+    {
+      fila[4][1] &= (0xFE);
+      fila[4][2] &= (0xFD);
+    }
+  if (gkey[KEY_CAPSLOCK])
+	{
+		fila[1][1] &= (0xFD);
+		fila[4][1] &= (0xFE);
+	}
+
+  if (gkey[KEY_UP])
+	{
+		fila[1][2] &= (0xF7);
+		fila[4][1] &= (0xFE);
+	}	  
+  if (gkey[KEY_DOWN])
+	{
+		fila[1][2] &= (0xEF);
+		fila[4][1] &= (0xFE);
+	}	  
+  if (gkey[KEY_LEFT])
+	{
+		fila[1][1] &= (0xEF);
+		fila[4][1] &= (0xFE);
+	}	  
+  if (gkey[KEY_RIGHT])
+	{
+		fila[1][2] &= (0xFB);
+		fila[4][1] &= (0xFE);
+	}	  
+  
+
+	
+  /* emulate SINCLAIR JOYSTICK 1 using cursor pad and Ctrl :)
+   *
+   * One should replace those lines for:
+   * 
+   *  int cursor_up, cursor_down, cursor_left, cursor_right;
+   *  if( key[KEY_UP] )  fila[X][X] &= (code_cursor_up);
+   *  etc...
+   * 
+   * This would allow to emulate OPQA<SPACE> or INTERF1 or 2
+   * or define custom keys for the cursor of the pc.
+   */
+/* by now the cursors are used as cursors, mainly for 128K menues.
+#define CUP    SPECKEY_9
+#define CDOWN  SPECKEY_8
+#define CRIGHT SPECKEY_7
+#define CLEFT  SPECKEY_6
+#define FIRE   SPECKEY_0
+#define filas teclas_fila
+
+  if (gkey[KEY_UP])
+    fila[filas[CUP][0]][filas[CUP][1]] &= (filas[CUP][2]);
+  if (gkey[KEY_DOWN])
+    fila[filas[CDOWN][0]][filas[CDOWN][1]] &= (filas[CDOWN][2]);
+  if (gkey[KEY_RIGHT])
+    fila[filas[CRIGHT][0]][filas[CRIGHT][1]] &= (filas[CRIGHT][2]);
+  if (gkey[KEY_LEFT])
+    fila[filas[CLEFT][0]][filas[CLEFT][1]] &= (filas[CLEFT][2]);
+  if (gkey[KEY_RCONTROL])
+    fila[filas[FIRE][0]][filas[FIRE][1]] &= (filas[FIRE][2]);
+
+#undef filas
+*/
+}
+
+
+
 
 #ifdef SOUND_BY_STREAM
 // ******************** WIN32 - WAY **********************

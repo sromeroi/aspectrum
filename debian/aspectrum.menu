@@ -1,0 +1,3 @@
+?package(aspectrum):needs="X11" section="Apps/Emulators" title="Aspectrum" \
+ command="/usr/bin/aspectrum" longtitle="ZX Spectrum Emulator"
+

@@ -96,10 +96,13 @@ int init_spectrum(int model,char *romfile){
 			ret=init_inves(romfile);
 			break;
 		case SPECMDL_128K:
-			ret=init_128k(romfile);
+			ret=init_128k();
 			break;
 		case SPECMDL_PLUS2:
-			ret=init_plus2(romfile);
+			ret=init_plus2();
+			break;
+		case SPECMDL_PLUS3:
+			ret=init_plus3();
 			break;
 /*		case SPECMDL_48KIF1:
 			ret=init_48k_if1(romfile);
@@ -114,6 +117,7 @@ int init_spectrum(int model,char *romfile){
 
 extern tipo_hwopt hwopt;
 
+/* This do aditional stuff for reset, like mute sound chip, o reset bank switch */
 int reset_spectrum(void){
 	int ret;
 	switch (hwopt.hw_model) {
@@ -125,6 +129,9 @@ int reset_spectrum(void){
 		case SPECMDL_128K:
 		case SPECMDL_PLUS2:
 			ret=reset_128k();
+			break;
+		case SPECMDL_PLUS3:
+			ret=reset_plus3();
 			break;
 /*		case SPECMDL_48KIF1:
 			ret=init_48k_if1(romfile);
@@ -333,9 +340,10 @@ int init_16k(char *romfile){
 	return 0;
 }
 
-int init_128k(char *romfile){
+int init_128k(void){
 	FILE *fp;
 	int i;
+	printf(__FILE__": Init 128K hardware.\n");
 	mem.md= 0x3FFF ;
 	mem.mp= 0xC000 ;
 	mem.mr= 14;
@@ -358,24 +366,25 @@ int init_128k(char *romfile){
 	mem.vo[0]=5*mem.sp;
 	mem.vo[1]=7*mem.sp;
 	// ULA config
+	// FIXME update de timing, also for the +3
 	hwopt.port_ff=0xFF;			// 0xff = emulate the port,  0x00 alwais 0xFF
 	hwopt.ts_lebo=24;			  // left border t states
 	hwopt.ts_grap=128;			 // graphic zone t states
 	hwopt.ts_ribo=24;			  // right border t states
-	hwopt.ts_hore=48;			  // horizontal retrace t states
-	hwopt.ts_line=224;			 // to speed the calc, the sum of 4 abobe
-	hwopt.line_poin=16;		    // lines in retraze post interrup
+	hwopt.ts_hore=52;			  // horizontal retrace t states
+	hwopt.ts_line=228;			 //to speed the calc, the sum of 4 abobe
+	hwopt.line_poin=15;		    // lines in retraze post interrup
 	hwopt.line_upbo=48;		    // lines of upper border
 	hwopt.line_grap=192;		   // lines of graphic zone = 192
 	hwopt.line_bobo=48;		    // lines of bottom border
 	hwopt.line_retr=8;		     // lines of the retrace
-	hwopt.TSTATES_PER_LINE=224;
+	hwopt.TSTATES_PER_LINE=228;
 	hwopt.TOP_BORDER_LINES=64;
 	hwopt.SCANLINES=192;
 	hwopt.BOTTOM_BORDER_LINES=56;
 	hwopt.tstate_border_left=24;
 	hwopt.tstate_graphic_zone=128;
-	hwopt.tstate_border_right=72;
+	hwopt.tstate_border_right=80;
 	hwopt.hw_model=SPECMDL_128K;
 	hwopt.int_type=NORMAL;
 	hwopt.videopage=0;
@@ -384,7 +393,7 @@ int init_128k(char *romfile){
 }
 
 int reset_128k(void){
-   hwopt.BANKM=0x00; /* necesario para que la siguiente linea funcione */
+   hwopt.BANKM=0x00; /* need to clear lock latch or next dont work. */
    outbankm_128k(0x00);
    return 0;
 }
@@ -404,10 +413,11 @@ void outbankm_128k(byte dato){
 
 }	
 
-int init_plus2(char *romfile){
+int init_plus2(void){
 	int a,i;
 	FILE *fp;
-	a=init_128k(romfile);
+	a=init_128k();
+	printf(__FILE__": Init +2 hardware.\n");
 	fp=findopen_file("plus2.rom");	
 	i=mem.sp*8;
 	while (!feof (fp))
@@ -417,10 +427,135 @@ int init_plus2(char *romfile){
 	return a;
 }
 
-
-int init_48k_if1(char *romfile){
+int init_plus3(void){
 	FILE *fp;
 	int i;
+	printf(__FILE__": Init +3 hardware.\n");
+	mem.md= 0x3FFF ;
+	mem.mp= 0xC000 ;
+	mem.mr= 14;
+	mem.np=4;
+	mem.sp=16*1024;
+	mem.vn=2;
+	mem.p=(byte *)malloc((8+4+1)*mem.sp);
+	// cargar rom de 64K
+	fp=findopen_file("plus3.rom");	
+	i=mem.sp*8;
+	while (!feof (fp))
+		*(mem.p+i++) = fgetc (fp);
+	fclose (fp);
+	mem.roo=12*mem.sp; 
+	mem.ro[0]=mem.sro[0]=mem.sp*8;
+	mem.wo[0]=mem.swo[0]=mem.roo;
+	mem.ro[1]=mem.sro[1]=mem.wo[1]=mem.swo[1]=5*mem.sp;
+	mem.ro[2]=mem.sro[2]=mem.wo[2]=mem.swo[2]=2*mem.sp;
+	mem.ro[3]=mem.sro[3]=mem.wo[3]=mem.swo[3]=0*mem.sp;
+	mem.vo[0]=5*mem.sp;
+	mem.vo[1]=7*mem.sp;
+	// ULA config
+	hwopt.port_ff=0x00;			// 0xff = emulate the port,  0x00 alwais 0xFF
+	hwopt.ts_lebo=24;			  // left border t states
+	hwopt.ts_grap=128;			 // graphic zone t states
+	hwopt.ts_ribo=24;			  // right border t states
+	hwopt.ts_hore=52;			  // horizontal retrace t states
+	hwopt.ts_line=228;			 // to speed the calc, the sum of 4 abobe
+	hwopt.line_poin=15;		    // lines in retraze post interrup
+	hwopt.line_upbo=48;		    // lines of upper border
+	hwopt.line_grap=192;		   // lines of graphic zone = 192
+	hwopt.line_bobo=48;		    // lines of bottom border
+	hwopt.line_retr=8;		     // lines of the retrace
+	hwopt.TSTATES_PER_LINE=228;
+	hwopt.TOP_BORDER_LINES=64;
+	hwopt.SCANLINES=192;
+	hwopt.BOTTOM_BORDER_LINES=56;
+	hwopt.tstate_border_left=24;
+	hwopt.tstate_graphic_zone=128;
+	hwopt.tstate_border_right=72;
+	hwopt.hw_model=SPECMDL_PLUS3;
+	hwopt.int_type=NORMAL;
+	hwopt.videopage=0;
+	hwopt.BANKM=0x00;
+	hwopt.BANK678=0x00;
+	return 0;
+
+}
+
+void outbankm_p31(byte dato){ // the 0x1FFD latch
+byte roms;
+   hwopt.BANK678=dato;
+   if ((dato & 0x01) == 0x01) {
+   	printf("Trying to page 64K of ram");
+	roms=(dato & 0x06) >> 1;
+	switch (roms) {	
+		case 0:
+	        	mem.ro[0]=mem.sro[0]=mem.wo[0]=mem.swo[0]=0*mem.sp;
+			mem.ro[1]=mem.sro[1]=mem.wo[1]=mem.swo[1]=1*mem.sp;
+		        mem.ro[2]=mem.sro[2]=mem.wo[2]=mem.swo[2]=2*mem.sp;
+	        	mem.ro[3]=mem.sro[3]=mem.wo[3]=mem.swo[3]=3*mem.sp;
+			break;
+		case 1: 
+	        	mem.ro[0]=mem.sro[0]=mem.wo[0]=mem.swo[0]=4*mem.sp;
+			mem.ro[1]=mem.sro[1]=mem.wo[1]=mem.swo[1]=5*mem.sp;
+		        mem.ro[2]=mem.sro[2]=mem.wo[2]=mem.swo[2]=6*mem.sp;
+	        	mem.ro[3]=mem.sro[3]=mem.wo[3]=mem.swo[3]=7*mem.sp;
+			break;
+		case 2:
+	        	mem.ro[0]=mem.sro[0]=mem.wo[0]=mem.swo[0]=4*mem.sp;
+			mem.ro[1]=mem.sro[1]=mem.wo[1]=mem.swo[1]=5*mem.sp;
+		        mem.ro[2]=mem.sro[2]=mem.wo[2]=mem.swo[2]=6*mem.sp;
+	        	mem.ro[3]=mem.sro[3]=mem.wo[3]=mem.swo[3]=3*mem.sp;
+			break;
+		case 3:
+	        	mem.ro[0]=mem.sro[0]=mem.wo[0]=mem.swo[0]=4*mem.sp;
+			mem.ro[1]=mem.sro[1]=mem.wo[1]=mem.swo[1]=7*mem.sp;
+		        mem.ro[2]=mem.sro[2]=mem.wo[2]=mem.swo[2]=3*mem.sp;
+	        	mem.ro[3]=mem.sro[3]=mem.wo[3]=mem.swo[3]=6*mem.sp;
+			break;
+	}
+   } else {
+        /* if we pass from 64K ram to normal mode, need to ensure that all the
+	 * pages go to where need, rom, ram, videoram.         */
+	mem.ro[1]=mem.sro[1]=mem.wo[1]=mem.swo[1]=5*mem.sp;
+        mem.ro[2]=mem.sro[2]=mem.wo[2]=mem.swo[2]=2*mem.sp;
+        outbankm_p37(hwopt.BANKM);
+/*    
+//       printf("Paging in BANK678=%x ",dato);
+       roms= 8 + ((hwopt.BANKM & 0x10) >> 4) + ((dato & 0x04) >>1);
+//       printf("Rom is %x\n",roms-8);
+       mem.ro[0]=mem.sro[0]=mem.sp * roms;
+       mem.wo[0]=mem.swo[0]=mem.roo;
+*/
+       }
+}
+
+void outbankm_p37(byte dato){ // the 0x7FFD latch
+byte roms;	
+//   printf("Paging in BANKM=%x ",dato);
+   if ((hwopt.BANKM | 0xDF) == 0xFF) return; /* El bloqueo en el bit 5 */
+   
+   hwopt.BANKM=dato;
+   hwopt.videopage= (dato & 0x08) >> 3 ; /* videoram switch even on 64K ram??? */
+   if ((hwopt.BANK678 & 0x01) == 0x01) return; /* 64K ram, no more to do */ 
+   roms= 8 + ((dato & 0x10) >> 4) + ((hwopt.BANK678 & 0x04) >>1);
+  // printf("Rom is %x\n",roms-8);
+   mem.ro[0]=mem.sro[0]=mem.sp * roms;
+   mem.wo[0]=mem.swo[0]=mem.roo;
+//  pagein(0x4000,0,(dato & 0x10) >> 4,RO_PAGE,SYSTEM_PAGE);
+   mem.ro[3]=mem.sro[3]=mem.wo[3]=mem.swo[3]=(dato & 0x07)*mem.sp;
+//  pagein(0x4000,3,dato & 0x07,RW_PAGE,SYSTEM_PAGE);
+}
+
+int reset_plus3(void){
+        hwopt.BANKM=0x00; // clear lock latch or outbankm_p31 don't work
+        outbankm_p31(0x00);
+        outbankm_p37(0x00);
+	return 0;
+}
+
+int init_48k_if1(){
+	FILE *fp;
+	int i;
+	printf(__FILE__": Init 48K + IF1 hardware.\n");
 	mem.md= 0x1FFF ;
 	mem.mp= 0xE000 ;
 	mem.mr= 13;

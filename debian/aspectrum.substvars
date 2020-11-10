@@ -1,0 +1,1 @@
+shlibs:Depends=liballegro4.1, libc6 (>= 2.3.2.ds1-4), libx11-6 | xlibs (>> 4.1.0), libxext6 | xlibs (>> 4.1.0), libxpm4 | xlibs (>> 4.1.0), libxxf86dga1, libxxf86vm1

@@ -1,0 +1,15 @@
+Source: aspectrum
+Section: otherosfs
+Priority: extra
+Maintainer: Alvaro Alea Fernandez <alvaro@asturlinux.org>
+
+Package: aspectrum
+Architecture: i386
+Depends: ${shlibs:Depends}
+Description: emulator of Sinclair ZX Spectrum
+ Aspectrum is a 8 bits machine Sinclair ZX Spectrum emulator, write entirely 
+ in C, using the allegro library to allow Multiplatform.
+ .
+ Can emulate 16K, 48K, Inves, 128K and +2 Machines.
+ Can Read and write .z80, .sna, .sp snapshots, .tap tape files and .scr screens.
+

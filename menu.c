@@ -137,8 +137,10 @@ int referencehelp_proc(void)
   image = load_bitmap(archivo, pal);
   free(archivo);
   set_palette(pal);
+  scare_mouse();
+  rectfill(screen,0,0,screen->w,screen->h,0);
   blit(image,screen,0,0,0,0,320,200);
-  
+  unscare_mouse();
   readkey();		
   destroy_bitmap(image);
   set_palette(old_pal);
@@ -419,14 +421,15 @@ menuhardware (void)
   extern Z80Regs spectrumZ80;	
   int c;
   DIALOG dialogo[] = {
-    {d_agup_window_proc, 0, 0, 195, 140, 0, 0, 0, 0, 0, 0,"Seleccion de Hardware", NULL, NULL },
-    {gui_button_proc, 30, 115, 70, 16, 0, 0, 13, D_EXIT, 0, 0, "OK", NULL, NULL},
-    {gui_button_proc, 110, 115, 70, 16, 0, 0, 27, D_EXIT, 0, 0, "Cancel", NULL, NULL},
+    {d_agup_window_proc, 0, 0, 195, 155, 0, 0, 0, 0, 0, 0,"Seleccion de Hardware", NULL, NULL },
+    {gui_button_proc, 30, 130, 70, 16, 0, 0, 13, D_EXIT, 0, 0, "OK", NULL, NULL},
+    {gui_button_proc, 110, 130, 70, 16, 0, 0, 27, D_EXIT, 0, 0, "Cancel", NULL, NULL},
     {GUI_radio_proc, 10, 30, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum 16K", (void *)1,(void *)0},
     {GUI_radio_proc, 10, 45, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum 48K", (void *)1,(void *)0},
     {GUI_radio_proc, 10, 60, 50, 8, 0, 0, 0, 0, 1, 0,"Inves Spectrum+ 48K", (void *)1,(void *)0},
     {GUI_radio_proc, 10, 75, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum 128K Espanol", (void *)1,(void *)0},
     {GUI_radio_proc, 10, 90, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum +2 (128K)", (void *)1,(void *)0},
+    {GUI_radio_proc, 10,105, 50, 8, 0, 0, 0, 0, 1, 0,"Spectrum +3 (128K)",(void *)1,(void *)0},
     {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL}
   };
 
@@ -442,10 +445,10 @@ menuhardware (void)
   if (popup_dialog (dialogo, 2) == 1)	//2 del que lleva el foco, 1 del boton de aceptar.
     {
      for(c=3;c<8;c++) if ((dialogo[c].flags & D_SELECTED)==D_SELECTED) break ;
-	 printf("Sale %i\n",c-2);
+	 //printf("Sale %i\n",c-2);
 	 end_spectrum();
 	 init_spectrum(c-2,"");
-	 printf("Inicio %i\n",c-2);
+	 //printf("Inicio %i\n",c-2);
 	 Z80Reset (&spectrumZ80, 69888);
     }
   return (0);

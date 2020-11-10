@@ -13,7 +13,7 @@
 =======================================================================
  In order to compile Aspectrum you need to have the adecuate devel enviroment,
  you must have GCC, GNU Make and Allegro compiled.
- Also if you are using the CVS version, need the agup-0.9.2 code.
+ Also if you are using the CVS version, need the agup-0.9.7 code.
 
  The Supported Arquitectures are:
  - Win32 (95 o later with DirectX 7 o later) using Mingw32
@@ -28,6 +28,14 @@
 
     make todo 
 
+ Remember que on Windows / Mingw32 make has change the name so, in windows
+ the command line is:
+ 
+    mingw32-make todo
+
+ Also in the sourceforge page, there is a document (in spanish) that show
+ step by step how to download and compile aspectrum from scratch.
+
  You can execute directly the emulator by running the aspectrum
  binary as ./aspectrum. At this moment it only runs on the same
  directory that has been compiled, that's because this program
@@ -35,6 +43,9 @@
  end-user...
 
  There is a experimental make install but no make uninstall... :-)
+
+ There is also installer packages for Debian Linux and Windows, but both are
+ experimental also :-)
  
  In some enviroments perhaps you need to create and tune a allegro.cfg file,
  please refer to the allegro DOC for more information.

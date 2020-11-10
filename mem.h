@@ -45,12 +45,17 @@ int reset_spectrum(void);
 int init_48k(char *romfile);
 int init_16k(char *romfile);
 int init_inves(char *romfile);
-int init_plus2(char *romfile);
+int init_plus2();
 
-int init_128k(char *romfile);
+int init_128k(void);
 int reset_128k(void);
 void outbankm_128k(byte dato);
 
-int init_48k_if1(char *romfile);
+int init_plus3(void);
+int reset_plus3(void);
+void outbankm_p31(byte dato);
+void outbankm_p37(byte dato);
+
+int init_48k_if1(void);
 
 #endif  // #ifdef MEM_H

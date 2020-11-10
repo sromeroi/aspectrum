@@ -1,0 +1,15 @@
+aspectrum (0.1.8-1) experimental; urgency=low
+
+  * Upstream release.
+  * Change Version Number.
+
+ -- Alvaro Alea Fernandez <alvaro@asturlinux.org>  Sat, 16 Apr 2005 20:00:02 +0200 
+
+aspectrum (0.7.0-1) experimental; urgency=low
+
+  * Initial Release.
+  * Added man page and menu entry.
+
+ -- Alvaro Alea Fernandez <alvaro@asturlinux.org>  Wed, 19 Jan 2005 11:10:36 +0100
+
+

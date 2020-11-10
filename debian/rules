@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+# debian/rules for alien
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# Use v3 compatability mode, so ldconfig gets added to maint scripts.
+export DH_COMPAT=3
+
+PACKAGE=$(shell dh_listpackages)
+
+build: build-debian
+	dh_testdir
+	make todo DESTDIR=/usr
+
+build-debian:
+	dh_testdir
+	/usr/bin/docbook-to-man debian/aspectrum.sgml > aspectrum.1
+	touch build-debian
+
+clean:
+	dh_testdir
+	dh_testroot
+	dh_clean -d
+	make clean
+	-rm aspectrum.1
+	-rm build-debian
+
+binary-indep: build
+
+binary-arch: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k -d
+	dh_installdirs
+	
+	dh_installdocs
+	dh_installchangelogs
+
+# Copy the packages's files.
+	
+	make install DESTDIR=debian/$(PACKAGE)/usr
+	-rm debian/$(PACKAGE)/usr/share/doc/aspectrum/License
+	-rm debian/$(PACKAGE)/usr/share/doc/aspectrum/INSTALL
+
+# This has been known to break on some wacky binaries.
+	dh_installman
+	dh_installmenu
+#	dh_strip
+	dh_compress
+#	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+	-dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary
