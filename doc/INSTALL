@@ -13,8 +13,10 @@
 
   HOW TO INSTALL THIS PROGRAM
 =======================================================================
-
- Just type the following (as root):
+ Uncompress the source tarball and uncomment the adecuate arquitecture
+ in Makefile.
+ 
+ Then just type the following (as root):
 
     make clean
     make

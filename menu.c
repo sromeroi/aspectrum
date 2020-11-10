@@ -31,24 +31,146 @@
 #include "menu.h"
 #include "monofnt.h"
 #include "main.h"
+#include "snaps.h"
+
+
+#ifdef I_HAVE_AGUP
+#include <agup.h>
+#include <agtk.h>
+#include <aphoton.h>
+#include <awin95.h>
+#include <aase.h>
+#define GUI_check_proc d_agup_check_proc
+#else
+#define GUI_check_proc d_check_proc
+#endif
+
 
 #define NUM_FILES 9
 
 extern int language;
+static volatile int selected_opt = -1;
+
+int dummy_proc (void)
+{
+  if (language == 0)
+    galert ("Still unimplemented", NULL, NULL, "Ok", NULL, 0, 0);
+  else if (language == 1)
+    galert ("Todavía sin implementar", NULL, NULL, "Ok", NULL, 0, 0);
+  return D_O_K;
+}
+
+int quit_proc (void)
+{
+  selected_opt = DIALOG_QUIT;
+  return D_CLOSE;
+}
+
+int load_proc (void)
+{
+  selected_opt = DIALOG_SNAP_LOAD;
+  return D_CLOSE;
+}
+
+int save_proc (void)
+{
+  selected_opt = DIALOG_SNAP_SAVE;
+  return D_CLOSE;
+}
+
+int debugger_proc (void)
+{
+  selected_opt = DIALOG_DEBUGGER_0;
+  return D_CLOSE;
+}
+
+int reset_proc (void)
+{
+  selected_opt = DIALOG_RESET;
+  return D_CLOSE;
+}
+
+int savescr_proc (void)
+{
+  selected_opt = DIALOG_SAVE_SCR;
+  return D_CLOSE;
+}
+
+int opentape_proc (void)
+{
+  selected_opt = DIALOG_OPEN_TAPE;
+  return D_CLOSE;
+}
+
+int rewindtape_proc (void)
+{
+  selected_opt = DIALOG_REWIND_TAPE;
+  return D_CLOSE;
+}
+
+int changelang_proc (void)
+{
+  selected_opt = DIALOG_CHANGE_LANG;
+  return D_CLOSE;
+}
+
+int referencehelp_proc(void)
+{
+  PALETTE pal,old_pal;
+  BITMAP *image;
+  char *archivo;
+  get_palette(old_pal);
+  archivo=find_file("keys.pcx");
+  image = load_bitmap(archivo, pal);
+  free(archivo);
+  set_palette(pal);
+  blit(image,screen,0,0,0,0,320,200);
+  
+  readkey();		
+  destroy_bitmap(image);
+  set_palette(old_pal);
+  selected_opt = DIALOG_REFERENCEKEYS;
+  return D_CLOSE;
+}
+
+about_proc (void)
+{
+  alert("Aspectrum Version: "VERSION,"(C) 2000-2003 Santiago Romero, Kak y Alvaro Alea",
+	"Distribuido bajo licencia GPL V2","OK",NULL,13,27);
+  selected_opt = DIALOG_ABOUT;
+  return D_CLOSE;
+}
+
 
 /*-----------------------------------------------------------------
  * This function implements the main options menu.
  ------------------------------------------------------------------*/
-int MainMenu( Z80Regs *regs, char *tfont )
+int
+MainMenu (Z80Regs * regs, char *tfont)
 {
-    int i, end = 0, selected = 0, keypress;
-    //int fontw = 8, 
-    int fonth=12;
-    int menux = 20, menuy = 15, menuw = 280, menuh = 170;
-    int bgcolor = 15, titlecolor=14;
-    int bgselcolor = 11, textbgselcolor=13;
-    int fgcolor = 0;
-   
+
+  int i, end = 0, selected = 0, keypress;
+  int fonth = 12;
+  int menux = 20, menuy = 15, menuw = 280, menuh = 170;
+  int bgcolor = 15, titlecolor = 14;
+  int bgselcolor = 11, textbgselcolor = 13;
+  int fgcolor = 0;
+
+#include "dialog_en.h"
+#include "dialog_es.h"
+  selected_opt=-1;
+  selected = -1;
+  set_dialog_color (menu_dlg_EN, gui_fg_color, gui_bg_color);
+  set_dialog_color (menu_dlg_ES, gui_fg_color, gui_bg_color);
+  if (language == 0)
+    do_dialog (menu_dlg_EN, -1);
+  else
+    do_dialog (menu_dlg_ES, -1);
+
+  return selected_opt;
+}  
+
+/*
     gbox( menux, menuy, menux+menuw, menuy+menuh, bgcolor );
     grectangle( menux+1, menuy+1, menux+menuw-1, menuy+menuh-1, fgcolor );
     gbox( menux+1, menuy+1, menux+menuw-1, menuy+1+fonth, fgcolor );
@@ -99,7 +221,7 @@ int MainMenu( Z80Regs *regs, char *tfont )
                         break;
          case KEY_F8:  return(8);
                         break;
-         case KEY_F10:  return(10);
+         case KEY_F10:  return(3);
                         break;
 
          case KEY_ENTER:
@@ -109,15 +231,19 @@ int MainMenu( Z80Regs *regs, char *tfont )
                         else return(10);
        };
     }
-}
+  }
+*/
+
 
 
 // Draws the selected or unselected option...
-void DrawSelected( int x1, int y1, int x2, int y2, char *text, int fgcolor,
-                   int bgcolor, int textbgcolor, char *tfont )
+void
+DrawSelected (int x1, int y1, int x2, int y2, char *text, int fgcolor,
+	      int bgcolor, int textbgcolor, char *tfont)
 {
-    gbox( x1, y1, x2, y2, bgcolor );
-    GFXprintf_tovideo( x1+12-2, y1+3, text, tfont, fgcolor, textbgcolor, 0);
+  gbox (x1, y1, x2, y2, bgcolor);
+  GFXprintf_tovideo (x1 + 12 - 2, y1 + 3, text, tfont, fgcolor, textbgcolor,
+		     0);
 }
 
 
@@ -126,9 +252,10 @@ void DrawSelected( int x1, int y1, int x2, int y2, char *text, int fgcolor,
 // Save SNA, Save SCR...) and returns the selected filename.
 *--------------------------------------------------------------------------*/
 
-int FileMenu( char *tfont, char type, char *filename )
+int
+FileMenu (char *tfont, char type, char *filename)
 {
-    extern struct tipo_emuopt emuopt;
+  extern struct tipo_emuopt emuopt;
 //    int i, current=0, end = 0, selected = 0, keypress;
 //    int fontw = 8, fonth=12;
 //    int menux = 18, menuy = 70, menuw = 284, menuh = 50;
@@ -136,37 +263,33 @@ int FileMenu( char *tfont, char type, char *filename )
 //    int titlecolor=14;
 //    int bgselcolor = 11, textbgselcolor=13;
 //    int fgcolor = 0;
-	int ret;
-	
-    char extensions[FILEBOX_TYPES][80] =
-    { 
-        "SNA;SP;Z80",
-        "SNA",
-        "SCR",
-	   "TAP"
-    };
-       
-    gui_fg_color = 0;
-    gui_bg_color = 7;
+  int ret;
 
-   if (emuopt.gunstick & GS_GUNSTICK) set_mouse_sprite(NULL);
+  char extensions[FILEBOX_TYPES][80] = {
+    "SNA;SP;Z80",
+    "SNA",
+    "SCR",
+    "TAP;TZX"
+  };
 
-#if ALLEGRO_WIP_VERSION >= 37 || ALLEGRO_VERSION >= 4
-#define FILEBUF ,255,
-#else
-#define FILEBUF ,
-#endif
- ret=file_select_ex( lang_filemenu[(language*FILEBOX_TYPES)+type],
-                    filename, extensions[type] FILEBUF 290, 170 );
-   /* si usamos gunstick volvemos a poner el punto de mira
+  gui_fg_color = 0;
+  gui_bg_color = 7;
+
+  if (emuopt.gunstick & GS_GUNSTICK)
+    set_mouse_sprite (NULL);
+
+  ret = file_select_ex (lang_filemenu[(language * FILEBOX_TYPES) + type],
+			filename, extensions[type] ,512, 290, 170);
+
+  /* si usamos gunstick volvemos a poner el punto de mira
    */
-   if (emuopt.gunstick & GS_GUNSTICK)
-   {
-      set_mouse_sprite(emuopt.raton_bmp);
-      set_mouse_sprite_focus(8,8);
-   }
+  if (emuopt.gunstick & GS_GUNSTICK)
+    {
+      set_mouse_sprite (emuopt.raton_bmp);
+      set_mouse_sprite_focus (8, 8);
+    }
 
-   return(ret);
+  return (ret);
 /*
     gbox( menux, menuy, menux+menuw, menuy+menuh, bgcolor );
     grectangle( menux+1, menuy+1, menux+menuw-1, menuy+menuh-1, fgcolor );
@@ -179,6 +302,7 @@ int FileMenu( char *tfont, char type, char *filename )
     GFXgets( menux+4, menuy+25, filename, tfont, 0, 15, 36 );
 */
 }
+
 /*
 char *lista_joys(int index int *list_size)
 {
@@ -198,63 +322,64 @@ char *lista_joys(int index int *list_size)
 		
 	}
 }
-*/	
-
-int menuopciones(void)
-{
-   extern struct tipo_emuopt emuopt;
-   DIALOG dialogo[]=
-   {
-      {d_shadow_box_proc,0,0,195,90, 0,15,0,0,0,0,NULL,NULL,NULL},       
-      {d_text_proc,25,5,100,16, 0,15,0,0,0,0,
-         lang_generaloptions[language],NULL,NULL},	
-      {d_check_proc,10,20,50,8, 0,15,'G',0,1,0,
-         lang_emulagunstick[language], NULL,NULL}, 
-      {d_button_proc,40,70,70,16, 0,7,13 ,D_EXIT,0,0,"OK",NULL,NULL},
-      {d_button_proc,120,70,70,16, 0,7,27 ,D_EXIT,0,0,"Cancel",NULL,NULL}, 
-      {d_check_proc,10,35,50,8, 0,15,'S',0,1,0,
-         lang_soundactive[language], NULL,NULL}, 
-//      {d_list_proc,10,30,50,16,0,15,NULL,d1,d2,lista_joys,*dp1,*dp2},
-      {NULL,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL}
-   };
-
-   /* ponemos en gris el boton, o el raton en flecha segun las
-      opciones 
-   */
-   if (!(emuopt.gunstick & GS_HAYMOUSE)) dialogo[2].flags|=D_DISABLED;
-   if (emuopt.gunstick & GS_GUNSTICK) 
-   {
-      dialogo[2].flags|=D_SELECTED;
-      set_mouse_sprite(NULL);
-   }
-   /* centramos el cuadro de dialogo y si se pulsa aceptar ocultamos
-      o mostramos el raton segun sea necesario
-   */
-   centre_dialog(dialogo);
-   if (popup_dialog(dialogo,2)==3) //2 del que lleva el foco, 3 del boton de aceptar.
-   {
-      if (dialogo[2].flags & D_SELECTED) 
-      {
-          emuopt.gunstick|=GS_GUNSTICK;
-          show_mouse(screen);
-      } else { 
-         emuopt.gunstick&= ~GS_GUNSTICK;
-         set_mouse_sprite(NULL);
-         show_mouse(NULL);
-      }
-   }   
-   /* si usamos gunstick volvemos a poner el punto de mira
-   */
-   if (emuopt.gunstick & GS_GUNSTICK)
-   {
-      set_mouse_sprite(emuopt.raton_bmp);
-      set_mouse_sprite_focus(8,8);
-   }
-
-/* TODO
-hacer que parezca un raton (y no el p.d.m) cuando se llama al cuadro de dialogo
 */
 
-   return(0);
-}
+int
+menuopciones (void)
+{
+  extern struct tipo_emuopt emuopt;
+  DIALOG dialogo[] = {
+    {gui_shadow_box_proc, 0, 0, 195, 90, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL},
+    {d_text_proc, 25, 5, 100, 16, 0, 0, 0, 0, 0, 0,
+     lang_generaloptions[language], NULL, NULL},
+    {GUI_check_proc, 10, 20, 50, 8, 0, 0, 'G', 0, 1, 0,
+     lang_emulagunstick[language], NULL, NULL},
+    {gui_button_proc, 40, 70, 70, 16, 0, 0, 13, D_EXIT, 0, 0, "OK", NULL,
+     NULL},
+    {gui_button_proc, 120, 70, 70, 16, 0, 0, 27, D_EXIT, 0, 0, "Cancel", NULL,
+     NULL},
+    {GUI_check_proc, 10, 35, 50, 8, 0, 0, 'S', 0, 1, 0,
+     lang_soundactive[language], NULL, NULL},
+//     {d_list_proc,10,30,50,16, 0,0,NULL,d1,d2,lista_joys,*dp1,*dp2},
+    {NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL}
+  };
 
+  /* ponemos en gris el boton, o el raton en flecha segun las
+     opciones 
+   */
+  if (!(emuopt.gunstick & GS_HAYMOUSE))
+    dialogo[2].flags |= D_DISABLED;
+  if (emuopt.gunstick & GS_GUNSTICK)
+    {
+      dialogo[2].flags |= D_SELECTED;
+      set_mouse_sprite (NULL);
+    }
+  /* centramos el cuadro de dialogo y si se pulsa aceptar ocultamos
+     o mostramos el raton segun sea necesario
+   */
+  centre_dialog (dialogo);
+  set_dialog_color (dialogo, gui_fg_color, gui_bg_color);
+  if (popup_dialog (dialogo, 2) == 3)	//2 del que lleva el foco, 3 del boton de aceptar.
+    {
+      if (dialogo[2].flags & D_SELECTED)
+	{
+	  emuopt.gunstick |= GS_GUNSTICK;
+	  show_mouse (screen);
+	}
+      else
+	{
+	  emuopt.gunstick &= ~GS_GUNSTICK;
+	  set_mouse_sprite (NULL);
+	  show_mouse (NULL);
+
+	}
+    }
+  /* si usamos gunstick volvemos a poner el punto de mira
+   */
+  if (emuopt.gunstick & GS_GUNSTICK)
+    {
+      set_mouse_sprite (emuopt.raton_bmp);
+      set_mouse_sprite_focus (8, 8);
+    }
+  return (0);
+}

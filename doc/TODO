@@ -4,27 +4,60 @@ Anexo de alea:
 + = Interesante
 - = Pijada
 
-* Arreglar bug en carga de snapshot
-- Pantalla de ayuda al teclado
-* Un GUI para las cintas
-+ Que el sonido se pueda desactivar y que pause al llamar al gui.
+Para la version 0.1.6.3
 
+* Ver por que falla cuando se arrastra al ejecutable desde WIN y probar
+  en los otros
+* Comprobar que se buscan los archivos en $(DESTDIR)/share/$(EXE) y no
+  en /usr/share/aspectrum de manera fija.
+* No aparece el dialogo al pulsar F7, no funciona AGUP y en el menu
+  no se llama a opcionsi (MS DOS)
++ Los acentos salen mal (Windows)
++ Investigar gettext para msdos/djgpp, y ver si se puede cambiar compilar
+  sin el y comprobar como van las rutas en win32.
+* Mover las rutinas de ficheros a main.c, y dejar snaps.c para las cosas 
+  de carga/grabacion parecido a libspectrum del de fuse
++ Que grabe .sp y .sna y .z80
++ Que grabe cintas .tap y .tzx
++ Investigar si se puede utilizar una sola funcion para todos los menus.
+  aprobechando que solo activa una variable.
+* eliminar el font ese que no hace falta ¿y el debuger?
+* Erase font.fnt and it's loading code and file.
+* Comprobar que se busca el nuevo font en los sitios estandar.
+- Hay que poner una escala de grises para mejorar el aspecto de agup
+- Acabar de traducir la instalacion bajo windows, que instale icono de doc.
+- Grabar PNG
+- Cargar SCR como si fuesen snapshots
+* Que el sonido se pueda desactivar y que pause al llamar al gui.
+
+Para la 0.7
+
++ cambiar el numero de version a 0.7
++ Que Make me haga automagicamente los aspectrum_[bin|src]_version.zip
+* Actualizar las WEB
+* Anunciar en todos los lados la nueva version:
+  WOS emulatronia speeccy.org allegro.cc freshmeat eccs lista aspectrum.
+* Tape GUI
 + Hacer que soporte joystick hardware
-+ Hacer que lea TZX ¿Que grabe? HAY MUCHO QUE HACER AQUI!!!
++ Soporte Completo de TZX ¿Que grabe? HAY MUCHO QUE HACER AQUI!!!
 * Pasar toda la parte de lectura de teclado a v_alleg.c
 - ¿PLugins de video? quiero ver como se veria a 160x160, o con scanlines.
 + Quitar codigo imnecesario u obsoleto
 + Soporte para archivos .pok y buscador de pokes.
+- Icono para Windows.
+- Pakete debian.
+- Replace debugger by Allegro dialog functions.
+- Si un archivo no es valido volver al cuadro de dialogo
++ limpiar la selecion antes de llamar a un cuadro de dialogo, para que al pulsar
+  cancelar no carge el ultimo archivo.
 
-Con todo eso estariamos listos para la 0.1.7
-
-Para la 0.2.0:
+Para la 1.0:
 
 Memoria contenida (requiere rescribir el z80 core)
 Paginacion de memoria, esto es todos los modelos
 El chip de sonido
 
-Para la 0.3.0:
+Para la 2.0:
 
 Emulacion de la unidad de disco del +3
 Soporte de ZX Printer, RS 232 y Centronics
@@ -39,11 +72,16 @@ Soporte de ZX Printer, RS 232 y Centronics
  - Some games blink when playing them, as Ghould And Ghosts. It's maybe
    something related with the video interruption or maybe the timing I'm
    using, no idea :(
+   DONE - The port FF and video interruption.
+   NOT DONE - The contened memory.
 
  - TAP loading routine is not working right for some games, maybe it's due
-   to z80core emulation bugs :(
+   to z80core emulation bugs :(  
+   ¿WHAT GAMES?
+   also try to load a tape in his end hang the emulator
 
  - Look for badly implemented Z80 opcodes.
+
 
  - Some stuff related to debuger that kak email santiago
 
@@ -62,25 +100,26 @@ Soporte de ZX Printer, RS 232 y Centronics
 
  - Improve TAP loading routine to detect errors and so on...
  - Add real-time TAP loading routine.
- - Add TZX loading routine.
-
+ - Complete the TZX loading routine.
 
  - Implement menu option for changing the TAPFILE and Rewind.
-   By default make tapfile = NULL. On a LOAD "" , if tapfile == NULL
+   DONE
+   
+ - By default make tapfile = NULL. On a LOAD "" , if tapfile == NULL
    ask for a tapfile, else load the opened tapfile.
    On the tapfile menu put the following:
 
-    - Select tapfile
-    - rewind tapfile
+ - rewind tapfile
    
 
  - Implement frameskip correctly so that older computers can use Aspectrum.
-   (DONE)
+   ¿DONE?
 
  - fix some scare_mouse and unscare_mouse that Alea put very happyly.
 
  - Eliminate al machine depend code (main.c, NO_GETOPTLONG ) and allegro version
-   depend. (menu.c and vallegro.c)
+   depend. (menu.c and vallegro.c) more now that allegro 3.99 WIP dont work
+   whith sound on win32.
 
  - See what happends with (my) mouse in Linux Console
  

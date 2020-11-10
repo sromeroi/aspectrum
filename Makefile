@@ -2,71 +2,75 @@
 # ¿lo de arriba esta bien? ¿no deberia ser /bin/make -f $@ o algo asi?
 
 CC = gcc
+MAKE = make
 EXE = aspectrum
-VERSION = 0.1.6
+VERSION = 0.1.6.2
 
-# remember to uncomment the adecuated dep target for each target.
+default : aspectrum
 
-# linux
-DESTDATPATH = /usr/share/$(EXE)
-LFLAGS = `allegro-config --libs`
-CFLAGS = -Wall -O3 -mcpu=i686 `allegro-config --cflags` \
-        -DVERSION=\"$(VERSION)\" -DDESTDAT=\"$(DESTDATPATH)\" \
-        -DSOUND_BY_STREAM
-RM = rm
+# lugar donde se instalan las cosas y donde se buscan por defecto.
+#DESTDIR = /usr
+DESTDIR = /usr/local
 
-# windos (mingw32)
-#LFLAGS = -lalleg 
-#CFLAGS = -DVERSION=\"$(VERSION)\" -DNO_GETOPTLONG -Wall -O2 -mwindows \
-#       -DSOUND_BY_STREAM
-#RM= del
+# remember to uncomment the adecuated target for each arquitecture.
+
+# target: Linux/GCC
+#include Makefile.lnx
+
+# Target: MS-DOS/DJGPP
+#include Makefile.dos
+
+# Target: Windows/mingw32
+include Makefile.min
+
 
 # esto no se pa que valdra. ( es pa debug )
 DBGLIB = -lmss -g
 DBGDEF = -DMSS -D_DEBUG_
 
-# esto todabia no lo uso
-DESTDOCPATH = /usr/share/doc/$(EXE)
-DESTEXEPATH = /usr/bin
-
-# fuentes y objetos para linux. 
-files = sound.c v_alleg.c snaps.c graphics.c menu.c debugger.c \
-main.c z80.c disasm.c 
-objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \
-main.o z80.o disasm.o 
-
-# objetos para windows las fuentes no hacen falta por que se usa makedeps.bat
-#objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \
-#main.o z80.o disasm.o contrib/getopt.o
 
 all: aspectrum
 
-aspectrum: dep $(objects) 
-	$(CC) $(EXTRA) -o $(EXE) $(objects) $(LFLAGS) 
+aspectrum: dep $(AGUPLIB) $(objects) 
+	$(CC) $(EXTRA) -o $(EXE) $(objects) $(AGUPLIB) $(LFLAGS) 
 
 $(objects): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-#linux dep
-dep:
-	echo >deps
-	for i in $(files) ; do $(CC) -MM $$i >>deps ; done
-
-#dos dep
-#dep:
-#	makedeps.bat
+$(AGUPLIB):
+	$(MAKE) -C $(AGUPDIR)
 
 clean:
 	-$(RM) *.o 
-	-$(RM) $(EXE) 
+	-$(RM) $(EXE)$(EXT) 
+	-$(RM) core
 	-$(RM) deps
+	-$(RM) contrib\getopt.o
+	-$(RM) contrib/getopt.o
+	-$(MAKE) -C $(AGUPDIR) clean
 
 todo: clean all
 
+install: aspectrum
+	install -d $(DESTDIR)/bin
+	install -d $(DESTDIR)/share/$(EXE)
+	install -d $(DESTDIR)/share/doc/$(EXE)
+	install -s $(EXE)$(EXT) $(DESTDIR)/bin/
+	install font.dat font.fnt spectrum.rom $(DESTDIR)/share/$(EXE)/
+	install doc/* $(DESTDIR)/share/doc/$(EXE)/
+
+uninstall:
+	rm -rf $(DESTDIR)/share/doc/$(EXE)
+	rm -rf $(DESTDIR)/share/$(EXE) 
+	rm $(DESTDIR)/bin/$(EXE)$(EXT)
+#	-rmdir $(DESTDIR)/share/doc
+#	-rmdir $(DESTDIR)/share
+#	-rmdir $(DESTDIR)/bin
+	
 -include deps
 
 # some unused stuff
 debug:
 	$(CC) $(EXTRA) -o $(EXE) $(FILES) $(ALL_FLAGS) $(DBGLIB) $(DBGDEF)
 
-
+#.phony clean default all

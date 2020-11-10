@@ -25,25 +25,30 @@
  ROM, or give it a .sna, .sp, .z80 or .tap filename to load snapshots
  or tap files...
 
-    ./aspectrum file.sna     (or .sp, or .tap, or .z80).
+    ./aspectrum file.sna     (or .sp, or .tap, .tzx or .z80).
 
  Remember that loading of .tap files requieres a LOAD "" in the
  BASIC interpreter of the emulator. The LOAD command is put by
  pressing the 'J' key, and the " by pressing ALT+P (like in the
  real Spectrum).
 
- to a resume of aspectrum command line args use "./aspectrum --help"
+ Also even the .tzx files are supported any kind of custom or turbo
+ loading squeme is not supporting and don't work by now.
+ 
+ To a resume of aspectrum command line args use "./aspectrum --help"
 
- You'll need Allegro 4.x (or 3.9.x WIP) to run this program.
+ You'll need Allegro 4.x to run this program.
  The font.fnt file MUST be located at the same directory where you
  run the aspectrum binary, or in /usr/share/aspectrum
 
  spectrum.rom MUST be in the same directory, in /usr/share/aspectrum
  or specified the ROM file by command line args.
 
+ You can also specific a dump of a Interface 2 Cardtrige. 
+
  To use Gunstick Emulation you must have a working mouse and call
  the emulator with "./aspectrum -j G" (CASE SENSITIVE), or activate
- the gunstick emulation by Gerenal Optiones menu (F7).
+ the gunstick emulation by General Options menu (F7).
 
  One time you start the gunstick emulation can avoid the "888"s locating
  the mouse in the border of the screen.
@@ -78,7 +83,7 @@
 
  o It can load .SNA, .SP and .Z80 snapshot files.
 
- o It can load .TAP files at "zero" speed (I've still not implemented
+ o It can load .TAP and .TZX files at "zero" speed (I've still not implemented
    the real-time loading routines), by using LOAD "" on the emulator.
    It still does not load protected games nor games launched by
    non-standard loaders. LOAD "" is writen pressing J and ALT+P and ALT+P.
@@ -128,7 +133,7 @@
      Raúl Gómez: R80 emulator (Spectrum).
      Philip Kendall: Fuse emulator (Spectrum).
      Ignacio Burgueño: GLECK emulator (Spectrum).
-     Z80user, Kak-, Hylian, Kel: From #spectrum on IRC-Hispano.
+     Z80user, Kak, Hylian, Kel: From #spectrum on IRC-Hispano.
 
  o Alvaro Alea, for submitting the first Aspectrum patch giving support
    to load Z80 snapshot files on the emulator.
@@ -147,4 +152,5 @@
 
   Santiago Romero AkA NoP/Compiler.
   sromero@escomposlinux.org
-  
+
+

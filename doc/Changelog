@@ -1,3 +1,35 @@
+I (alea) don't have in mind update this file anymore.
+Is boring, I hate, I forget What I made in each file.
+If You are interesting in a full changelog of the aspectrum source
+check the CVS that exist for this.
+
+
+v 0.1.6.2
+---------
+snap.c
+  Stuff to allow loading of TZX
+menu.c
+main.c
+  Stuff to allow loading of TZX
+  New GUI based on AGUP
+v_allegro.c
+Makefile
+   New GUI based on AGUP
+machines.c
+machines.h
+   stuff to allow a future 128K emulation
+
+v 0.1.6.1
+---------
+main.c
+    stuff for correct timming and port FF
+    confirmation dialog on F10
+v_allegro.c
+    a new gui
+    retry the initialitation of graphics with GFX_SAFE if GFX_DEFAULT fails
+z80.c
+    a bug with gunstick on resolution of 320x240
+
 v 0.1.6
 -------
 main.c

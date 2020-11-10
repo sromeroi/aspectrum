@@ -190,6 +190,7 @@
    (reg)--;                                                       \
    r_F |= ( (reg)==0x7f ? FLAG_V : 0 ) | sz53_table[(reg)]
 
+// COMMENTS:
 // it was:
 //   r_F |= ( (reg)==0x79 ? FLAG_V : 0 ) | sz53_table[(reg)]
 // But Kak pointed my was not 0x79 -> 0x7F, changed 7-3-2001
@@ -400,10 +401,3 @@
 /*--- MISC operations -----------------------------------------------*/
 #define IN_PORT(reg,port)    (reg)=Z80InPort(regs,(port));                  \
                          r_F = ( r_F & FLAG_C) | sz53p_table[(reg)]
-
-
-
-
-
-
-

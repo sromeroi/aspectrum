@@ -17,12 +17,12 @@
 
  Copyright (c) 2000 Santiago Romero Iglesias.
  Email: sromero@escomposlinux.org
- ======================================================================*/
-
+ ======================================================================*/  
+  
 #ifndef TABLES_H
 #define TABLES_H
-
-/*--- One byte opcodes: ----------------------------------------------*/
+  
+/*--- One byte opcodes: ----------------------------------------------*/ 
 #define  NOP           0
 #define  LD_BC_NN      1
 #define  LD_xBC_A      2
@@ -279,10 +279,10 @@
 #define  PREFIX_FD     253
 #define  CP_N          254
 #define  RST_38        255
+  
 
 
-
-/*--- CB Prefix opcodes: ---------------------------------------------*/
+/*--- CB Prefix opcodes: ---------------------------------------------*/ 
 #define  RLC_B         0
 #define  RLC_C         1
 #define  RLC_D         2
@@ -539,9 +539,9 @@
 #define  SET_7_L       253
 #define  SET_7_xHL     254
 #define  SET_7_A       255
+  
 
-
-/*--- ED opcodes: ----------------------------------------------------*/
+/*--- ED opcodes: ----------------------------------------------------*/ 
 #define  IN_B_xC       64
 #define  OUT_xC_B      65
 #define  SBC_HL_BC     66
@@ -623,16 +623,16 @@
 #define  INDR          186
 #define  OTDR          187
 #define  ED_FE         254
+  
 
-
-/*--- DD xx opcodes: -------------------------------------------------*/
+/*--- DD xx opcodes: -------------------------------------------------*/ 
 /* Those are the DD xx opcodes where HL is treated as IX + a
-   signed byte displacement n when required:  DD opcode n:            */
-
-/*--- FD xx opcodes: -------------------------------------------------*/
+   signed byte displacement n when required:  DD opcode n:            */ 
+  
+/*--- FD xx opcodes: -------------------------------------------------*/ 
 /* Those are the FD xx opcodes where HL is treated as IY + a
-   signed byte displacement n when required:  FD opcode n:            */
-
+   signed byte displacement n when required:  FD opcode n:            */ 
+  
 #define  ADD_IXY_BC     9
 #define  ADD_IXY_DE     25
 #define  LD_IXY_NN      33
@@ -718,17 +718,17 @@
 #define  PUSH_IXY       229
 #define  JP_IXY         233
 #define  LD_SP_IXY      249
+  
 
 
 
-
-/*--- DD CB Prefix opcodes: ------------------------------------------*/
+/*--- DD CB Prefix opcodes: ------------------------------------------*/ 
 /* Those are the CB xx opcodes where HL is treated as IX + a
-   signed byte displacement n:  DD CB n opcode:                       */
-/*--- FD CB Prefix opcodes: ------------------------------------------*/
+   signed byte displacement n:  DD CB n opcode:                       */ 
+/*--- FD CB Prefix opcodes: ------------------------------------------*/ 
 /* Those are the CB xx opcodes where HL is treated as IY + a
-   signed byte displacement n:  FD CB n opcode:                       */
-
+   signed byte displacement n:  FD CB n opcode:                       */ 
+  
 #define  RLC_IXYh       4
 #define  RLC_IXYl       5
 #define  RLC_xIXY       6
@@ -825,5 +825,5 @@
 #define  SET_7_IXYh     252
 #define  SET_7_IXYl     253
 #define  SET_7_xIXY     254
-
+  
 #endif

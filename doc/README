@@ -25,16 +25,19 @@
  ROM, or give it a .sna, .sp, .z80 or .tap filename to load snapshots
  or tap files...
 
-    ./aspectrum file.sna     (or .sp, or .tap, or .z80).
+    ./aspectrum file.sna     (or .sp, or .tap, .tzx or .z80).
 
  Remember that loading of .tap files requieres a LOAD "" in the
  BASIC interpreter of the emulator. The LOAD command is put by
  pressing the 'J' key, and the " by pressing ALT+P (like in the
  real Spectrum).
 
- to a resume of aspectrum command line args use "./aspectrum --help"
+ Also even the .tzx files are supported any kind of custom or turbo
+ loading squeme is not supporting and don't work by now.
+ 
+ To a resume of aspectrum command line args use "./aspectrum --help"
 
- You'll need Allegro 4.x (or 3.9.x WIP) to run this program.
+ You'll need Allegro 4.x to run this program.
  The font.fnt file MUST be located at the same directory where you
  run the aspectrum binary, or in /usr/share/aspectrum
 
@@ -80,7 +83,7 @@
 
  o It can load .SNA, .SP and .Z80 snapshot files.
 
- o It can load .TAP files at "zero" speed (I've still not implemented
+ o It can load .TAP and .TZX files at "zero" speed (I've still not implemented
    the real-time loading routines), by using LOAD "" on the emulator.
    It still does not load protected games nor games launched by
    non-standard loaders. LOAD "" is writen pressing J and ALT+P and ALT+P.

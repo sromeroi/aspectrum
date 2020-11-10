@@ -17,7 +17,10 @@
 
  Copyright (c) 2000 Santiago Romero Iglesias and Ginés Flores Segura
  Email: sromero@escomposlinux.org
- ======================================================================*/
+ ======================================================================*/  
+  
+word ParseOpcode (char *opcode, char *devuelve, char *cad2, word PC,
+		     Z80Regs * regs);
 
-word ParseOpcode( char *opcode, char *devuelve, char *cad2, word PC, Z80Regs *regs  );
-word Z80Disassembler ( Z80Regs *regs,  char *cad1,  char *cad2 );
+word Z80Disassembler (Z80Regs * regs, char *cad1, char *cad2);
+

@@ -17,16 +17,44 @@
 
  Copyright (c) 2000 Santiago Romero Iglesias.
  Email: sromero@escomposlinux.org
- ======================================================================*/
-char LoadSP( Z80Regs *, FILE *);
-char LoadSNA( Z80Regs *, FILE * );
-char LoadTAP( Z80Regs *, FILE * );
-char SaveSNA( Z80Regs *, FILE * );
-char SaveSCR( Z80Regs *, FILE * );
-char LoadZ80( Z80Regs *, FILE *);
-char LoadSnapshot( Z80Regs *regs, char *filename );
-char LoadTapfile( Z80Regs *regs, char *filename );
-char SaveSnapshot( Z80Regs *regs, char *filename );
-char SaveScreenshot( Z80Regs *regs, char *filename );
-   
-   
+ ======================================================================*/  
+
+#define TYPE_NULL 0
+#define TYPE_TZX 1
+#define TYPE_TAP 2
+#define TYPE_Z80 3
+#define TYPE_SNA 4
+#define TYPE_SP  5
+#define TYPE_SCR 6
+int typeoffile(char *);
+
+
+char LoadSnapshot (Z80Regs * regs, char *filename);
+char LoadSP (Z80Regs *, FILE *);
+char LoadSNA (Z80Regs *, FILE *);
+char LoadZ80 (Z80Regs *, FILE *);
+
+char SaveSNA (Z80Regs *, FILE *);
+char SaveSCR (Z80Regs *, FILE *);
+char SaveSnapshot (Z80Regs * regs, char *filename);
+char SaveScreenshot (Z80Regs * regs, char *filename);
+
+
+/* RUTINAS DE CINTA: GENERICAS */
+FILE *InitTape(FILE *fp);
+char LoadTAP (Z80Regs *, FILE *);
+char RewindTAP (Z80Regs *, FILE *);
+
+/* RUTINAS DE CINTA: ESPECIFICAS */
+char TAP_init(FILE *fp);
+char TAP_loadblock(Z80Regs * regs, FILE * fp);
+char TAP_rewind(FILE *fp);
+
+char TZX_init(FILE *fp);
+char TZX_loadblock(Z80Regs * regs, FILE * fp);
+char TZX_rewind();
+char TZX_genindex(FILE *fp);
+
+/* busca el archivo en los sitios habituales y lo abre como rb */
+FILE *findopen_file(char *file);
+char *find_file(char *file);

@@ -1,0 +1,21 @@
+# linux
+DESTDATPATH = /usr/share/$(EXE)
+LFLAGS = `allegro-config --libs`
+#CFLAGS = -Wall -O3 -mcpu=i686 `allegro-config --cflags` 
+CFLAGS = -Wall -g `allegro-config --cflags` \
+        -DVERSION=\"$(VERSION)\" -DDESTDAT=\"$(DESTDATPATH)\" \
+        -DSOUND_BY_STREAM -DENABLE_LOGS -DI_HAVE_AGUP -I$(AGUPDIR)
+RM = rm
+EXT=
+
+# fuentes y objetos para linux. 
+files = sound.c v_alleg.c snaps.c graphics.c menu.c debugger.c \
+main.c z80.c disasm.c 
+objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \
+main.o z80.o disasm.o 
+
+#linux dep
+dep:
+	echo >deps
+	for i in $(files) ; do $(CC) -MM $$i >>deps ; done
+

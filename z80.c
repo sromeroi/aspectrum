@@ -44,26 +44,19 @@
    row variables for keyboard emulation                   */
 extern byte *RAM;
 extern int debug, main_tecla, scanl;
-
+extern char *msg_log;
 extern int fila[5][5];
 //extern char *tapfile;
-extern FILE *tapfile;
+//extern FILE *tapfile;
 extern char *tfont;
 
-//#include "macros.c"		// now in aspec.h
+//#include "macros.c"           // now in aspec.h
 
-extern int TSTATES_PER_LINE,TOP_BORDER_LINES,BOTTOM_BORDER_LINES,SCANLINES;
+extern int TSTATES_PER_LINE, TOP_BORDER_LINES, BOTTOM_BORDER_LINES, SCANLINES;
 
 
 // previously in macros.c
 #ifndef _DISASM_
-
-/* Whether a half carry occured or not can be determined by looking at
-   the 3rd bit of the two arguments and the result; these are hashed
-   into this table in the form r12, where r is the 3rd bit of the
-   result, 1 is the 3rd bit of the 1st argument and 2 is the
-   third bit of the 2nd argument; the tables differ for add and subtract
-   operations */
 
 /* Whether a half carry occured or not can be determined by looking at
    the 3rd bit of the two arguments and the result; these are hashed
@@ -80,9 +73,9 @@ byte overflow_add_table[] = { 0, 0, 0, FLAG_V, FLAG_V, 0, 0, 0 };
 byte overflow_sub_table[] = { 0, FLAG_V, 0, 0, 0, 0, FLAG_V, 0 };
 
 /* Some more tables; initialised in z80_init_tables() */
-byte sz53_table[0x100];   /* The S, Z, 5 and 3 bits of the temp value */
-byte parity_table[0x100]; /* The parity of the temp value */
-byte sz53p_table[0x100];  /* OR the above two tables together */
+byte sz53_table[0x100];		/* The S, Z, 5 and 3 bits of the temp value */
+byte parity_table[0x100];	/* The parity of the temp value */
+byte sz53p_table[0x100];	/* OR the above two tables together */
 /*------------------------------------------------------------------*/
 
 // Contributed by Metalbrain to implement OUTI, etc.
@@ -91,17 +84,14 @@ byte ioblock_dec1_table[64];
 byte ioblock_2_table[0x100];
 
 /*--- Memory Write on the A address on no bank machines -------------*/
-void Z80WriteMem( word where, word A, Z80Regs *regs)
+void
+Z80WriteMem (word where, word A, Z80Regs * regs)
 {
-  if( where >= 16384 )
-     regs->RAM[where] = A;
+  if (where >= 16384)
+    regs->RAM[where] = A;
 }
 
 #endif
-
-
-
-
 
 /*====================================================================
   void Z80Reset( Z80Regs *regs, int cycles )
@@ -112,32 +102,32 @@ void Z80WriteMem( word where, word A, Z80Regs *regs)
   of cycles required to check for interrupts and do special
   hardware checking/updating.
  ===================================================================*/
-void Z80Reset( Z80Regs *regs, int int_cycles )
+void
+Z80Reset (Z80Regs * regs, int int_cycles)
 {
-   /* reset PC and the rest of main registers: */
-   regs->PC.W = regs->R.W = 0x0000;
+  /* reset PC and the rest of main registers: */
+  regs->PC.W = regs->R.W = 0x0000;
 
-   regs->AF.W = regs->BC.W = regs->DE.W = regs->HL.W =
-   regs->AFs.W = regs->BCs.W = regs->DEs.W = regs->HLs.W =
-   regs->IX.W = regs->IY.W = 0x0000;
+  regs->AF.W = regs->BC.W = regs->DE.W = regs->HL.W =
+    regs->AFs.W = regs->BCs.W = regs->DEs.W = regs->HLs.W =
+    regs->IX.W = regs->IY.W = 0x0000;
 
-   /* Make the stack point to $F000 */
-   regs->SP.W = 0xF000;
+  /* Make the stack point to $F000 */
+  regs->SP.W = 0xF000;
 
-   /* reset variables to their default values */
-   regs->I = 0x00;
-   regs->IFF1 = regs->IFF2 = regs->IM = regs->halted = 0x00;
-   regs->ICount = regs->IPeriod = int_cycles;
+  /* reset variables to their default values */
+  regs->I = 0x00;
+  regs->IFF1 = regs->IFF2 = regs->IM = regs->halted = 0x00;
+  regs->ICount = regs->IPeriod = int_cycles;
 
-   regs->IRequest = INT_NOINT;
-   regs->we_are_on_ddfd = regs->dobreak = regs->BorderColor = 0;
+  regs->IRequest = INT_NOINT;
+  regs->we_are_on_ddfd = regs->dobreak = regs->BorderColor = 0;
 
 //#ifdef _DEBUG_
-   regs->DecodingErrors = 1;
+  regs->DecodingErrors = 1;
 //#endif
 
 }
-
 
 /*====================================================================
   word Z80Run( Z80Regs *regs, int numopcodes )
@@ -168,111 +158,115 @@ void Z80Reset( Z80Regs *regs, int int_cycles )
   Pass as numcycles the number of clock cycle you want to execute
   z80 opcodes for or < 0 (negative) to execute "infinite" opcodes.
  ===================================================================*/
-word Z80Run( Z80Regs *regs, int numcycles )
+word
+Z80Run (Z80Regs * regs, int numcycles)
 {
-   /* opcode and temp variables */
-   register byte opcode;
-   eword tmpreg, ops, mread, tmpreg2;
-   unsigned long tempdword;
-   register int loop;
-   unsigned short tempword;
+  /* opcode and temp variables */
+  register byte opcode;
+  eword tmpreg, ops, mread, tmpreg2;
+  unsigned long tempdword;
+  register int loop;
+  unsigned short tempword;
 
-   /* emulate <numcycles> cycles */
-   loop = (regs->ICount - numcycles);
+  /* emulate <numcycles> cycles */
+  loop = (regs->ICount - numcycles);
 
-   /* this is the emulation main loop */
-   while( regs->ICount > loop )
-   {
-   #ifdef DEBUG
+  /* this is the emulation main loop */
+  while (regs->ICount > loop)
+    {
+#ifdef DEBUG
       /* test if we have reached the trap address */
-      if( regs->PC.W == regs->TrapAddress && regs->dobreak != 0 )
-         return(regs->PC.W);
-   #endif
+      if (regs->PC.W == regs->TrapAddress && regs->dobreak != 0)
+	return (regs->PC.W);
+#endif
 
-     if( regs->halted == 1 )
-     { r_PC--; AddCycles(4); }
+      if (regs->halted == 1)
+	{
+	  r_PC--;
+	  AddCycles (4);
+	}
 
-       /* read the opcode from memory (pointed by PC) */
-       opcode = Z80ReadMem(regs->PC.W);
-       regs->PC.W++;
+      /* read the opcode from memory (pointed by PC) */
+      opcode = Z80ReadMem (regs->PC.W);
+      regs->PC.W++;
 
-       /* increment the R register and decode the instruction */
-       AddR(1);
-       switch(opcode)
-	   {
-			#ifndef CPP_COMPILATION
-			 #include "opcodes.c"
-			#else
-			 #include "opcodes.cpp"
-			#endif
-          case PREFIX_CB:
-			 AddR(1);
-			#ifndef CPP_COMPILATION
-			 #include "op_cb.c"
-			#else
-			 #include "op_cb.cpp"
-			#endif
-			 break;
-		  case PREFIX_ED:
-			 AddR(1);
-			#ifndef CPP_COMPILATION
-			 #include "op_ed.c"
-			#else
-			 #include "op_ed.cpp"
-			#endif
-			 break;
-		  case PREFIX_DD:
-		  case PREFIX_FD:
-			 AddR(1);
-             if( opcode == PREFIX_DD )
-             {
-               #define REGISTER regs->IX
-			   regs->we_are_on_ddfd = WE_ARE_ON_DD;
-			#ifndef CPP_COMPILATION
-			 #include "op_dd_fd.c"
-			#else
-			 #include "op_dd_fd.cpp"
-			#endif
+      /* increment the R register and decode the instruction */
+      AddR (1);
+      switch (opcode)
+	{
+#ifndef CPP_COMPILATION
+#include "opcodes.c"
+#else
+#include "opcodes.cpp"
+#endif
+	case PREFIX_CB:
+	  AddR (1);
+#ifndef CPP_COMPILATION
+#include "op_cb.c"
+#else
+#include "op_cb.cpp"
+#endif
+	  break;
+	case PREFIX_ED:
+	  AddR (1);
+#ifndef CPP_COMPILATION
+#include "op_ed.c"
+#else
+#include "op_ed.cpp"
+#endif
+	  break;
+	case PREFIX_DD:
+	case PREFIX_FD:
+	  AddR (1);
+	  if (opcode == PREFIX_DD)
+	    {
+#define REGISTER regs->IX
+	      regs->we_are_on_ddfd = WE_ARE_ON_DD;
+#ifndef CPP_COMPILATION
+#include "op_dd_fd.c"
+#else
+#include "op_dd_fd.cpp"
+#endif
 
-               #undef  REGISTER
-             }
-             else
-             {
-               #define REGISTER regs->IY
-               regs->we_are_on_ddfd = WE_ARE_ON_FD;
-			#ifndef CPP_COMPILATION
-			 #include "op_dd_fd.c"
-			#else
-			 #include "op_dd_fd.cpp"
-			#endif
-			   #undef  REGISTER
-             }
-             regs->we_are_on_ddfd = 0;
-             break;
-       }
+#undef  REGISTER
+	    }
+	  else
+	    {
+#define REGISTER regs->IY
+	      regs->we_are_on_ddfd = WE_ARE_ON_FD;
+#ifndef CPP_COMPILATION
+#include "op_dd_fd.c"
+#else
+#include "op_dd_fd.cpp"
+#endif
+#undef  REGISTER
+	    }
+	  regs->we_are_on_ddfd = 0;
+	  break;
+	}
 
-     /* patch ROM loading routine */
-     // address contributed by Ignacio Burgueño :)
+      /* patch ROM loading routine */
+      // address contributed by Ignacio Burgueño :)
 //     if( r_PC == 0x0569 )
-     if( r_PC >= 0x0556 && r_PC <= 0x056c )
-          Z80Patch( regs );
+      if (r_PC >= 0x0556 && r_PC <= 0x056c)
+	Z80Patch (regs);
 
-     /* check if it's time to do other hardware emulation */
-     if( regs->ICount <= 0 )
-     {
-          tmpreg.W = Z80Hardware(regs);
-          regs->ICount += regs->IPeriod;
-          loop = regs->ICount + loop;
+      /* check if it's time to do other hardware emulation */
+      if (regs->ICount <= 0)
+	{
+	  tmpreg.W = Z80Hardware (regs);
+	  regs->ICount += regs->IPeriod;
+	  loop = regs->ICount + loop;
 
-          /* check if we must exit the emulation or there is an INT */
-          if( tmpreg.W == INT_QUIT )
-		  return( regs->PC.W );
-          if( tmpreg.W != INT_NOINT )
-             Z80Interrupt( regs, tmpreg.W );
-     }
-   }
+	  /* check if we must exit the emulation or there is an INT */
+	  if (tmpreg.W == INT_QUIT)
+	    return (regs->PC.W);
+	  if (tmpreg.W != INT_NOINT)
+	    Z80Interrupt (regs, tmpreg.W);
+	}
+    }
 
-   return(regs->PC.W);
+  return (regs->PC.W);
 }
 
 
@@ -280,30 +274,38 @@ word Z80Run( Z80Regs *regs, int numcycles )
 /*====================================================================
   void Z80Interrupt( Z80Regs *regs, word ivec )
  ===================================================================*/
-void Z80Interrupt( Z80Regs *regs, word ivec )
+void
+Z80Interrupt (Z80Regs * regs, word ivec)
 {
-   word intaddress;
+  word intaddress;
 
-   /* unhalt the computer */
-   if( regs->halted == 1 )
-      regs->halted = 0;
-   
-   if( regs->IFF1 )
-   {
-      PUSH(PC);
+  /* unhalt the computer */
+  if (regs->halted == 1)
+    regs->halted = 0;
+
+  if (regs->IFF1)
+    {
+      PUSH (PC);
       regs->IFF1 = 0;
-      switch(regs->IM)
-      {
-        case 0: r_PC = 0x0038; AddCycles(12); break;
-        case 1: r_PC = 0x0038; AddCycles(13); break;
-        case 2: intaddress = (((regs->I & 0xFF)<<8) | 0xFF);
-                regs->PC.B.l = Z80ReadMem(intaddress);
-                regs->PC.B.h = Z80ReadMem(intaddress+1);
-                AddCycles(19);
-                break;
-      }
+      switch (regs->IM)
+	{
+	case 0:
+	  r_PC = 0x0038;
+	  AddCycles (12);
+	  break;
+	case 1:
+	  r_PC = 0x0038;
+	  AddCycles (13);
+	  break;
+	case 2:
+	  intaddress = (((regs->I & 0xFF) << 8) | 0xFF);
+	  regs->PC.B.l = Z80ReadMem (intaddress);
+	  regs->PC.B.h = Z80ReadMem (intaddress + 1);
+	  AddCycles (19);
+	  break;
+	}
 
-   }
+    }
 
 }
 
@@ -314,13 +316,14 @@ void Z80Interrupt( Z80Regs *regs, word ivec )
   Do here your emulated machine hardware emulation. Read Z80Execute()
   to know about how to quit emulation and generate interrupts.
  ===================================================================*/
-word  Z80Hardware( register Z80Regs *regs )
+word
+Z80Hardware (register Z80Regs * regs)
 {
-  if( debug != 1  /*&& scanl >= 224*/ )
-  {
+  if (debug != 1 /*&& scanl >= 224 */ )
+    {
       ;
-  }
-  return( INT_IRQ );
+    }
+  return (INT_IRQ);
 }
 
 
@@ -336,29 +339,18 @@ word  Z80Hardware( register Z80Regs *regs )
 
   This allows "BIOS" patching (cassette loading, keyboard ...).
  ===================================================================*/
-void Z80Patch( register Z80Regs *regs )
+void
+Z80Patch (register Z80Regs * regs)
 {
+	extern FILE *tapfile;  
+	extern struct tipo_emuopt emuopt;
+  	if (emuopt.tapefile[0] != 0)
+    {
+	  //	AS_printf("Z80patch:%x\n",tapfile);
+      LoadTAP (regs, tapfile);
+      POP (PC);
+    }
 
-   if( tapfile != NULL )
-   {
-        LoadTAP( regs, tapfile );
-        POP(PC);
-   }
-
-   /*
-        if( strlen(tapfile) != 0 )
-        {
-           if( LoadTapFile( regs, tapfile ) )
-           {  POP(PC);  }
-        }
-        else
-        {
-           FileMenu( tfont, 3, tapfile );
-           if( strlen(tapfile) != 0 )
-             if( LoadTapFile( regs, tapfile ) )
-                {  POP(PC);  }
-        }
-   */
 }
 
 
@@ -371,9 +363,10 @@ void Z80Patch( register Z80Regs *regs )
 
   Return DEBUG_OK to state success and DEBUG_QUIT to quit emulation.
  ===================================================================*/
-byte Z80Debug( register Z80Regs *regs )
+byte
+Z80Debug (register Z80Regs * regs)
 {
-   return( DEBUG_QUIT );
+  return (DEBUG_QUIT);
 }
 
 
@@ -384,9 +377,10 @@ byte Z80Debug( register Z80Regs *regs )
   This function reads from the given memory address. It is not inlined,
   and it's written for debugging purposes.
  ===================================================================*/
-byte Z80MemRead( register word address, Z80Regs *regs )
+byte
+Z80MemRead (register word address, Z80Regs * regs)
 {
-  return(Z80ReadMem(address));
+  return (Z80ReadMem (address));
 }
 
 
@@ -396,9 +390,10 @@ byte Z80MemRead( register word address, Z80Regs *regs )
   This function writes on memory the given value. It is not inlined,
   ands it's written for debugging purposes.
  ===================================================================*/
-void Z80MemWrite( register word address, register byte value, Z80Regs *regs )
+void
+Z80MemWrite (register word address, register byte value, Z80Regs * regs)
 {
-  Z80WriteMem( address, value, regs );
+  Z80WriteMem (address, value, regs);
 }
 
 
@@ -408,78 +403,105 @@ void Z80MemWrite( register word address, register byte value, Z80Regs *regs )
   This function reads from the given I/O port. It is not inlined,
   and it's written for debugging purposes.
  ===================================================================*/
-byte Z80InPort(register Z80Regs *regs,  register word port)
+byte
+Z80InPort (register Z80Regs * regs, register word port)
 {
-//  int cur_tstate,tmp;
+  int cur_tstate, tmp;
   int code = 0xFF;
-  byte valor; int x,y;
+  byte valor;
+  int x, y;
   extern struct tipo_emuopt emuopt;
-  extern struct tipo_hwopt   hwopt;
+  extern struct tipo_hwopt hwopt;
+  extern int v_border;
 
   /* El teclado */
-  if (!(port & 0x01)) 
-  {
-  	if (!(port & 0x0100)) code &= fila[4][1];
-  	if (!(port & 0x0200)) code &= fila[3][1];
-  	if (!(port & 0x0400)) code &= fila[2][1];
-  	if (!(port & 0x0800)) code &= fila[1][1];
-	if (!(port & 0x1000)) code &= fila[1][2];
-	if (!(port & 0x2000)) code &= fila[2][2];
-  	if (!(port & 0x4000)) code &= fila[3][2];
-  	if (!(port & 0x8000)) code &= fila[4][2];
+  if (!(port & 0x01))
+    {
+      if (!(port & 0x0100))
+	code &= fila[4][1];
+      if (!(port & 0x0200))
+	code &= fila[3][1];
+      if (!(port & 0x0400))
+	code &= fila[2][1];
+      if (!(port & 0x0800))
+	code &= fila[1][1];
+      if (!(port & 0x1000))
+	code &= fila[1][2];
+      if (!(port & 0x2000))
+	code &= fila[2][2];
+      if (!(port & 0x4000))
+	code &= fila[3][2];
+      if (!(port & 0x8000))
+	code &= fila[4][2];
 
-	/* la gunstick */
-        if ( !(port & 0x1000) && 
-           (emuopt.gunstick & GS_GUNSTICK) && (emuopt.gunstick & GS_HAYMOUSE))
-        {
-           /* disparo de la gunstick con el raton. */
-  	   if (mouse_b & 1)  code &= (0xFE) ;
-  	   /* Miramos a ver si los atributos son blanco  */
-      	   if ((mouse_x>31) && (mouse_x<287) && (mouse_y>4) && (mouse_y<197)) 
-      	   {
-               x=(mouse_x-32)/8;
-               y=(mouse_y-5)/8;
-               valor=Z80ReadMem(0x5800 +32*y +x );
-                if ( ((valor & 0x07)==0x07)  || ((valor & 0x38)==0x38) ) 
-		  code &=0xFB ;
-	   } // mouse x>....
-        } // port & 0x1000
+      /* la gunstick */
+      if (!(port & 0x1000) && (emuopt.gunstick & GS_GUNSTICK) &&
+	  (emuopt.gunstick & GS_HAYMOUSE))
+	{
+	  /* disparo de la gunstick con el raton. */
+	  if (mouse_b & 1)
+	    code &= (0xFE);
+	  /* Miramos a ver si los atributos son blanco  */
+	  if ((mouse_x > 31) && (mouse_x < 287) &&
+	      (mouse_y > v_border) && (mouse_y < (192 + v_border)))
+	    {
+	      x = (mouse_x - 32) / 8;
+	      y = (mouse_y - 1 - v_border) / 8;
+	      valor = Z80ReadMem (0x5800 + 32 * y + x);
+	      if (((valor & 0x07) == 0x07) || ((valor & 0x38) == 0x38))
+		code &= 0xFB;
+	    }			// mouse x>....
+	}			// port & 0x1000
 
-  	/*
-     	issue 2 emulation, thx to Raul Gomez!!!!!
-     	I should implement this also:
-	if( !ear_on && mic_on )
-        	code &= 0xbf;
-     	where earon = bit 4 of the last OUT to the 0xFE port
-     	and   micon = bit 3 of the last OUT to the 0xFE port
-  	*/
-  	code &= 0xbf;
-  }
+      /*
+         issue 2 emulation, thx to Raul Gomez!!!!!
+         I should implement this also:
+         if( !ear_on && mic_on )
+         code &= 0xbf;
+         where earon = bit 4 of the last OUT to the 0xFE port
+         and   micon = bit 3 of the last OUT to the 0xFE port
+       */
+      code &= 0xbf;
+    }
+  if ((port & 0xFF) == 0xFF)
 
-  if( (port & 0xFF) == 0xFF )
-  {
-	  if (hwopt.port_ff==0xFF) code=0xFF;
-	  else code= rand()%0xFE;
-  }	
+    {
+      if (hwopt.port_ff == 0xFF)
+	code = 0xFF;
+      else
+	{
+	  code = rand ();
+	  if (code == 0xFF)
+	    code = 0x00;
+	}
+
+    }
 /*
   {
       cur_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
 
       // top border
-      if (cur_tstate<TSTATES_PER_LINE*TOP_BORDER_LINES) return 0xff;
+      if (cur_tstate<hwopt.TSTATES_PER_LINE*hwopt.TOP_BORDER_LINES) 
+         return 0xff;
+
       // bottom border
-      if (spectrumZ80.ICount<TSTATES_PER_LINE*BOTTOM_BORDER_LINES) return 0xff;
+      if (spectrumZ80.ICount<hwopt.TSTATES_PER_LINE*hwopt.BOTTOM_BORDER_LINES) 
+         return 0xff;
 
-      // FIXME! 48 should be a variable depending on hardware
-      tmp=cur_tstate%TSTATES_PER_LINE;
-      if (tmp<48) return 0xff;			// left border
-      if (tmp>TSTATES_PER_LINE-48) return 0xff;	// right border.
+      tmp=cur_tstate%hwopt.TSTATES_PER_LINE;
 
-      return rand()%0xfe;		// don't return ff!
+      // left border
+      if (tmp<hwopt.tstate_border_left) 
+         return 0xff;
+
+      // right border  
+      if (tmp>hwopt.TSTATES_PER_LINE-hwopt.tstate_border_right) 
+         return 0xff;	
+
+      return rand()%0xfe;	// don't return ff!
   }
-*/
-
-  return( code );
+ */
+  return (code);
 }
 
 
@@ -489,21 +511,21 @@ byte Z80InPort(register Z80Regs *regs,  register word port)
   This function outs a value to a given I/O port. It is not inlined,
   and it's written for debugging purposes.
  ===================================================================*/
-void Z80OutPort( register Z80Regs *regs,
-                 register word port, register byte value )
+void
+Z80OutPort (register Z80Regs * regs, register word port, register byte value)
 {
-    /* change border colour */
-    if( ! (port & 0x01) )
+  /* change border colour */
+  if (!(port & 0x01))
     {
-	regs->BorderColor = (value & 0x07);
-	logSound (value & 0x10);
+      regs->BorderColor = (value & 0x07);
+      logSound (value & 0x10);
     }
-	/* sound logging
-	if ((port&0xff)==0xfe)
-	{
-		logSound (value&0x10);
-	}
-        */
+  /* sound logging
+     if ((port&0xff)==0xfe)
+     {
+     logSound (value&0x10);
+     }
+   */
 }
 
 
@@ -514,20 +536,26 @@ void Z80OutPort( register Z80Regs *regs,
    Creates a look-up table for future flag setting...
    Taken from fuse's sources. Thanks to Philip Kendall.
  ===================================================================*/
-void Z80FlagTables(void)
+void
+Z80FlagTables (void)
 {
-  int i,j,k;
+  int i, j, k;
   byte parity;
 
-  for(i=0;i<0x100;i++) {
-    sz53_table[i]= i & ( FLAG_3 | FLAG_5 | FLAG_S );
-    j=i; parity=0;
-    for(k=0;k<8;k++) { parity ^= j & 1; j >>=1; }
-    parity_table[i]= ( parity ? 0 : FLAG_P );
-    sz53p_table[i] = sz53_table[i] | parity_table[i];
-  }
+  for (i = 0; i < 0x100; i++)
+    {
+      sz53_table[i] = i & (FLAG_3 | FLAG_5 | FLAG_S);
+      j = i;
+      parity = 0;
+      for (k = 0; k < 8; k++)
+	{
+	  parity ^= j & 1;
+	  j >>= 1;
+	}
+      parity_table[i] = (parity ? 0 : FLAG_P);
+      sz53p_table[i] = sz53_table[i] | parity_table[i];
+    }
 
-  sz53_table[0]  |= FLAG_Z;
+  sz53_table[0] |= FLAG_Z;
   sz53p_table[0] |= FLAG_Z;
 }
-

@@ -1,3 +1,17 @@
+v 0.1.6.2 - 18-02-2003
+--------------------------------------------------------------------
+ - Change all the Gui to AGUP (by NOP)
+ - About dialog and Keyboard reference screen
+ - Support for loading of TZX (by Alea)
+
+v 0.1.6.1 - 11-10-2002
+--------------------------------------------------------------------
+ - Bugfixed
+ - Confirmation Dialog on Exit
+ - support 320x240 and 320x200 if first is not avalible
+ - Better estetical dialogs thanks to AGUP (by Alea)
+
+
 v 0.1.6   - 1-10-2002
 --------------------------------------------------------------------
  - compile under windows/VisualC

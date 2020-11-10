@@ -17,14 +17,21 @@
 
  Copyright (c) 2000 Santiago Romero Iglesias.
  Email: sromero@escomposlinux.org
- ======================================================================*/
+ ======================================================================*/  
 
-void DrawInstruction( Z80Regs *, char * );
-void GetHexValue( int, int, char *, char *, char *, int, int, int );
-void ClearScreen( char );
-void DrawHelp( char * );
-void ShowMem( Z80Regs *, int, char * );
-void Z80Dump( Z80Regs *, char * );
-int DebuggerHelp( char *tfont );
-   
+void DrawInstruction (Z80Regs *, char *);
+
+void GetHexValue (int, int, char *, char *, char *, int, int, int);
+
+void ClearScreen (char);
+
+void DrawHelp (char *);
+
+void ShowMem (Z80Regs *, int, char *);
+
+void Z80Dump (Z80Regs *, char *);
+
+int DebuggerHelp (char *tfont);
+
+
 
