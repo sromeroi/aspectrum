@@ -304,4 +304,13 @@ static char lang_emulagunstick[LANGUAGES][30]=
     "Emulacion de &Gunstick"
 };
 
+static char lang_soundactive[LANGUAGES][20]=
+{
+"&Sound active",
+"&Sonido activo",
+"&Sonido activo"
+};
+
+
+
 #endif

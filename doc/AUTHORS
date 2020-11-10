@@ -17,16 +17,18 @@
  - 13-05-2001: OUTI implementation.
  - 22-09-2001: Add comand line parameters.
  - 15-10-2001: Add Gunstick emulation.
-    
+ - 01-01-2002: Border and Flash Emulation    
 
 
- Kak-
+ Kak
 --------------------------------------------------------------------
  - 07-03-2001: He found a bug in the DEC macro (0x79 -> 0x7F).
- - 15-05-2001: Kak- has submitted a patch wrapping all the Allegro
+ - 15-05-2001: Kak has submitted a patch wrapping all the Allegro
                graphical functions on a separate C file in order
                to make easier to port to non-allegro platforms.
-
+ - 20-09-2002: A (realy 3) Sound Engine, FF port Emulation and correction
+ 	       to emulate the adecuate t states in each frame, some bug
+ 	       fixes and compile issues under Visual C.
 
  Raúl Gómez:
 --------------------------------------------------------------------

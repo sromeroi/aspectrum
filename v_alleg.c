@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /*=====================================================================
 	"platform dependant" file
 	to port emu to other platforms / libraries , just "translate" all the
@@ -13,6 +14,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "aspec.h"
 #include "z80.h"
 #include "snaps.h"
 
@@ -36,6 +38,7 @@ volatile char *gkey;
 // allegro virtual screen
 BITMAP *vscreen;
 extern Z80Regs spectrumZ80;
+extern unsigned int colors[256];
 
 
 /*-----------------------------------------------------------------
@@ -67,7 +70,8 @@ void gclear (void)
 // it CAN be a flip_screen   ( but you'll have to swap the screen and vscreen pointers)
 void dumpVirtualToScreen (void)
 {
-		blit( vscreen, screen, 0, 0, 0, 0, 320, 200 );
+		extern int v_res;
+		blit( vscreen, screen, 0, 0, 0, 0, 320, v_res );
 }
 
 // draws text in the virtual screen
@@ -121,45 +125,34 @@ void grelease_bitmap(void)
 
 
 
-/*----------------------------------------------------------------
-  Calls initialization functions, initializes system. This function must:
-   * Initialize graphic system (create virtual screen if needed, init gfx, ...)
-   * Initialize keyboard system
-   * Initialize timers:
-	  - Function count_frames must be called once every second
-	  - Function target_incrementor must be called 50 times a second
-----------------------------------------------------------------*/
 void InitSystem (void)
 {
 		// inits everything (for allegro)
 		InitGraphics();
+		gInitSound ();
+
 }
 
-/*-----------------------------------------------------------------
- InitGraphics( video_flags );
- This function inits all the graphics and SDL stuff...
-
- Thanks to Nathan Strong and Sam Lantinga for such an example
- (stars.c). I took a look at stars.c by Nathan Strong (ported
- to SDL by Sam Lantinga) and learnt how to use SDL on my small
- projects (and the big ones :-).
-------------------------------------------------------------------*/
 void InitGraphics( void )
 {
    int i, depth;
    PALETTE specpal;
-
+   extern int v_res;
+   extern int v_border;
    allegro_init();
    install_keyboard();
    install_timer();
 
    set_color_depth(8);
-   if (set_gfx_mode(GFX_SAFE, 320, 200, 0, 0) != 0)
+   if (set_gfx_mode(GFX_SAFE, 320, v_res, 0, 0) != 0)
    {
       set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
       allegro_message("Error setting graphics mode\n%s\n", allegro_error);
       ExitEmulator();
    }
+   //printf("se pedia %i y se obtubo %i\n",v_res,SCREEN_H);
+   v_res=SCREEN_H;
+   v_border=(v_res-192)/2;
 
    // if we're on windowed mode, update color conversion tables...
 
@@ -174,9 +167,9 @@ void InitGraphics( void )
    {
       for (i = 0; i <16; i++)
       {
-         colors[i] = i;
+		 colors[i] = i;
 		 gset_color(i, &colores[i] );
-      }
+	  }
    }
 /*
       for (i = 0; i <16; i++)
@@ -197,7 +190,7 @@ set_pallete(specpal);
    install_int_ex(target_incrementor, BPS_TO_TIMER(50));
    last_fps = frame_counter = target_cycle = 0;
 
-   vscreen = create_bitmap(320, 200);
+   vscreen = create_bitmap(320,v_res);
    if( vscreen == NULL )
    {
       set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
@@ -254,7 +247,7 @@ void v_initmouse(void)
    extern struct tipo_emuopt emuopt;
    int color_b,color_n;
 	
-   if (install_mouse()!=-1) 
+   if (install_mouse()!=-1)
    {
    	emuopt.gunstick|=GS_HAYMOUSE;
 
@@ -273,10 +266,216 @@ void v_initmouse(void)
 
    	if ((emuopt.gunstick & GS_GUNSTICK)!=0) 
    	{
- 		set_mouse_sprite(emuopt.raton_bmp);
+		set_mouse_sprite(emuopt.raton_bmp);
    		set_mouse_sprite_focus(8,8);
    		show_mouse(screen);
 	}
    }
 
 }
+
+#ifdef SOUND_BY_STREAM
+// ******************** WIN32 - WAY **********************
+// audiostreams
+
+int gSoundInited=0;
+AUDIOSTREAM *audioStream;
+
+void gInitSound (void)
+{
+	initSoundLog ();
+
+	reserve_voices (3,-1);
+	if (install_sound (DIGI_AUTODETECT,MIDI_NONE,NULL)<0)
+	{
+		printf("Sound error\n");
+		return;
+	} 
+	
+	printf("Sonido Iniciado correctamente\n");
+	audioStream=play_audio_stream (882,8,0,44100,255,128);
+	gSoundInited=1;
+
+
+}
+
+u8 *gGetSampleBuffer (void)
+{
+   u8 *ptr;
+   if (!gSoundInited) return NULL;
+
+	while (1)
+	{
+		ptr=(u8 *)get_audio_stream_buffer(audioStream);
+		if (ptr!=NULL) break;
+	}
+	return ptr;
+}
+
+
+void gPlaySound (void)
+{
+	if (!gSoundInited) return;
+	free_audio_stream_buffer (audioStream);
+
+}
+
+void gSoundSync (void)
+{
+	// no need for soundsync, while in gGetSampleBuffer does the work
+}
+#endif //ifdef SOUND_BY_STREAM
+
+
+#ifdef SOUND_BY_SAMPLE
+// ******************** MSDOS - WAY **********************
+#define NSAMPS 1
+SAMPLE *smp[NSAMPS];
+int smpvoice;
+int cursamp=0;
+int gSoundInited=0;
+
+void gInitSound (void)
+{
+   int i,j;
+   initSoundLog ();
+
+   reserve_voices (1,-1);
+   if (install_sound (DIGI_AUTODETECT,MIDI_NONE,NULL)<0)
+   {
+      allegro_message ("Sound error");
+      return;
+   }
+
+#define SAMPLE_SIZE 882*2
+   for (j=0;j<NSAMPS;j++)
+   smp[j]=create_sample (8,0,44100,SAMPLE_SIZE);
+   gSoundInited=1;
+
+   for (j=0;j<NSAMPS;j++)
+      for (i=0;i<SAMPLE_SIZE;i++)
+      {
+	((u8 *)(smp[j]->data))[i]=128;
+      }
+   playMainSample();
+
+}
+
+void playMainSample (void)
+{
+   smpvoice=play_sample (smp[0],255,128,1000,1);	// play always loopin
+}
+
+volatile int getVoicePos (void)
+{
+   return voice_get_position (smpvoice);
+}
+
+u8 *gGetSampleBuffer (void)
+{
+   int pos;
+   if (!gSoundInited) return NULL;
+
+   pos=getVoicePos();
+   if (pos>=882) return (u8 *)smp[0]->data;
+   else return ((u8 *)smp[0]->data)+882;
+}
+
+void gPlaySound (void)
+{
+   if (!gSoundInited) return;
+   // void... in this version. anyway function must exist, as it will 
+   // be called from sound.cpp (other "drivers" will need it)
+}
+
+void gSoundSync (void)
+{
+   static int last_sample_pos=0,current_sample_pos;
+
+   // this is the best way (I've found) to handle sound in msdos
+   do {
+     current_sample_pos=getVoicePos();
+     if (last_sample_pos==0) if (current_sample_pos>882) break;
+     if (last_sample_pos==882) if (current_sample_pos<882) break;
+   } while (1);
+   if (current_sample_pos>882) last_sample_pos=882;
+   else last_sample_pos=0;
+}
+#endif // ifdef SOUND_BY_SAMPLE
+
+
+#ifdef SOUND_METHOD_2
+// ******************** METHOD 2 - WAY **********************
+// not good enough under windows (voice_get_position has not enough resolution, lots of background sound)
+// left here cos it could run nice on linux...
+
+#define NSAMPS 3
+SAMPLE *smp[NSAMPS];
+int smpvoice=-1;
+int cursamp=0;
+int gSoundInited=0;
+
+void gInitSound (void)
+{
+int i,j;
+	initSoundLog ();
+
+	reserve_voices (3,-1);
+	if (install_sound (DIGI_AUTODETECT,MIDI_NONE,NULL)<0)
+	{
+		allegro_message ("Sound error");
+		return;
+	}
+
+#define SAMPLE_SIZE 882
+	for (j=0;j<NSAMPS;j++)
+		smp[j]=create_sample (8,0,44100,SAMPLE_SIZE);
+	gSoundInited=1;
+
+	for (j=0;j<NSAMPS;j++)
+	for (i=0;i<SAMPLE_SIZE;i++)
+	{
+		((u8 *)(smp[j]->data))[i]=128;
+	}
+
+
+}
+
+u8 *gGetSampleBuffer (void)
+{
+u8 *ptr;
+	if (!gSoundInited) return NULL;
+
+	ptr=(u8 *)smp[cursamp]->data;
+	return ptr;
+
+}
+
+
+void gPlaySound (void)
+{
+int rv;
+	if (!gSoundInited) return;
+
+	if (smpvoice!=-1) 
+		while (1)
+		{
+			rv=voice_get_position(smpvoice);
+			if (rv==-1) break;
+		}
+
+	smpvoice=play_sample (smp[cursamp],255,128,1000,0);
+	cursamp++;
+	if (cursamp==NSAMPS) cursamp=0;
+
+
+}
+
+void gSoundSync (void)
+{
+	// no need for soundsync, voice_get_position in gPlaySound does the work
+
+}
+
+#endif // ifdef SOUND_METHOD_2
+

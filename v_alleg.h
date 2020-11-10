@@ -52,27 +52,6 @@ static gRGB colores[17] = {
 
 
 
-void gExitEmulator( void );
-void gset_color (int index,gRGB *p);
-void gclear (void);
-void dumpVirtualToScreen (void);
-void gtextout ( char *b, int x,int y,int color);
-void gtextoutb ( char *b, int x,int y,int color, FONT *tfont);
-void init_wrapper (void);
-void gacquire_bitmap(void);
-void grelease_bitmap(void);
-void InitGraphics( void );
-void gclear_to_color(int color);
-void gUpdateRect( int x, int y, int sizeX,int sizeY);
-void gPutPixel (int x, int y, int col );
-void gbox( int x1, int y1, int x2, int y2, int color );
-void grectangle( int x1, int y1, int x2, int y2, int color );
-void ghline( int x1, int y1, int x2, int color );
-void InitSystem (void);
-void v_initmouse(void);
-
-
-
 
 // "borrowed" from allegro
 
@@ -89,7 +68,7 @@ void v_initmouse(void);
 #define gKEY_K KEY_K
 #define gKEY_L KEY_L
 #define gKEY_M KEY_M                
-#define gKEY_N KEY_N               
+#define gKEY_N KEY_N
 #define gKEY_O KEY_O              
 #define gKEY_P KEY_P             
 #define gKEY_Q KEY_Q            
@@ -106,7 +85,7 @@ void v_initmouse(void);
 #define gKEY_1 KEY_1        
 #define gKEY_2 KEY_2       
 #define gKEY_3 KEY_3          
-#define gKEY_4 KEY_4         
+#define gKEY_4 KEY_4
 #define gKEY_5 KEY_5              
 #define gKEY_6 KEY_6              
 #define gKEY_7 KEY_7              
@@ -123,7 +102,7 @@ void v_initmouse(void);
 #define gKEY_8_PAD KEY_8_PAD            
 #define gKEY_9_PAD KEY_9_PAD            
 #define gKEY_F1 KEY_F1               
-#define gKEY_F2 KEY_F2               
+#define gKEY_F2 KEY_F2
 #define gKEY_F3 KEY_F3               
 #define gKEY_F4 KEY_F4               
 #define gKEY_F5 KEY_F5               
@@ -146,5 +125,36 @@ void v_initmouse(void);
 #define gKEY_RIGHT KEY_RIGHT
 #define gKEY_RCONTROL KEY_RCONTROL
 #define gKEY_BACKSPACE KEY_BACKSPACE
+
+
+
+void gExitEmulator( void );
+void gset_color (int index,gRGB *p);
+void gclear (void);
+void dumpVirtualToScreen (void);
+void gtextout ( char *b, int x,int y,int color);
+void gtextoutb ( char *b, int x,int y,int color, FONT *tfont);
+void init_wrapper (void);
+void gacquire_bitmap(void);
+void grelease_bitmap(void);
+void InitGraphics( void );
+void gclear_to_color(int color);
+void gUpdateRect( int x, int y, int sizeX,int sizeY);
+void gPutPixel (int x, int y, int col );
+void gbox( int x1, int y1, int x2, int y2, int color );
+void grectangle( int x1, int y1, int x2, int y2, int color );
+void ghline( int x1, int y1, int x2, int color );
+void InitSystem (void);
+void v_initmouse(void);
+
+
+// sound functions 
+void gInitSound (void);
+unsigned char *gGetSampleBuffer (void);
+void gPlaySound (void);
+volatile int getVoicePos (void);
+void playMainSample (void);
+void gSoundSync (void);
+
 
 #endif  /* v_alleg.h */ 

@@ -1,3 +1,48 @@
+v 0.1.6
+-------
+main.c
+     stuff so now can use several Vertical Resolutions. 
+     a bug that causes alwais load a snapshot on F3, even press cancel next,
+     and to load TAP files.
+graphics.c
+     stuff so now can use several Vertical Resolutions. 
+v_allegro.c
+     stuff so now can use several Vertical Resolutions. 
+menu.c
+     a bug that causes alwais load a snapshot on F3, even press cancel next.
+contrib/getopt.c
+      More recent version 
+contrib/getopt.h
+      (NEW) More recent version 
+contrib/config.h
+      (NEW) More recent version 
+Sound.c      	
+      (NEW) The sound engine	
+All the files
+      Code to allow compile under Visual C 
+      Bug fixed
+      Eliminate all the stuff of Alvaro to interrup, sound...
+      Add the Sound and interrup sync by Kak
+      The FF port emulation by Kak with a touch of Alvaro.
+
+v 0.1.5.2
+---------
+v_alleg.c
+v_alleg.h
+z80.c
+main.c
+main.h
+        stuff for the sound engine, several new function and more.
+
+V 0.1.5.1
+---------
+main.c
+        stuff for do the interrup at correct time, also draw screen line by
+	line, and browse again the frame counter screen drawing
+
+graphics.c
+        stuff to allow a line by line screen drawing
+
 V 0.1.5
 -------
 graphics.c

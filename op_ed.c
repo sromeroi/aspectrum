@@ -91,14 +91,14 @@ switch(opcode)
   /* * OUT (C), 0 */
   case  ED_71       :  Z80OutPort(regs,r_BC, 0);  AddCycles( 4+4+4 ); break;
 
-  case  IN_B_xC     :  IN(r_B, r_BC); AddCycles( 4+4+4 ); break;
-  case  IN_C_xC     :  IN(r_C, r_BC); AddCycles( 4+4+4 ); break;
-  case  IN_D_xC     :  IN(r_D, r_BC); AddCycles( 4+4+4 ); break;
-  case  IN_E_xC     :  IN(r_E, r_BC); AddCycles( 4+4+4 ); break;
-  case  IN_L_xC     :  IN(r_L, r_BC); AddCycles( 4+4+4 ); break;
-  case  IN_H_xC     :  IN(r_H, r_BC); AddCycles( 4+4+4 ); break;
-  case  IN_A_xC     :  IN(r_A, r_BC); AddCycles( 4+4+4 ); break;
-  case  IN_F_xC     :  IN(r_meml, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_B_xC     :  IN_PORT(r_B, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_C_xC     :  IN_PORT(r_C, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_D_xC     :  IN_PORT(r_D, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_E_xC     :  IN_PORT(r_E, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_L_xC     :  IN_PORT(r_L, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_H_xC     :  IN_PORT(r_H, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_A_xC     :  IN_PORT(r_A, r_BC); AddCycles( 4+4+4 ); break;
+  case  IN_F_xC     :  IN_PORT(r_meml, r_BC); AddCycles( 4+4+4 ); break;
 
   case  LD_A_I      :  r_A = regs->I;
                        r_F = ( r_F & FLAG_C )|sz53_table[r_A]|

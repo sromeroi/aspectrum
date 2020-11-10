@@ -207,8 +207,12 @@ case  LD_L_xIXY     : r_meml =Z80ReadMem(r_PC); r_PC++;
                       AddCycles( 4+3+3+3+3+3 ); break;
 
 case PREFIX_CB:
-                      #include "opddfdcb.c"
-                      break;
+			#ifndef CPP_COMPILATION
+			 #include "opddfdcb.c"
+			#else
+			 #include "opddfdcb.cpp"
+			#endif
+					  break;
 
 /*
 case PREFIX_DD:

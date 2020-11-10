@@ -41,9 +41,11 @@
  spectrum.rom MUST be in the same directory, in /usr/share/aspectrum
  or specified the ROM file by command line args.
 
+ You can also specific a dump of a Interface 2 Cardtrige. 
+
  To use Gunstick Emulation you must have a working mouse and call
  the emulator with "./aspectrum -j G" (CASE SENSITIVE), or activate
- the gunstick emulation by Gerenal Optiones menu (F7).
+ the gunstick emulation by General Options menu (F7).
 
  One time you start the gunstick emulation can avoid the "888"s locating
  the mouse in the border of the screen.
@@ -128,7 +130,7 @@
      Raúl Gómez: R80 emulator (Spectrum).
      Philip Kendall: Fuse emulator (Spectrum).
      Ignacio Burgueño: GLECK emulator (Spectrum).
-     Z80user, Kak-, Hylian, Kel: From #spectrum on IRC-Hispano.
+     Z80user, Kak, Hylian, Kel: From #spectrum on IRC-Hispano.
 
  o Alvaro Alea, for submitting the first Aspectrum patch giving support
    to load Z80 snapshot files on the emulator.
@@ -147,4 +149,5 @@
 
   Santiago Romero AkA NoP/Compiler.
   sromero@escomposlinux.org
-  
+
+

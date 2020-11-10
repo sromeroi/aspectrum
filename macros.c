@@ -91,44 +91,6 @@
 #define FLAG_Z  0x40
 #define FLAG_S  0x80
 
-/* Whether a half carry occured or not can be determined by looking at
-   the 3rd bit of the two arguments and the result; these are hashed
-   into this table in the form r12, where r is the 3rd bit of the
-   result, 1 is the 3rd bit of the 1st argument and 2 is the
-   third bit of the 2nd argument; the tables differ for add and subtract
-   operations */
-
-/* Whether a half carry occured or not can be determined by looking at
-   the 3rd bit of the two arguments and the result; these are hashed
-   into this table in the form r12, where r is the 3rd bit of the
-   result, 1 is the 3rd bit of the 1st argument and 2 is the
-   third bit of the 2nd argument; the tables differ for add and subtract
-   operations */
-byte halfcarry_add_table[] = { 0, FLAG_H, FLAG_H, FLAG_H, 0, 0, 0, FLAG_H };
-byte halfcarry_sub_table[] = { 0, 0, FLAG_H, 0, FLAG_H, 0, FLAG_H, FLAG_H };
-
-/* Similarly, overflow can be determined by looking at the 7th bits; again
-   the hash into this table is r12 */
-byte overflow_add_table[] = { 0, 0, 0, FLAG_V, FLAG_V, 0, 0, 0 };
-byte overflow_sub_table[] = { 0, FLAG_V, 0, 0, 0, 0, FLAG_V, 0 };
-
-/* Some more tables; initialised in z80_init_tables() */
-byte sz53_table[0x100];   /* The S, Z, 5 and 3 bits of the temp value */
-byte parity_table[0x100]; /* The parity of the temp value */
-byte sz53p_table[0x100];  /* OR the above two tables together */
-/*------------------------------------------------------------------*/
-
-// Contributed by Metalbrain to implement OUTI, etc.
-byte ioblock_inc1_table[64];
-byte ioblock_dec1_table[64];
-byte ioblock_2_table[0x100];
-
-/*--- Memory Write on the A address on no bank machines -------------*/
-void Z80WriteMem( word where, word A, Z80Regs *regs)
-{
-  if( where >= 16384 )
-     regs->RAM[where] = A;
-}
 
 #endif
 
@@ -436,7 +398,7 @@ void Z80WriteMem( word where, word A, Z80Regs *regs)
 #define NEG_A()  r_opl = r_A; r_A=0; SUB(r_opl)
 
 /*--- MISC operations -----------------------------------------------*/
-#define IN(reg,port)    (reg)=Z80InPort(regs,(port));                  \
+#define IN_PORT(reg,port)    (reg)=Z80InPort(regs,(port));                  \
                          r_F = ( r_F & FLAG_C) | sz53p_table[(reg)]
 
 

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /*=====================================================================
   z80.c -> Main File related to the Z80 emulation code.
 
@@ -30,11 +31,10 @@
 #include <mss.h>
 #endif
 
-#include "z80.h"
 #include "tables.h"
 #include <stdio.h>
+#include "aspec.h"
 
-#include "v_alleg.h"
 #include "graphics.h"
 #include "monofnt.h"
 #include "menu.h"
@@ -50,7 +50,57 @@ extern int fila[5][5];
 extern FILE *tapfile;
 extern char *tfont;
 
-#include "macros.c"
+//#include "macros.c"		// now in aspec.h
+
+extern int TSTATES_PER_LINE,TOP_BORDER_LINES,BOTTOM_BORDER_LINES,SCANLINES;
+
+
+// previously in macros.c
+#ifndef _DISASM_
+
+/* Whether a half carry occured or not can be determined by looking at
+   the 3rd bit of the two arguments and the result; these are hashed
+   into this table in the form r12, where r is the 3rd bit of the
+   result, 1 is the 3rd bit of the 1st argument and 2 is the
+   third bit of the 2nd argument; the tables differ for add and subtract
+   operations */
+
+/* Whether a half carry occured or not can be determined by looking at
+   the 3rd bit of the two arguments and the result; these are hashed
+   into this table in the form r12, where r is the 3rd bit of the
+   result, 1 is the 3rd bit of the 1st argument and 2 is the
+   third bit of the 2nd argument; the tables differ for add and subtract
+   operations */
+byte halfcarry_add_table[] = { 0, FLAG_H, FLAG_H, FLAG_H, 0, 0, 0, FLAG_H };
+byte halfcarry_sub_table[] = { 0, 0, FLAG_H, 0, FLAG_H, 0, FLAG_H, FLAG_H };
+
+/* Similarly, overflow can be determined by looking at the 7th bits; again
+   the hash into this table is r12 */
+byte overflow_add_table[] = { 0, 0, 0, FLAG_V, FLAG_V, 0, 0, 0 };
+byte overflow_sub_table[] = { 0, FLAG_V, 0, 0, 0, 0, FLAG_V, 0 };
+
+/* Some more tables; initialised in z80_init_tables() */
+byte sz53_table[0x100];   /* The S, Z, 5 and 3 bits of the temp value */
+byte parity_table[0x100]; /* The parity of the temp value */
+byte sz53p_table[0x100];  /* OR the above two tables together */
+/*------------------------------------------------------------------*/
+
+// Contributed by Metalbrain to implement OUTI, etc.
+byte ioblock_inc1_table[64];
+byte ioblock_dec1_table[64];
+byte ioblock_2_table[0x100];
+
+/*--- Memory Write on the A address on no bank machines -------------*/
+void Z80WriteMem( word where, word A, Z80Regs *regs)
+{
+  if( where >= 16384 )
+     regs->RAM[where] = A;
+}
+
+#endif
+
+
+
 
 
 /*====================================================================
@@ -149,32 +199,53 @@ word Z80Run( Z80Regs *regs, int numcycles )
        /* increment the R register and decode the instruction */
        AddR(1);
        switch(opcode)
-       {
-             #include "opcodes.c"
+	   {
+			#ifndef CPP_COMPILATION
+			 #include "opcodes.c"
+			#else
+			 #include "opcodes.cpp"
+			#endif
           case PREFIX_CB:
-             AddR(1);
-             #include "op_cb.c"
-             break;
-          case PREFIX_ED:
-             AddR(1);
-             #include "op_ed.c"
-             break;
-          case PREFIX_DD:
-          case PREFIX_FD:
-             AddR(1);
+			 AddR(1);
+			#ifndef CPP_COMPILATION
+			 #include "op_cb.c"
+			#else
+			 #include "op_cb.cpp"
+			#endif
+			 break;
+		  case PREFIX_ED:
+			 AddR(1);
+			#ifndef CPP_COMPILATION
+			 #include "op_ed.c"
+			#else
+			 #include "op_ed.cpp"
+			#endif
+			 break;
+		  case PREFIX_DD:
+		  case PREFIX_FD:
+			 AddR(1);
              if( opcode == PREFIX_DD )
              {
                #define REGISTER regs->IX
-               regs->we_are_on_ddfd = WE_ARE_ON_DD;
-               #include "op_dd_fd.c"
+			   regs->we_are_on_ddfd = WE_ARE_ON_DD;
+			#ifndef CPP_COMPILATION
+			 #include "op_dd_fd.c"
+			#else
+			 #include "op_dd_fd.cpp"
+			#endif
+
                #undef  REGISTER
              }
              else
              {
                #define REGISTER regs->IY
                regs->we_are_on_ddfd = WE_ARE_ON_FD;
-               #include "op_dd_fd.c"
-               #undef  REGISTER
+			#ifndef CPP_COMPILATION
+			 #include "op_dd_fd.c"
+			#else
+			 #include "op_dd_fd.cpp"
+			#endif
+			   #undef  REGISTER
              }
              regs->we_are_on_ddfd = 0;
              break;
@@ -182,7 +253,7 @@ word Z80Run( Z80Regs *regs, int numcycles )
 
      /* patch ROM loading routine */
      // address contributed by Ignacio Burgueño :)
-//     if( r_PC == 0x0569 )       
+//     if( r_PC == 0x0569 )
      if( r_PC >= 0x0556 && r_PC <= 0x056c )
           Z80Patch( regs );
 
@@ -195,7 +266,7 @@ word Z80Run( Z80Regs *regs, int numcycles )
 
           /* check if we must exit the emulation or there is an INT */
           if( tmpreg.W == INT_QUIT )
-          return( regs->PC.W );
+		  return( regs->PC.W );
           if( tmpreg.W != INT_NOINT )
              Z80Interrupt( regs, tmpreg.W );
      }
@@ -339,24 +410,27 @@ void Z80MemWrite( register word address, register byte value, Z80Regs *regs )
  ===================================================================*/
 byte Z80InPort(register Z80Regs *regs,  register word port)
 {
+//  int cur_tstate,tmp;
   int code = 0xFF;
   byte valor; int x,y;
   extern struct tipo_emuopt emuopt;
+  extern struct tipo_hwopt   hwopt;
 
+  /* El teclado */
   if (!(port & 0x01)) 
   {
   	if (!(port & 0x0100)) code &= fila[4][1];
   	if (!(port & 0x0200)) code &= fila[3][1];
   	if (!(port & 0x0400)) code &= fila[2][1];
   	if (!(port & 0x0800)) code &= fila[1][1];
-  	if (!(port & 0x1000)) code &= fila[1][2];
-  	if (!(port & 0x2000)) code &= fila[2][2];
+	if (!(port & 0x1000)) code &= fila[1][2];
+	if (!(port & 0x2000)) code &= fila[2][2];
   	if (!(port & 0x4000)) code &= fila[3][2];
   	if (!(port & 0x8000)) code &= fila[4][2];
 
 	/* la gunstick */
         if ( !(port & 0x1000) && 
-        (emuopt.gunstick & GS_GUNSTICK) && (emuopt.gunstick & GS_HAYMOUSE) ) 
+           (emuopt.gunstick & GS_GUNSTICK) && (emuopt.gunstick & GS_HAYMOUSE))
         {
            /* disparo de la gunstick con el raton. */
   	   if (mouse_b & 1)  code &= (0xFE) ;
@@ -367,26 +441,43 @@ byte Z80InPort(register Z80Regs *regs,  register word port)
                y=(mouse_y-5)/8;
                valor=Z80ReadMem(0x5800 +32*y +x );
                 if ( ((valor & 0x07)==0x07)  || ((valor & 0x38)==0x38) ) 
-             	  code &=0xFB ; 
-           } // mouse x>....
+		  code &=0xFB ;
+	   } // mouse x>....
         } // port & 0x1000
 
   	/*
      	issue 2 emulation, thx to Raul Gomez!!!!!
      	I should implement this also:
-     	if( !ear_on && mic_on )
+	if( !ear_on && mic_on )
         	code &= 0xbf;
      	where earon = bit 4 of the last OUT to the 0xFE port
      	and   micon = bit 3 of the last OUT to the 0xFE port
   	*/
   	code &= 0xbf;
   }
-  
+
   if( (port & 0xFF) == 0xFF )
   {
-      if( (rand() % 10) > 7 ) return(0xff);
-      else return( rand()%0xFF );
+	  if (hwopt.port_ff==0xFF) code=0xFF;
+	  else code= rand()%0xFE;
+  }	
+/*
+  {
+      cur_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
+
+      // top border
+      if (cur_tstate<TSTATES_PER_LINE*TOP_BORDER_LINES) return 0xff;
+      // bottom border
+      if (spectrumZ80.ICount<TSTATES_PER_LINE*BOTTOM_BORDER_LINES) return 0xff;
+
+      // FIXME! 48 should be a variable depending on hardware
+      tmp=cur_tstate%TSTATES_PER_LINE;
+      if (tmp<48) return 0xff;			// left border
+      if (tmp>TSTATES_PER_LINE-48) return 0xff;	// right border.
+
+      return rand()%0xfe;		// don't return ff!
   }
+*/
 
   return( code );
 }
@@ -403,7 +494,16 @@ void Z80OutPort( register Z80Regs *regs,
 {
     /* change border colour */
     if( ! (port & 0x01) )
-        regs->BorderColor = (value & 0x07);
+    {
+	regs->BorderColor = (value & 0x07);
+	logSound (value & 0x10);
+    }
+	/* sound logging
+	if ((port&0xff)==0xfe)
+	{
+		logSound (value&0x10);
+	}
+        */
 }
 
 

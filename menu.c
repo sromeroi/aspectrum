@@ -42,7 +42,8 @@ extern int language;
 int MainMenu( Z80Regs *regs, char *tfont )
 {
     int i, end = 0, selected = 0, keypress;
-    int fontw = 8, fonth=12;
+    //int fontw = 8, 
+    int fonth=12;
     int menux = 20, menuy = 15, menuw = 280, menuh = 170;
     int bgcolor = 15, titlecolor=14;
     int bgselcolor = 11, textbgselcolor=13;
@@ -128,18 +129,21 @@ void DrawSelected( int x1, int y1, int x2, int y2, char *text, int fgcolor,
 int FileMenu( char *tfont, char type, char *filename )
 {
     extern struct tipo_emuopt emuopt;
-    int i, current=0, end = 0, selected = 0, keypress;
-    int fontw = 8, fonth=12;
-    int menux = 18, menuy = 70, menuw = 284, menuh = 50;
-    int bgcolor = 15, titlecolor=14;
-    int bgselcolor = 11, textbgselcolor=13;
-    int fgcolor = 0;
-
+//    int i, current=0, end = 0, selected = 0, keypress;
+//    int fontw = 8, fonth=12;
+//    int menux = 18, menuy = 70, menuw = 284, menuh = 50;
+//    int bgcolor = 15; 
+//    int titlecolor=14;
+//    int bgselcolor = 11, textbgselcolor=13;
+//    int fgcolor = 0;
+	int ret;
+	
     char extensions[FILEBOX_TYPES][80] =
     { 
         "SNA;SP;Z80",
         "SNA",
-        "SCR"
+        "SCR",
+	   "TAP"
     };
        
     gui_fg_color = 0;
@@ -147,12 +151,12 @@ int FileMenu( char *tfont, char type, char *filename )
 
    if (emuopt.gunstick & GS_GUNSTICK) set_mouse_sprite(NULL);
 
-#if ALLEGRO_WIP_VERSION >= 37
+#if ALLEGRO_WIP_VERSION >= 37 || ALLEGRO_VERSION >= 4
 #define FILEBUF ,255,
 #else
 #define FILEBUF ,
 #endif
-    file_select_ex( lang_filemenu[(language*FILEBOX_TYPES)+type],
+ ret=file_select_ex( lang_filemenu[(language*FILEBOX_TYPES)+type],
                     filename, extensions[type] FILEBUF 290, 170 );
    /* si usamos gunstick volvemos a poner el punto de mira
    */
@@ -162,7 +166,7 @@ int FileMenu( char *tfont, char type, char *filename )
       set_mouse_sprite_focus(8,8);
    }
 
-   return(1);
+   return(ret);
 /*
     gbox( menux, menuy, menux+menuw, menuy+menuh, bgcolor );
     grectangle( menux+1, menuy+1, menux+menuw-1, menuy+menuh-1, fgcolor );
@@ -201,13 +205,15 @@ int menuopciones(void)
    extern struct tipo_emuopt emuopt;
    DIALOG dialogo[]=
    {
-      {d_shadow_box_proc,0,0,195,75, 0,15,0,0,0,0,NULL,NULL,NULL},       
+      {d_shadow_box_proc,0,0,195,90, 0,15,0,0,0,0,NULL,NULL,NULL},       
       {d_text_proc,25,5,100,16, 0,15,0,0,0,0,
          lang_generaloptions[language],NULL,NULL},	
       {d_check_proc,10,20,50,8, 0,15,'G',0,1,0,
          lang_emulagunstick[language], NULL,NULL}, 
-      {d_button_proc,40,50,70,16, 0,7,13 ,D_EXIT,0,0,"OK",NULL,NULL},
-      {d_button_proc,120,50,70,16, 0,7,27 ,D_EXIT,0,0,"Cancel",NULL,NULL}, 
+      {d_button_proc,40,70,70,16, 0,7,13 ,D_EXIT,0,0,"OK",NULL,NULL},
+      {d_button_proc,120,70,70,16, 0,7,27 ,D_EXIT,0,0,"Cancel",NULL,NULL}, 
+      {d_check_proc,10,35,50,8, 0,15,'S',0,1,0,
+         lang_soundactive[language], NULL,NULL}, 
 //      {d_list_proc,10,30,50,16,0,15,NULL,d1,d2,lista_joys,*dp1,*dp2},
       {NULL,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL}
    };

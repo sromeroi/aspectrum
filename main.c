@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /*=====================================================================
   ASpectrum Emulator. This is our contribution to the Spectrum World.
   We're trying to release our simple, useable and portable Spectrum
@@ -28,21 +29,37 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
+#ifdef NO_GETOPTLONG
+#include "contrib/getopt.h"
+#else
 #include <getopt.h>
+#endif // NO_GETOPTLONG
+
+#include "aspec.h"
 #include "langs.h"
 #include "z80.h"
 #include "snaps.h"
 
-#include "v_alleg.h"
 #include "monofnt.h"
 #include "graphics.h"
 #include "debugger.h"
 #include "menu.h"
-#include "main.h"
-struct tipo_emuopt emuopt={"\0","\0","\0",GS_INACTIVE,NULL,'n',"opqa " };
+
+struct tipo_emuopt emuopt={"\0","\0","\0",GS_INACTIVE,NULL,'n',{'o','p','q','a',' ' }};
+struct tipo_hwopt   hwopt = {0xFF,224, 48,56,192, 24,224-24-24,24};
+
+// =4 para 320x200  =24 para 320x240 
+int v_res=240;
+int v_border=24;
+//int v_res=200;
+//int v_border=4;
+
+// switch between display by scanlines or display at end of frame
+//int displayByScanlines=1;
 
 // generic wrapper
-extern char *gkey;
+extern volatile char *gkey;
 
 /* Some global variables used in the emulator */
 Z80Regs spectrumZ80;
@@ -59,7 +76,7 @@ int debug=0, main_tecla, hay_tecla, scanl=0, quit_thread=0;
 int fila[5][5];
 
 /* 0 = english
- * 1 = spanish 
+ * 1 = spanish
  * 2 = valencia/catala
  * */
 int language = 0;
@@ -75,18 +92,128 @@ void target_incrementor( void );
 void count_frames( void );
 
 
+// now global
+char tfont[4096];
+
+// to know if sound is ok
+extern int gSoundInited;
+
+
+int Z80Initialization (void)
+{
+FILE *fp;
+int i;
+/* we get memory and load font, spectrum ROM and
+   possible snapshots selected by the command line */
+
+   printf ("ASpectrum GNU pure C Z80 / Spectrum Emulator V " VERSION "\n"
+		  "(C) 2000-2001 Santiago Romero (NoP/Compiler).\n"
+		  "Powered by Allegro 4 - http://aspectrum.sf.net\n"
+		  "Distributed under the terms of GNU Public License V2\n\n");
+
+   spectrumZ80.RAM = (byte *) malloc( 65536 );
+   if( spectrumZ80.RAM == NULL )
+   {
+	  printf("\n Z80: Error allocating RAM memory, exiting...\n\n");
+	  return(0);
+   }
+
+   init_wrapper();
+
+   // abrimos el fichero de letras
+#ifdef DESTDAT
+	if ((fp=fopen( DESTDAT"/font.fnt", "rb" ) )!= NULL)
+		printf("using "DESTDAT"/font.fnt\n");
+	else
+#endif
+	if ((fp=fopen( "font.fnt", "rb" )) !=NULL)
+		printf("using  ./font.fnt\n");
+	else
+	{
+		printf("File font.fnt does not exist...\n");
+		return(0);
+	 };
+	fread( tfont, 4096, 1, fp );
+	fclose(fp);
+
+	i=0;
+
+	// abrimos el fichero de rom
+	if (emuopt.romfile[0]!=0)
+	{
+		if ((fp=fopen(emuopt.romfile,"rb"))!=NULL )
+			printf("Using ROM file %s\n",emuopt.romfile);
+		else
+		{
+			printf("The ROM file does not exists.\n");
+			return(0);
+		}
+	}
+#ifdef DESTDAT
+	else if ((fp=fopen( DESTDAT"/spectrum.rom","rb") )!=NULL)
+		printf("using "DESTDAT"/spectrum.rom\n");
+#endif
+	else if ((fp=fopen( "spectrum.rom","rb"))!=NULL )
+		printf("using spectrum.rom\n");
+	else
+	{
+		 printf("File spectrum.rom does not exist ...\n");
+		 return(0);
+	};
+   while( !feof(fp) )
+	  spectrumZ80.RAM[i++]=fgetc(fp);
+   fclose(fp);
+
+// ¿Necesario? ¿Para que?
+   //CreateVideoTables();
+   Z80Reset( &spectrumZ80, 69888 );
+   Z80FlagTables();
+   return 1;
+
+}
+
+
+#ifdef ZXDEB
+void screenRedraw_forZXDEB (void)
+{
+	DisplayScreen( &spectrumZ80 );
+	dumpVirtualToScreen();
+
+}
+
+int ZXDEB_break;
+void keyboardHandler_forZXDEB (void)
+{
+	UpdateKeyboard();
+	if (gkey[KEY_ESC]) ZXDEB_break=1;
+
+}
+#endif
+
+
+#ifndef ZXDEBUG_MFC
+int main (int argc,char *argv[])
+{
+	return emuMain (argc,argv);
+}
+#endif
+
 /*----------------------------------------------------------------
  Main function. It inits all the emulator stuff and executes it.
 ----------------------------------------------------------------*/
-int main( int argc, char *argv[] )
+int emuMain( int argc, char *argv[] )
 {
-   char instruccion[256], opcode_data[256]="\0", opsize=0;
-   char tfont[4096];
+   int target_tstate,current_tstate;
+//   char instruccion[256], opcode_data[256]="\0", opsize=0;
    char b[1024];
    char done = 0, value;
-   int offs=0, isize, poke, option, simulate=1;
+   int offs=0, poke, option;
+//   int isize;
+//   int simulate=1;
    FILE *fp;
-   int i=0, c,tecla;
+//   int i=0;
+   int c,tecla=0;
+   static int f_flash=1,f_flash2=0;
 
    extern char *optarg;
    extern int optind, opterr, optopt;
@@ -99,18 +226,20 @@ int main( int argc, char *argv[] )
       {"version", 0, NULL, 'V'},
       {"debug",   0, NULL, 'd'},
       {"joy",     1, NULL, 'j'}, 
-      {0, 0, 0, 0} 
+	  {0, 0, 0, 0}
    };
 
 // first of all do the parser for options arguments
-// codigo de control de argumentos pasados al programa. 
+// codigo de control de argumentos pasados al programa.
    //opterr=0; // pa que narices valia esto ????
 
+#ifndef ZXDEB
+
 #ifdef NO_GETOPTLONG
-   while( (c=getopt(argc,argv,"r:s:t:hVdj:") )!= -1 ) 
+   while( (c=getopt(argc,argv,"r:s:t:hVdj:") )!= -1 )
 #else
    while( (c=getopt_long(argc,argv,"r:s:t:hVdj:",long_options,NULL) )!= -1 ) 
-#endif
+ #endif
    {
       switch (c)
       {
@@ -119,19 +248,19 @@ int main( int argc, char *argv[] )
          case 's': strncpy(emuopt.snapfile,optarg,255);
                  break;
          case 't': strncpy(emuopt.tapefile,optarg,255);
-                 break;
+		 break;
          case 'V': printf ("ASpectrum Version "VERSION"\n"); 
-	         	done=1;
-                 break;
-         case 'd': debug=1;
-         	    break;                          
+		 done=1;
+		 break;
+	 case 'd': debug=1;
+                 break;                          
          case 'j': if (strstr(optarg,"G") != NULL) 
     		       emuopt.gunstick |= GS_GUNSTICK;
-    		   if (strstr(optarg,"k") != NULL)
+		   if (strstr(optarg,"k") != NULL)
     		   ;
 		   break;                    
     	 case ':': printf ("Lack of parameters\n");
-    	 case 'h':	
+		 case 'h':
          case '?': 
          printf ("ASpectrum GNU pure C Z80 / Spectrum Emulator V "VERSION"\n"
        	  "(C) 2000-2001 Santiago Romero (NoP/Compiler).\n"
@@ -139,100 +268,38 @@ int main( int argc, char *argv[] )
        	  " http://www.talula.demon.co.uk/allegro/\n"
        	  "Distribuited under the terms of GNU Public License V2\n\n"
        	  "Use of Aspectrum:\n"
-       	  "   aspectrum [options] [snapshot or tape file]\n\n"
+		  "   aspectrum [options] [snapshot or tape file]\n\n"
        	  "Options can be:\n"
-       	  "   -r --rom romfile  use romfile instead own romfile.\n"
-       	  "   -s --snap file    load snapshot at startup\n"
+		  "   -r --rom romfile  use romfile instead own romfile.\n"
+		  "   -s --snap file    load snapshot at startup\n"
        	  "                     suported snapshot files are .SP .SNA .Z80\n"
              "   -t --tape file    use file as tape for load routines.\n"
-    	     "   -d --debug        start the emulator paused in debug mode.\n"
-             "   -V --version      echo the version of the emulator.\n"
-             "   -h --help         this help.\n"
+			 "   -d --debug        start the emulator paused in debug mode.\n"
+			 "   -V --version      echo the version of the emulator.\n"
+			 "   -h --help         this help.\n"
              "   -j --joy def      enable joystick, def is a string of caracter\n"
              "	                for each joystick, see doc for more help.\n"
-	          );
-               done=1;
-         	  break ;  
-      };
+			  );
+			   done=1;
+			  break ;
+	  };
   };
   if (done!=0) return(0); /* causa de salida instantanea por error 
-					    en parametros   */
+						en parametros   */
+#endif 	// ZXDEB endif
 
-        
-/* we get memory and load font, spectrum ROM and
-   possible snapshots selected by the command line */
+   Z80Initialization ();
 
-   printf ("ASpectrum GNU pure C Z80 / Spectrum Emulator V "VERSION"\n"
-     	  "(C) 2000-2001 Santiago Romero (NoP/Compiler).\n"
-     	  "Powered by Allegro 4/3.x WIP  -"
-     	  " http://www.talula.demon.co.uk/allegro/\n"
-     	  "Distributed under the terms of GNU Public License V2\n\n");
-
-   spectrumZ80.RAM = (byte *) malloc( 65536 );
-   if( spectrumZ80.RAM == NULL )
-   {
-      printf("\n Z80: Error allocating RAM memory, exiting...\n\n");
-      return(0);
-   }
-
-   init_wrapper();
-
-   // abrimos el fichero de letras
-#ifdef DESTDAT
-	if ((fp=fopen( DESTDAT"/font.fnt", "rb" ) )!= NULL) 
-		printf("using "DESTDAT"/font.fnt\n");
-	else 
-#endif	
-	if ((fp=fopen( "font.fnt", "rb" )) !=NULL) 
-		printf("using  ./font.fnt\n");
-	else 
-	{ 
-	    printf("File font.fnt does not exist...\n");
-		return(-1);
-     };
-    fread( tfont, 4096, 1, fp );
-	fclose(fp);
-
-	// abrimos el fichero de rom
-	if (emuopt.romfile[0]!=0)
-	{
-		if ((fp=fopen(emuopt.romfile,"rb"))!=NULL )
-			printf("Using ROM file %s\n",emuopt.romfile);
-		else
-		{
-			printf("The ROM file does not exists.\n");
-			return(-1);
-		}
-	}
-#ifdef DESTDAT
-	else if ((fp=fopen( DESTDAT"/spectrum.rom","rb") )!=NULL)
-		printf("using "DESTDAT"/spectrum.rom\n");
-#endif
-	else if ((fp=fopen( "spectrum.rom","rb"))!=NULL )
-		printf("using spectrum.rom\n");
-	else 
-	{ 
-		 printf("File spectrum.rom does not exist ...\n");
-         return(-1);
-    };
-   while( !feof(fp) )
-      spectrumZ80.RAM[i++]=fgetc(fp);
-   fclose(fp);
-
-// ¿Necesario? ¿Para que?
-   //CreateVideoTables();
-   Z80Reset( &spectrumZ80, 69888 );
-   Z80FlagTables();
 
 // comprobar que es el ultimo argumento y ponerlo donde corresponda
-   if ((optind+1)<argc) 
+   if ((optind+1)<argc)
    {
 		printf ("excess of unknow args\n");
 		return(-1);
-   } 
-   else if ((optind+1)==argc) 
+   }
+   else if ((optind+1)==argc)
    {
-   	if ( strstr(argv[optind], ".z80") != NULL ||
+	if ( strstr(argv[optind], ".z80") != NULL ||
 			strstr(argv[optind], ".Z80") != NULL ||
 			strstr(argv[optind], ".sp") != NULL ||
 			strstr(argv[optind], ".SP") != NULL ||
@@ -240,7 +307,7 @@ int main( int argc, char *argv[] )
 			strstr(argv[optind], ".SNA") != NULL )
 				strncpy(emuopt.snapfile,argv[optind],255);
 		else if ( strstr(argv[optind], ".tap") != NULL ||
-			    strstr(argv[optind], ".TAP") != NULL ||
+				strstr(argv[optind], ".TAP") != NULL ||
 				strstr(argv[optind], ".tzx") != NULL ||
 				strstr(argv[optind], ".TZX") != NULL )
 				strncpy(emuopt.tapefile,argv[optind],255); 
@@ -294,14 +361,15 @@ int main( int argc, char *argv[] )
    if( debug )
    {
       ClearScreen(0);
-      Z80Dump( &spectrumZ80, tfont );
+	  Z80Dump( &spectrumZ80, tfont );
       DrawInstruction( &spectrumZ80, tfont );
       ShowMem( &spectrumZ80, offs, tfont );
       DrawHelp( tfont );
       debug = 1;
-      tecla = '.';
+	  tecla = '.';
    }
 
+   initSoundLog ();		// first sound log initialization
 
    // MAIN LOOP
    while( !done )
@@ -311,7 +379,7 @@ int main( int argc, char *argv[] )
       if( tecla >> 8 == gKEY_F1 )
       {
           // call the menu and get the selected option
-          scare_mouse();
+		  scare_mouse();
           option = MainMenu( &spectrumZ80, tfont );
 	      unscare_mouse();
           
@@ -319,35 +387,35 @@ int main( int argc, char *argv[] )
           switch(option)
           {
               case 0 : tecla = gKEY_ESC << 8 ; debug = 0;  break;
-              case 1 : tecla = gKEY_ESC << 8 ; debug = 1;  break;
+		    case 1 : tecla = gKEY_ESC << 8 ; debug = 1;  break;
               case 2 : tecla = gKEY_F2  << 8 ; break;
               case 3 : tecla = gKEY_F3  << 8 ; break;
-              case 4 : tecla = gKEY_F4  << 8 ; break;
+		    case 4 : tecla = gKEY_F4  << 8 ; break;
               case 5 : tecla = gKEY_F5  << 8 ; break;
-              case 6 : tecla = gKEY_F1  << 8 ; break;
+              case 6 : tecla = gKEY_F6  << 8 ; break;
               case 7 : tecla = gKEY_F7  << 8 ; break;
               case 8 : tecla = gKEY_F8  << 8 ; break;
               case 10: tecla = gKEY_F10 << 8 ; break;
           };
  
       }
-      switch(tecla >> 8)
+	  switch(tecla >> 8)
       {
                         
-         case gKEY_F2 : FileMenu( tfont, 1, fname );
-                        SaveSnapshot( &spectrumZ80, fname );
+         case gKEY_F2 : if (FileMenu( tfont, DIALOG_SNA, fname )!=0) 
+									SaveSnapshot( &spectrumZ80, fname );
                         tecla = gKEY_ESC << 8;
                         debug = 1-debug;
                         break;
- 
-         case gKEY_F3 : FileMenu( tfont, 0, fname );
-                        LoadSnapshot( &spectrumZ80, fname );
-                        tecla = gKEY_ESC << 8;
-                        debug = 1-debug;
-                        break;
+
+         case gKEY_F3 : if (FileMenu( tfont, DIALOG_SNAyC, fname )!=0)  
+									LoadSnapshot( &spectrumZ80, fname );
+					     tecla = gKEY_ESC << 8;
+                        		debug = 1-debug;
+                       		break;
                           
-         case gKEY_F4 : FileMenu( tfont, 2, fname );
-                        SaveScreenshot( &spectrumZ80, fname );
+		 case gKEY_F4 : if (FileMenu( tfont, DIALOG_SCR, fname )!=0) 
+									SaveScreenshot( &spectrumZ80, fname );
                         tecla = gKEY_ESC << 8;
                         debug = 1-debug;
                         break;
@@ -357,12 +425,22 @@ int main( int argc, char *argv[] )
                         debug = 1-debug;
                         break;
 
-         case gKEY_F6 : tecla = gKEY_ESC << 8;
-                        debug = 1-debug;
-                        break;
+         case gKEY_F6 : if (FileMenu( tfont, DIALOG_TAP,fname)!=0)
+						{
+							if (emuopt.tapefile[0]!=0) fclose (fp);
+				               strncpy(emuopt.tapefile,fname,255); 
+							if ((fp=fopen(emuopt.tapefile,"rb")) !=NULL) 
+							{
+								printf("Using tape file %s.\n",emuopt.tapefile);
+								tapfile = fp;
+							}
+						}
+					tecla = gKEY_ESC << 8;
+                         debug = 1-debug;
+					break;
                         
          case gKEY_F7 : tecla = gKEY_ESC << 8;
-			menuopciones();
+			         menuopciones();
                         debug = 1-debug;
                         break;
          
@@ -371,7 +449,7 @@ int main( int argc, char *argv[] )
                         else
                            language = 0;
                         tecla = gKEY_ESC << 8;
-                        debug = 1-debug;
+						debug = 1-debug;
                         break;
                         
          case gKEY_F12:  DebuggerHelp( tfont );
@@ -379,7 +457,7 @@ int main( int argc, char *argv[] )
                         debug = 1-debug;
                         break;
                         
-         case gKEY_F10: done = 1;
+		 case gKEY_F10: done = 1;
                         break;
       };
       
@@ -391,7 +469,7 @@ int main( int argc, char *argv[] )
             gclear();
             Z80Dump( &spectrumZ80, tfont );
             DrawInstruction( &spectrumZ80, tfont );
-            ShowMem( &spectrumZ80, offs, tfont );
+			ShowMem( &spectrumZ80, offs, tfont );
             DrawHelp( tfont );
             tecla = '.';
             debug = 1;
@@ -399,53 +477,100 @@ int main( int argc, char *argv[] )
          else
          {
             debug = target_cycle = 0;
-            ClearScreen(0);
+			ClearScreen(0);
             DisplayScreen( &spectrumZ80 );
-         }
+		 }
       } 
 
      // the meaning of the keyb depends on being or not in debug mode:
      switch( debug )
      {
        // emulation mode;
-       case 0:  
-                // Run the emulator for 64 scanlines (up border)
-                Z80Run( &spectrumZ80, 224*64 );
+	   case 0:
+            // calculo del valor de FLASH,parpadea tanto si se ve como si no.
+            f_flash2=(f_flash2++)%32;
+            if (f_flash2<16) f_flash=1; else f_flash=0;
 
-                // Now run the emulator for all the real screen (192 lines)
-                for( scanl=0; scanl<192; scanl++ )
-                {
-//
-// Those 2 lines run the emulator at almost real time, refreshing scanline
-// by scanline instead of the entire screen. I had to comment them as it
-// seems quite slow on non-fullscreen video modes.
-//
-//                  DisplayScanLine( scanl, &spectrumZ80 );
-//                  blit( vscreen, screen, 0, scanl+4, 0, scanl+4, 320, 1);
-                  Z80Run( &spectrumZ80, 224 );
-                }
+		// si vamos bien de tiempo emulo y dibujo el frame.
+          if( target_cycle < 2 || frame_counter == 0 )
+		{         
+	    		// no visible upper border
+	    		hwopt.port_ff=0xFF;
+	    		target_tstate=hwopt.TSTATES_PER_LINE*(hwopt.TOP_BORDER_LINES-v_border);
+	    		current_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
+	    		Z80Run( &spectrumZ80, target_tstate-current_tstate );
 
-                // Run it for 56 lines covering botton border and ray return
-                Z80Run( &spectrumZ80, 224*56 );
-                if( target_cycle < 2 ||
-                    frame_counter == 0 )
-                {
-                    DisplayScreen( &spectrumZ80 );
-                    //sprintf( b, "%d ", last_fps );
-                    //gtextout( b, 4, 200-16, 15 );
-		    		scare_mouse();	
-                    dumpVirtualToScreen();
-                    unscare_mouse();
-                }
+			// visible upper border 	
+		 	for (scanl=0;scanl<v_border;scanl++)
+			{
+				target_tstate+=hwopt.TSTATES_PER_LINE;
+	   		     current_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
+	     		Z80Run( &spectrumZ80, target_tstate-current_tstate );
+        		     displayborderscanline(scanl);
+          	}
+  
+			// Now run the emulator for all the real screen (192 lines)
+   	         for( scanl=0; scanl<192; scanl++ )
+    		    {
+				//borde Izquierdo
+	  			target_tstate+=hwopt.tstate_border_left;
+		          current_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
+  		          hwopt.port_ff=0xFF;
+	     	     Z80Run( &spectrumZ80, target_tstate-current_tstate );
+		         //Pantalla
+       		    target_tstate+=hwopt.tstate_graphic_zone;
+	              current_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
+                   hwopt.port_ff=0x00;
+	              Z80Run( &spectrumZ80, target_tstate-current_tstate );
+			    //borde derecho
+                  target_tstate+=hwopt.tstate_border_right;
+	             current_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
+                  hwopt.port_ff=0xFF;
+	             Z80Run( &spectrumZ80, target_tstate-current_tstate );
 
-                //Speed control
-                while( target_cycle == 0 ) 
-                   ;
-                
-                target_cycle--;
-                frame_counter++;
-                UpdateKeyboard();
-                break;
+		        displayscanline2(scanl,f_flash, &spectrumZ80);	
+            }
+
+		   // visible botton border
+	        for (scanl=192+v_border;scanl<v_res;scanl++)
+	        {
+	           target_tstate+=hwopt.TSTATES_PER_LINE;
+	           current_tstate=spectrumZ80.IPeriod-spectrumZ80.ICount;
+	           Z80Run( &spectrumZ80, target_tstate-current_tstate );
+               displayborderscanline(scanl);
+             }
+	       
+	        // lo que queda (se supone que 56-4 lineas)	
+             // Run it for 56 lines covering botton border and ray return
+             Z80Run( &spectrumZ80, spectrumZ80.ICount );
+
+		   //Calculo los FPS y vuelco a pantalla.	
+             sprintf( b, "%d ", last_fps );
+             gtextout( b, 4, v_res -16, 15 );
+             scare_mouse();	
+             dumpVirtualToScreen();
+             unscare_mouse();
+
+		} else {
+		// Si vamos mal de tiempo, no dibujo la pantalla, solo emulo.
+		Z80Run(&spectrumZ80,spectrumZ80.ICount);
+		}
+
+
+	     // Speed control without sound
+	     if (!gSoundInited)
+                 while( target_cycle == 0 )
+                     ;
+	     else {
+	        gSoundSync();		// wait for 1/50th
+	        soundDump ();
+	        target_cycle=0;
+             }
+
+             target_cycle--;
+             frame_counter++;
+             UpdateKeyboard();
+             break;
 
 
        // Debug mode:         
@@ -459,7 +584,7 @@ int main( int argc, char *argv[] )
                            dumpVirtualToScreen();
                            readkey();
                            ClearScreen(0);
-                           gclear();
+						   gclear();
                            DrawHelp( tfont );
                            ShowMem( &spectrumZ80, offs, tfont );
                            DrawHelp( tfont );
@@ -479,7 +604,7 @@ int main( int argc, char *argv[] )
                               DrawInstruction( &spectrumZ80, tfont );
                               ShowMem( &spectrumZ80, offs, tfont );
                            }
-                           break;
+						   break;
 
                 // Run the emulator on simulation mode until PC = given address
                 case 'w':  GetHexValue(2,130, lang_runto_w[language],
@@ -539,7 +664,7 @@ int main( int argc, char *argv[] )
                            spectrumZ80.AFs.W = strtol(b, (char**)NULL, 16 );
                            break;
                 case 'a':  GetHexValue(2,130,lang_change_af[language], b, tfont,6,0,6);
-                           spectrumZ80.AF.W = strtol(b, (char**)NULL, 16 );
+						   spectrumZ80.AF.W = strtol(b, (char**)NULL, 16 );
                            break;
                 case 'B':  GetHexValue(2,130,lang_change_bc2[language], b, tfont,6,0,6);
                            spectrumZ80.BCs.W = strtol(b, (char**)NULL, 16 );
@@ -559,7 +684,7 @@ int main( int argc, char *argv[] )
                 case 'h':  GetHexValue(2,130,lang_change_hl[language], b, tfont,6,0,6);
                            spectrumZ80.HL.W = strtol(b, (char**)NULL, 16 );
                            break;
-                case 'x':  GetHexValue(2,130,lang_change_ix[language], b, tfont,6,0,6);
+				case 'x':  GetHexValue(2,130,lang_change_ix[language], b, tfont,6,0,6);
                            spectrumZ80.IX.W = strtol(b, (char**)NULL, 16 );
                            break;
                 case 'y':  GetHexValue(2,130,lang_change_iy[language], b, tfont,6,0,6);
@@ -579,7 +704,7 @@ int main( int argc, char *argv[] )
                            if( offs > 0xFFFF - 18 ) offs = 0xFFFF - 18;
                            else if( offs < 0 ) offs=0;
                            if( offs & 1 ) offs--;
-                           ShowMem( &spectrumZ80, offs, tfont );
+						   ShowMem( &spectrumZ80, offs, tfont );
                            break;
              
                 // Advance emulation by 1 instruction
@@ -619,7 +744,7 @@ void CreateVideoTables ( void )
                         (((y >> 3) & 0x07) << 5) +
                         ((y & 0x07) << 8) +
                         ((x >> 3) & 0x1f);
-       Atributos[y] = 22528 + ((x >> 3) & 0x1f) +
+	   Atributos[y] = 22528 + ((x >> 3) & 0x1f) +
                         ((y >> 3) << 5);
    }
 }
@@ -639,7 +764,7 @@ enum SpecKeys
 {
     SPECKEY_0, SPECKEY_1, SPECKEY_2, SPECKEY_3, SPECKEY_4, SPECKEY_5,
     SPECKEY_6, SPECKEY_7, SPECKEY_8, SPECKEY_9, SPECKEY_A, SPECKEY_B,
-    SPECKEY_C, SPECKEY_D, SPECKEY_E, SPECKEY_F, SPECKEY_G, SPECKEY_H, 
+	SPECKEY_C, SPECKEY_D, SPECKEY_E, SPECKEY_F, SPECKEY_G, SPECKEY_H,
     SPECKEY_I, SPECKEY_J, SPECKEY_K, SPECKEY_L, SPECKEY_M, SPECKEY_N,
     SPECKEY_O, SPECKEY_P, SPECKEY_Q, SPECKEY_R, SPECKEY_S, SPECKEY_T,
     SPECKEY_U, SPECKEY_V, SPECKEY_W, SPECKEY_X, SPECKEY_Y, SPECKEY_Z,
@@ -679,7 +804,7 @@ static unsigned char teclas_fila[NUM_KEYB_KEYS][3] =
   
    /* change row and column signals according to pressed key */
    /* HEY THIS DONT USE V_ALLEGRO.H DEF use ALLEGRO.H
-      but by "motivos personales" I DONT CHANGE THIS X'D */
+	  but by "motivos personales" I DONT CHANGE THIS X'D */
       
    if( gkey[KEY_Z] ) fila[4][1] &= (0xFD);
    if( gkey[KEY_X] ) fila[4][1] &= (0xFB);

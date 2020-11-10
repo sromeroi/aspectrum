@@ -16,4 +16,18 @@ struct tipo_emuopt {
     char joy1key[5] ;
     } ;
 
+struct tipo_hwopt {
+	int port_ff;
+	int TSTATES_PER_LINE;
+	int TOP_BORDER_LINES;
+	int BOTTOM_BORDER_LINES;
+	int SCANLINES;	
+	int tstate_border_left;
+	int tstate_graphic_zone;
+	int tstate_border_right;
+	};
+
+int emuMain( int argc, char *argv[] );
+int Z80Initialization (void);
+
 #endif  /* main.h */  

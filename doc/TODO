@@ -1,4 +1,35 @@
+Anexo de alea:
+--------------
+* = Importante
++ = Interesante
+- = Pijada
 
+* Arreglar bug en carga de snapshot
+- Pantalla de ayuda al teclado
+* Un GUI para las cintas
++ Que el sonido se pueda desactivar y que pause al llamar al gui.
+
++ Hacer que soporte joystick hardware
++ Hacer que lea TZX ¿Que grabe? HAY MUCHO QUE HACER AQUI!!!
+* Pasar toda la parte de lectura de teclado a v_alleg.c
+- ¿PLugins de video? quiero ver como se veria a 160x160, o con scanlines.
++ Quitar codigo imnecesario u obsoleto
++ Soporte para archivos .pok y buscador de pokes.
+
+Con todo eso estariamos listos para la 0.1.7
+
+Para la 0.2.0:
+
+Memoria contenida (requiere rescribir el z80 core)
+Paginacion de memoria, esto es todos los modelos
+El chip de sonido
+
+Para la 0.3.0:
+
+Emulacion de la unidad de disco del +3
+Soporte de ZX Printer, RS 232 y Centronics
+
+                          
  ASPECTRUM EMULATOR TO-DO 
 ============================================================================
 
@@ -13,16 +44,20 @@
    to z80core emulation bugs :(
 
  - Look for badly implemented Z80 opcodes.
- 
+
+ - Some stuff related to debuger that kak email santiago
+
+ - check that the ula not emulate more border lines that the real spectrum.
+   e.d. if I use 640x400 not emulate 104+192+104 but 56+192+57 that have the
+   real spectrum (number not exact.) 
 
  EMULATOR:
 ----------------------------------------------------------------------------
+ - I think that in debuger the screen is not redraw correctly
 
  - Modify disasm.c and create a good disassemble routine
    Finish disassembler (@ simbols)
  
- - Function DrawScanLine(int linea);
-   Update screen each scanline, not each screen (224 tstates, 321 lines).
  - Add undocumented opcodes.
 
  - Improve TAP loading routine to detect errors and so on...
@@ -40,6 +75,7 @@
    
 
  - Implement frameskip correctly so that older computers can use Aspectrum.
+   (DONE)
 
  - fix some scare_mouse and unscare_mouse that Alea put very happyly.
 
@@ -57,4 +93,6 @@
  INTERNACIONALIZATION:
 ----------------------------------------------------------------------------
 
- 
+ - Perhaps detect the Language based on enviroment VARs, and optionaly select
+   default language in compilation time/Config file.
+

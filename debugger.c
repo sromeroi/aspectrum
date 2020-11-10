@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /*=====================================================================
   Debugger.c -> This file includes all the debugging functions
                 for the emulator, called from the main loop.
@@ -25,6 +26,7 @@
 #endif
 
 #include <stdio.h>
+#include "aspec.h"
 #include "z80.h"
 #include "debugger.h"
 #include "langs.h"
@@ -87,7 +89,7 @@ void ShowMem( Z80Regs *regs, int offset, char *font )
 {
     char b[256];
     int i;
-    char instruccion[256];
+//    char instruccion[256];
 
     /* Draw on the screen the memory contents */
     GFXprintf(319-(15*7), 12, "Mem:", font, 7, 0, -1);
@@ -165,7 +167,8 @@ void Z80Dump( Z80Regs *regs, char *font )
 int DebuggerHelp( char *tfont )
 {
    int i;
-   int fontw = 8, fonth=12;
+//   int fontw = 8;
+   int fonth=12;
    int menux = 6, menuy = 4, menuw = 305, menuh = 191;
    int bgcolor = 15, titlecolor=14;
    int fgcolor = 0;
@@ -183,6 +186,7 @@ int DebuggerHelp( char *tfont )
     dumpVirtualToScreen();
     readkey();   
 
+	return 1;
 }
 
 

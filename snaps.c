@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /*=====================================================================
   snaps.c    -> This file includes all the snapshot handling functions
                 for the emulator, called from the main loop and when

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /*=====================================================================
   graphics.c -> This file includes all the graphical functions
                 for the ASpectrum emulator.
@@ -25,14 +26,10 @@
 #endif
 
 #include <stdio.h>
+#include "aspec.h"
+#include "graphics.h"
 #include "z80.h"
 
-//#include <allegro.h>
-
-#include "v_alleg.h"
-#include "graphics.h"
-
-//extern BITMAP *vscreen;
 
 extern void ExitEmulator( void );
 extern byte *RAM;
@@ -46,6 +43,8 @@ extern int cycle;
 extern void target_incrementor();
 extern void count_frames();
 
+unsigned int colors[256];
+
 /*-----------------------------------------------------------------
  Redraw the entire screen from the speccy's VRAM.
  It reads the from the 16384 memory address the bytes of the
@@ -54,6 +53,8 @@ extern void count_frames();
 void DisplayScreen( Z80Regs *regs )
 {
   int y;
+extern int v_border;
+extern int v_res;
 //I supous that this is a global flags that change n times by sec
 // but I not have timer by now.
   static int f_flash=1,f_flash2=0;
@@ -69,10 +70,10 @@ void DisplayScreen( Z80Regs *regs )
   /* stupid-border-implementation (tm) by NoP/Compiler */
   /* using allegro hline (acelerated were abalible)    */
 
-  for(y=0; y<4; y++ )
+  for(y=0; y<v_border; y++ )
   {
-	ghline(0,y,319,spectrumZ80.BorderColor);	
-	ghline(0,199-y,319,spectrumZ80.BorderColor);	
+        displayborderscanline(y);
+        displayborderscanline(v_res-1-y);
   }
   
   for( y=0; y<192; y++ )
@@ -90,12 +91,17 @@ void DisplayScreen( Z80Regs *regs )
  *  dir_p explicao en pag. 274 del curso de codigo maquina de MH 
  * ¿ se pue optimizar mas?, yo digo que no X'DDD
  * -------------------------------------------------------------------------*/
+void displayborderscanline(int y)
+{
+   ghline(0,y,319,spectrumZ80.BorderColor);
+}
 
 void displayscanline2( int y, int f_flash, Z80Regs *regs )
 {
   int x,row,col,dir_p,dir_a,pixeles,tinta,papel,atributos;
+  extern int v_border;
 
-  row = y+4;    // 4 y 32 son los offset de la parte grafica de la pantalla.
+  row = y+v_border;    // 4 y 32 son los offset de la parte grafica de la pantalla.
   col = 32;     // 32+256+32=320  4+192+4=200  total 320x200 de resolucion.
 
   dir_p = 0x4000+((y & 0xC0)<<5) +((y & 0x7)<<8) +((y & 0x38)<<2);
@@ -255,7 +261,8 @@ void GFXprintf_tovideo( int x, int y, char *sentence, char *font,
 int GFXgets( int x, int y, char *cadena, char *font,
              int fg_color, int bg_color, int max )
 {
-   char car, offs=0, tecla=0;
+   char car, tecla=0;
+   int offs=0;	
 
    /* Draw initial cursor. */
    PutChar8x16( x+(offs*8), y, '_', font, fg_color, bg_color );
@@ -289,7 +296,7 @@ int GFXgets( int x, int y, char *cadena, char *font,
      else if( tecla == '\b' && offs > 0 )
      {
         PutChar8x16( x+(offs*8), y, ' ', font, bg_color, bg_color );
-        offs--;
+		offs--;
         car = cadena[offs];
         cadena[offs]='\0';
         PutChar8x16( x+(offs*8), y, '_', font, fg_color, bg_color );
@@ -305,6 +312,7 @@ int GFXgets( int x, int y, char *cadena, char *font,
      }
 
    }
+   return 0;
 }
 
 

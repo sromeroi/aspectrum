@@ -1,22 +1,24 @@
 #!/bin/sh
-# ¿lo de arriba esta bien?
+# ¿lo de arriba esta bien? ¿no deberia ser /bin/make -f $@ o algo asi?
 
 CC = gcc
 EXE = aspectrum
-VERSION = 0.1.5
+VERSION = 0.1.6
 
 # remember to uncomment the adecuated dep target for each target.
 
 # linux
 DESTDATPATH = /usr/share/$(EXE)
 LFLAGS = `allegro-config --libs`
-CFLAGS = -Wall -O3 -mcpu=pentium `allegro-config --cflags` \
-	-DVERSION=\"$(VERSION)\" -DDESTDAT=\"$(DESTDATPATH)\"
-RM= rm
+CFLAGS = -Wall -O3 -mcpu=i686 `allegro-config --cflags` \
+        -DVERSION=\"$(VERSION)\" -DDESTDAT=\"$(DESTDATPATH)\" \
+        -DSOUND_BY_STREAM
+RM = rm
 
 # windos (mingw32)
 #LFLAGS = -lalleg 
-#CFLAGS = -DVERSION=\"$(VERSION)\" -DNO_GETOPTLONG -Wall -O2 -mwindows
+#CFLAGS = -DVERSION=\"$(VERSION)\" -DNO_GETOPTLONG -Wall -O2 -mwindows \
+#       -DSOUND_BY_STREAM
 #RM= del
 
 # esto no se pa que valdra. ( es pa debug )
@@ -28,14 +30,14 @@ DESTDOCPATH = /usr/share/doc/$(EXE)
 DESTEXEPATH = /usr/bin
 
 # fuentes y objetos para linux. 
-files = v_alleg.c snaps.c graphics.c menu.c debugger.c main.c z80.c \
-disasm.c 
-objects=v_alleg.o snaps.o graphics.o menu.o debugger.o main.o z80.o \
-disasm.o 
+files = sound.c v_alleg.c snaps.c graphics.c menu.c debugger.c \
+main.c z80.c disasm.c 
+objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \
+main.o z80.o disasm.o 
 
 # objetos para windows las fuentes no hacen falta por que se usa makedeps.bat
-#objects=v_alleg.o snaps.o graphics.o menu.o debugger.o main.o z80.o \
-#disasm.o contrib/getopt.o
+#objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \
+#main.o z80.o disasm.o contrib/getopt.o
 
 all: aspectrum
 

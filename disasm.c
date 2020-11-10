@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /*=====================================================================
   Disasm.c   -> This file includes functions to dissamble the
                 instruction pointed by the PC register.
@@ -31,7 +32,11 @@
 #include "disasm.h"
 
 #define _DISASM_
+#ifndef CPP_COMPILATION
 #include "macros.c"
+#else
+#include "macros.cpp"
+#endif
 #undef _DISASM_
 
 // NN = >
@@ -258,7 +263,8 @@ word Z80Disassembler ( Z80Regs *regs,  char *cad1,  char *cad2 )
 {
 	word P;
 	byte opcode, opsize;
-	char *opcode_name,  *position;
+	char *opcode_name;
+//	char *position;
 
 	P = r_PC;
 	opcode = Z80ReadMem(P++);

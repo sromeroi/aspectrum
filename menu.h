@@ -28,4 +28,9 @@ void DrawSelected( int x1, int y1, int x2, int y2, char *text, int bgcolor,
 int FileMenu( char *tfont, char type, char *filename );
 int menuopciones(void);   
 
+#define DIALOG_SNAyC  0
+#define DIALOG_SNA 1
+#define DIALOG_SCR 2
+#define DIALOG_TAP 3
+
 #endif
