@@ -22,16 +22,17 @@
 #include <string.h>
 
 #include <allegro5/allegro5.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_audio.h>
 #include <allegro5/keyboard.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_audio.h>
 
 #include "v_alleg.h"
 #include "z80.h"
 #include "snaps.h"
 #include "main.h"
-#include "monofnt.h"
+#include "monofnt.h"     //FIXME check if need 
 #include "graphics.h"
 #include "debugger.h"
 #include "main.h"
@@ -62,9 +63,13 @@ ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *mouseicon;
 extern Z80Regs spectrumZ80;
 unsigned int colors[256];
-static DATAFILE *datafile = NULL;
+//static DATAFILE *datafile = NULL;
+ALLEGRO_FONT *font;
 
-static gRGB colores[17] = { 
+#define NUMCOLORSPALETE 17
+ALLEGRO_COLOR paleta[NUMCOLORSPALETE];
+
+static int colores[NUMCOLORSPALETE][3] = { 
   {  0 / 4,   0 / 4,   0 / 4}, 
   {  0 / 4,   0 / 4, 192 / 4}, 
   {192 / 4,   0 / 4,   0 / 4}, 
@@ -110,9 +115,9 @@ static gRGB colores[17] = {
 ------------------------------------------------------------------*/
 // function called when you exit from the emulator (unitialization here)
 void ExitEmulator (void){
-  unload_datafile (datafile);
+  //unload_datafile (datafile);
   if (vscreen != NULL)
-    destroy_bitmap (vscreen);
+    al_destroy_bitmap (vscreen);
 //PENDING  set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
 #ifdef I_HAVE_AGUP
   agup_shutdown ();
@@ -124,10 +129,9 @@ void ExitEmulator (void){
   exit (0);
 }
 
-
 // clear the visible screen
 void gclear (void){
-  clear (screen);
+  al_clear_to_color(paleta[0]);
 }
 
 
@@ -145,12 +149,12 @@ void dumpVirtualToScreen(void) {
 void gtextout (char *b, int x, int y, int color){
 //  textout (vscreen, font, b, x, y, color);
 // FIXME perhaps use al_get_text_dimensions to delete background???
-  al_draw_text(font,color,x,y,ALLEGRO_ALIGN_LEFT,b);
+  al_draw_text(font,paleta[color],x,y,ALLEGRO_ALIGN_LEFT,b);
 }
 
 // draws text in the virtual screen with no background
 void gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont){
-  al_draw_text(font,color,x,y,ALLEGRO_ALIGN_LEFT,b);
+  al_draw_text(font,paleta[color],x,y,ALLEGRO_ALIGN_LEFT,b);
 //  text_mode (-1);
 //  textout (vscreen, tfont, b, x, y, color);
 //  text_mode (0);
@@ -160,9 +164,9 @@ void gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont){
 // if you're not under a palette-based video mode this function can
 // be empty, but the PutPixel function will have to "translate" from speccy
 // colours (0-15) to real colors
-void gset_color (int index, gRGB * p){
-  set_color (index, (RGB *) p);
-}
+//void gset_color (int index, gRGB * p){
+//  set_color (index, (RGB *) p);
+//}
 
 // put platform specific initialization code here
 //void init_wrapper (void){
@@ -171,8 +175,8 @@ void gset_color (int index, gRGB * p){
 
 // puts a pixel (col) in the virtual screen. look gset_color for more details.
 // col is a "speccy color"
-void gPutPixel (int x, int y, col){
-  al_put_pixel(x, y, col);
+void gPutPixel (int x, int y, int col){
+  al_put_pixel(x, y, paleta[col]);
 }
 
 
@@ -212,6 +216,7 @@ void InitGraphics (void){
 //ASprintf("antes timer \n");
 //  install_timer ();
 
+  /*
   set_color_depth (8);
   if (set_gfx_mode (GFX_AUTODETECT, 320, v_res, 0, 0) != 0)
     {
@@ -223,12 +228,13 @@ void InitGraphics (void){
 	  ExitEmulator ();
 	}
     }
+  */
 //  ASprintf("se pedia %i y se obtubo %i\n",v_res,SCREEN_H);
-  v_res = SCREEN_H;
+  v_res = al_get_display_height(display);
   v_border = (v_res - 192) / 2;
 
   // if we're on windowed mode, update color conversion tables...
-
+/*
   if ((depth = desktop_color_depth ()) > 8){
       ASprintf("desktop_color_depth y bitmap_color_depth devuelve diferente valor ?????\n");
       for (i = 0; i < 16; i++)
@@ -242,6 +248,7 @@ void InitGraphics (void){
 	      gset_color (i, &colores[i]);
 	    }
   }
+*/
 /*
       for (i = 0; i <16; i++)
       {
@@ -251,9 +258,15 @@ void InitGraphics (void){
       }
    set_pallete(specpal);   
 */
+  for(i=0;i<NUMCOLORSPALETE;i++){
+    paleta[i]=al_map_rgb(colores[i][0],colores[i][1],colores[i][2]);
+  }
 
-  datafile = load_datafile (find_file("font.dat"));
-  font = datafile[0].dat;
+  //datafile = load_datafile (find_file("font.dat"));
+  //font = datafile[0].dat;
+  al_init_font_addon();
+  al_init_ttf_addon();
+  font = al_load_font("DroidFallbackFull.ttf",8,ALLEGRO_TTF_MONOCHROME);
 
   LOCK_VARIABLE (last_fps);
   LOCK_VARIABLE (frame_counter);
@@ -268,7 +281,7 @@ void InitGraphics (void){
 
 //  vscreen = create_bitmap (320, v_res);
 vscreen = al_get_backbuffer(display);
-
+/*
   if (vscreen == NULL)
     {
       set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
@@ -278,7 +291,7 @@ vscreen = al_get_backbuffer(display);
     }
   ASprintf("Working at %d bpp\n", bitmap_color_depth (screen));
   clear (vscreen);
-
+*/
 #ifdef I_HAVE_AGUP
   /* estaria bien crear 16 tonos de gris en una parte de la paleta no 
      usada para mejorar como se ven los engines 
@@ -311,13 +324,13 @@ vscreen = al_get_backbuffer(display);
 // draw filled rectangles
 void gbox (int x1, int y1, int x2, int y2, int color){
 //  rectfill (vscreen, x1, y1, x2, y2, color);
-  al_draw_filledrectangle(x1, y1, x2, y2, color);
+  al_draw_filledrectangle(x1, y1, x2, y2, paleta[color]);
 }
 
 // draw rectangles
 void grectangle (int x1, int y1, int x2, int y2, int color){
 //  rect (vscreen, x1, y1, x2, y2, color);
-al_draw_rectangle(x1,y1,x2,y2,color,0)
+al_draw_rectangle(x1,y1,x2,y2,paleta[color],0);
 }
 
 // draw hlines
@@ -325,14 +338,14 @@ void ghline (int x1, int y1, int x2, int col){
   int x;
   for (x = x1; x <= x2; x++)
 //    PutPixel (vscreen, x, y1, col);
-al_draw_pixel(x,y1,col);
+al_draw_pixel(x,y1,paleta[col]);
 //      hline(vscreen,x1,y1,x2,col);
 }
 
 
 // cls with specified color
 void gclear_to_color (int color){
-  clear_to_color (vscreen, color);
+  clear_to_color (vscreen, paleta[color]);
 }
 
 // transfers from (x,y) to (x+w,y+h) from the virtual screen to the visible screen

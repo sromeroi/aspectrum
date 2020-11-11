@@ -19,6 +19,8 @@
  Email: sromero@escomposlinux.org
  ======================================================================*/  
 
+#define FALSE 0
+#define TRUE 1
 enum tipos_archivo { TYPE_NULL=0, TYPE_TZX ,TYPE_TAP, TYPE_Z80, TYPE_SNA,
 			TYPE_SP, TYPE_SCR }; 
 int typeoffile(char *);
@@ -29,7 +31,8 @@ char LoadSP (Z80Regs *, FILE *);
 char LoadSNA (Z80Regs *, FILE *);
 char LoadZ80 (Z80Regs *, FILE *);
 char LoadSCR (Z80Regs *, FILE *);
-char SaveSP (Z80Regs *, FILE *);
+
+char SaveSP (Z80Regs *, FILE *);
 char SaveSNA (Z80Regs *, FILE *);
 char SaveZ80 (Z80Regs *, FILE *);
 char SaveSCR (Z80Regs *, FILE *);
@@ -48,7 +51,8 @@ char TAP_loadblock(Z80Regs * regs, FILE * fp);
 char TAP_rewind(FILE *fp);
 
 char TZX_init(FILE *fp);
-char TZX_loadblock(Z80Regs * regs, FILE * fp);char TZX_rewind();
+char TZX_loadblock(Z80Regs * regs, FILE * fp);
+char TZX_rewind();
 char TZX_genindex(FILE *fp);
 
 /* busca el archivo en los sitios habituales y(opcional) lo abre como rb */

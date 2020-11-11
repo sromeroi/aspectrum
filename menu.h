@@ -21,11 +21,20 @@
   
 #ifndef _MENU_H_
 #define _MENU_H_
-int MainMenu (Z80Regs * regs, char *tfont);
-void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor,
-		    int fgcolor, int textbgselcolor, char *tfont);
-int FileMenu (char *tfont, char type, char *filename);
-int menuopciones (void);
+#define D_EXIT 0
+#define D_SELECTED 1
+#define D_O_K 2
+#define D_CLOSE 3
+
+int MainMenu (Z80Regs * regs, char *tfont);
+
+void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor,
+		    
+int fgcolor, int textbgselcolor, char *tfont);
+
+int FileMenu (char *tfont, char type, char *filename);
+
+int menuopciones (void);
 int menuhardware (void);
 
 enum filedialogconst { DIALOG_SNAyC=0, DIALOG_SNA, DIALOG_SCR, DIALOG_TAP };
@@ -34,4 +43,5 @@ enum dialogconst { DIALOG_DEBUGGER_0=0, DIALOG_DEBUGGER_1, DIALOG_SNAP_SAVE,
 		DIALOG_SNAP_LOAD, DIALOG_QUIT, DIALOG_RESET, DIALOG_SAVE_SCR, 
 	    DIALOG_OPEN_TAPE, DIALOG_CHANGE_LANG, DIALOG_REWIND_TAPE, 
 	    DIALOG_REFERENCEKEYS, DIALOG_ABOUT, DIALOG_OPTIONS, DIALOG_HARDWARE} ;
-#endif	/*  */
+#endif	/* 
+ */
