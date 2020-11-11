@@ -63,22 +63,23 @@ unsigned int colors[256];
 static DATAFILE *datafile = NULL;
 
 static gRGB colores[17] = { 
-    {0 / 4, 0 / 4, 0 / 4}, 
-  {0 / 4, 0 / 4, 192 / 4}, 
-  {192 / 4, 0 / 4, 0 / 4}, 
-  {192 / 4, 0 / 4, 192 / 4}, 
-  {0 / 4, 192 / 4, 0 / 4}, 
-  {0 / 4, 192 / 4, 192 / 4}, 
-  {192 / 4, 192 / 4, 0 / 4}, 
+  {  0 / 4,   0 / 4,   0 / 4}, 
+  {  0 / 4,   0 / 4, 192 / 4}, 
+  {192 / 4,   0 / 4,   0 / 4}, 
+  {192 / 4,   0 / 4, 192 / 4}, 
+  {  0 / 4, 192 / 4,   0 / 4}, 
+  {  0 / 4, 192 / 4, 192 / 4}, 
+  {192 / 4, 192 / 4,   0 / 4}, 
   {192 / 4, 192 / 4, 192 / 4}, 
-  {0 / 4, 0 / 4, 0 / 4}, 
-  {0 / 4, 0 / 4, 255 / 4}, 
-  {255 / 4, 0 / 4, 0 / 4}, 
-  {255 / 4, 0 / 4, 255 / 4}, 
-  {0 / 4, 255 / 4, 0 / 4}, 
-  {0 / 4, 255 / 4, 255 / 4}, 
-  {255 / 4, 255 / 4, 0 / 4}, 
-  {255 / 4, 255 / 4, 255 / 4}, {255 / 4, 0 / 4, 0 / 4} 
+  {  0 / 4,   0 / 4,   0 / 4}, 
+  {  0 / 4,   0 / 4, 255 / 4}, 
+  {255 / 4,   0 / 4,   0 / 4}, 
+  {255 / 4,   0 / 4, 255 / 4}, 
+  {  0 / 4, 255 / 4,   0 / 4}, 
+  {  0 / 4, 255 / 4, 255 / 4}, 
+  {255 / 4, 255 / 4, 0   / 4}, 
+  {255 / 4, 255 / 4, 255 / 4},
+  {255 / 4,   0 / 4,   0 / 4} 
 /*
   Old colour palette:
   
@@ -106,52 +107,45 @@ static gRGB colores[17] = {
  ends, it must finish threads, SDL and other library/mem stuff.
 ------------------------------------------------------------------*/
 // function called when you exit from the emulator (unitialization here)
-void
-ExitEmulator (void)
-{
+void ExitEmulator (void){
   unload_datafile (datafile);
   if (vscreen != NULL)
     destroy_bitmap (vscreen);
-  set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
+//PENDING  set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
 #ifdef I_HAVE_AGUP
   agup_shutdown ();
 #endif
 
   end_spectrum();
-  allegro_exit ();
+  al_uninstall_system();
 //  fcloseall();
   exit (0);
 }
 
 
 // clear the visible screen
-void
-gclear (void)
-{
+void gclear (void){
   clear (screen);
 }
 
 
 // dumps memory from the virtual screen to the visible screen
 // it CAN be a flip_screen   ( but you'll have to swap the screen and vscreen pointers)
-void
-dumpVirtualToScreen (void)
-{
+void dumpVirtualToScreen(void) {
   extern int v_res;
-  blit (vscreen, screen, 0, 0, 0, 0, 320, v_res);
+  //blit (vscreen, screen, 0, 0, 0, 0, 320, v_res);
+  al_set_target_bitmap(vscreen);
+  al_draw_bitmap(screen,0,0);
+  al_flip_display();
 }
 
 // draws text in the virtual screen
-void
-gtextout (char *b, int x, int y, int color)
-{
+void gtextout (char *b, int x, int y, int color){
   textout (vscreen, font, b, x, y, color);
 }
 
 // draws text in the virtual screen with no background
-void
-gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont)
-{
+void gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont){
   text_mode (-1);
   textout (vscreen, tfont, b, x, y, color);
   text_mode (0);
@@ -161,70 +155,57 @@ gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont)
 // if you're not under a palette-based video mode this function can
 // be empty, but the PutPixel function will have to "translate" from speccy
 // colours (0-15) to real colors
-void
-gset_color (int index, gRGB * p)
-{
+void gset_color (int index, gRGB * p){
   set_color (index, (RGB *) p);
 }
 
 // put platform specific initialization code here
-void
-init_wrapper (void)
-{
+void init_wrapper (void){
   gkey = key;
 }
 
 // puts a pixel (col) in the virtual screen. look gset_color for more details.
 // col is a "speccy color"
-void
-gPutPixel (int x, int y, int col)
-{
-  PutPixel (vscreen, x, y, col);
+void gPutPixel (int x, int y, int col){
+  al_put_pixel(x, y, col);
 }
 
 
 // generic acquire bitmap function
-void
-gacquire_bitmap (void)
-{
-  acquire_bitmap (vscreen);
+void gacquire_bitmap (void){
+  //acquire_bitmap (vscreen);
+  al_set_target_bitmap(vscreen);
 }
 
 // generic release bitmap function
-void
-grelease_bitmap (void)
-{
-  release_bitmap (vscreen);
+void grelease_bitmap (void){
+//  release_bitmap (vscreen);
 }
 
 
 
-void
-InitSystem (void)
-{
+void InitSystem (void){
+//ASprintf("antes allegro \n");
+//  allegro_init ();
+al_init();
   // inits everything (for allegro)
 //ASprintf("antes graficos \n");
   InitGraphics ();
 //ASprintf("antes sonido \n");
   gInitSound ();
 //ASprintf("despues sonido\n");
-
 }
 
-void
-InitGraphics (void)
-{
+void InitGraphics (void){
   int i, depth;
 //  FILE *archivo;
 //  PALETTE specpal;
   extern int v_res;
   extern int v_border;
-//ASprintf("antes allegro \n");
-  allegro_init ();
 //ASprintf("antes keyboards \n");
   al_install_keyboard ();
 //ASprintf("antes timer \n");
-  install_timer ();
+//  install_timer ();
 
   set_color_depth (8);
   if (set_gfx_mode (GFX_AUTODETECT, 320, v_res, 0, 0) != 0)
@@ -243,22 +224,19 @@ InitGraphics (void)
 
   // if we're on windowed mode, update color conversion tables...
 
-  if ((depth = desktop_color_depth ()) > 8)
-    {
+  if ((depth = desktop_color_depth ()) > 8){
       ASprintf("desktop_color_depth y bitmap_color_depth devuelve diferente valor ?????\n");
       for (i = 0; i < 16; i++)
 	colors[i] =
 	  makecol (colores[i].r * 4, colores[i].g * 4, colores[i].b * 4);
-    }
-  else
-    {
+  } else {
       ASprintf("Vale, al final solo 8bit por pixel\n");
       for (i = 0; i < 16; i++)
-	{
-	  colors[i] = i;
-	  gset_color (i, &colores[i]);
-	}
-    }
+	    {
+	      colors[i] = i;
+	      gset_color (i, &colores[i]);
+	    }
+  }
 /*
       for (i = 0; i <16; i++)
       {
@@ -283,7 +261,9 @@ InitGraphics (void)
 
 //ASprintf("creando vscreen\n");
 
-  vscreen = create_bitmap (320, v_res);
+//  vscreen = create_bitmap (320, v_res);
+vscreen = al_get_backbuffer(display);
+
   if (vscreen == NULL)
     {
       set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
@@ -324,23 +304,17 @@ InitGraphics (void)
 
 
 // draw filled rectangles
-void
-gbox (int x1, int y1, int x2, int y2, int color)
-{
+void gbox (int x1, int y1, int x2, int y2, int color){
   rectfill (vscreen, x1, y1, x2, y2, color);
 }
 
 // draw rectangles
-void
-grectangle (int x1, int y1, int x2, int y2, int color)
-{
+void grectangle (int x1, int y1, int x2, int y2, int color){
   rect (vscreen, x1, y1, x2, y2, color);
 }
 
 // draw hlines
-void
-ghline (int x1, int y1, int x2, int col)
-{
+void ghline (int x1, int y1, int x2, int col){
   int x;
   for (x = x1; x <= x2; x++)
     PutPixel (vscreen, x, y1, col);
@@ -349,29 +323,22 @@ ghline (int x1, int y1, int x2, int col)
 
 
 // cls with specified color
-void
-gclear_to_color (int color)
-{
+void gclear_to_color (int color){
   clear_to_color (vscreen, color);
 }
 
 // transfers from (x,y) to (x+w,y+h) from the virtual screen to the visible screen
-void
-gUpdateRect (int x, int y, int w, int h)
-{
+void gUpdateRect (int x, int y, int w, int h){
   blit (vscreen, screen, x, y, x, y, w, h);
 }
 
 
 ALLEGRO_MOUSE_CURSOR *mousecursor;
-void
-v_initmouse (void)
-{
+void v_initmouse (void) {
   extern tipo_emuopt emuopt;
   int color_b, color_n;
 
-  if (al_install_mouse ())
-    {
+  if (al_install_mouse ()){
       emuopt.gunstick |= GS_HAYMOUSE;
 
       // dibujar puntero 
@@ -387,21 +354,18 @@ v_initmouse (void)
       al_putpixel (mouseicon, 8, 7, color_n);
       al_putpixel (mouseicon, 8, 9, color_n);
 
-      if ((emuopt.gunstick & GS_GUNSTICK) != 0)
-	{
-	  mousecursor = al_create_mouse_cursor(mouseicon,8,8);
-	  //set_mouse_sprite (emuopt.raton_bmp);
-	  //set_mouse_sprite_focus (8, 8);
-	  al_show_mouse_cursor (screen);
-	}
-    }
+      if ((emuopt.gunstick & GS_GUNSTICK) != 0) {
+          mousecursor = al_create_mouse_cursor(mouseicon,8,8);
+          //set_mouse_sprite (emuopt.raton_bmp);
+          //set_mouse_sprite_focus (8, 8);
+          al_show_mouse_cursor (screen);
+      }
+  }
 
 }
 
-int
-galert (const char *s1, const char *s2, const char *s3, const char *b1,
-	const char *b2, int c1, int c2)
-{
+int galert (const char *s1, const char *s2, const char *s3, const char *b1,
+	const char *b2, int c1, int c2) {
   int a;
 //    gui_fg_color = 0;
 //    gui_bg_color = 7;
@@ -641,12 +605,10 @@ void UpdateKeyboard (void)
 // ******************** WIN32 - WAY **********************
 // audiostreams
 
-int gSoundInited = 0;
+int gSoundInited = 0; 
 ALLEGRO_AUDIO_STREAM *audioStream;
 
-void
-gInitSound (void)
-{
+void gInitSound (void){
 // PENDING  initSoundLog ();
 
 // PENDING reserve_voices (3, -1);
@@ -664,9 +626,7 @@ gInitSound (void)
 
 }
 
-byte *
-gGetSampleBuffer (void)
-{
+byte * gGetSampleBuffer (void){
   byte *ptr;
   if (!al_is_audio_installed())
     return NULL;
@@ -681,18 +641,13 @@ gGetSampleBuffer (void)
 }
 
 
-void
-gPlaySound (void)
-{
+void gPlaySound (void){
   if (!gSoundInited)
     return;
 // PENDING  free_audio_stream_buffer (audioStream);
-
 }
 
-void
-gSoundSync (void)
-{
+void gSoundSync (void){
   // no need for soundsync, while in gGetSampleBuffer does the work
 }
 #endif //ifdef SOUND_BY_STREAM
@@ -706,9 +661,7 @@ int smpvoice;
 int cursamp = 0;
 int gSoundInited = 0;
 
-void
-gInitSound (void)
-{
+void gInitSound (void){
   int i, j;
   initSoundLog ();
 
@@ -733,15 +686,11 @@ gInitSound (void)
 
 }
 
-void
-playMainSample (void)
-{
+void playMainSample (void){
   smpvoice = play_sample (smp[0], 255, 128, 1000, 1);	// play always loopin
 }
 
-volatile int
-getVoicePos (void)
-{
+volatile int getVoicePos (void){
   return voice_get_position (smpvoice);
 }
 
@@ -758,18 +707,14 @@ byte * gGetSampleBuffer (void)
     return ((byte *) smp[0]->data) + 882;
 }
 
-void
-gPlaySound (void)
-{
+void gPlaySound (void){
   if (!gSoundInited)
     return;
   // void... in this version. anyway function must exist, as it will 
   // be called from sound.cpp (other "drivers" will need it)
 }
 
-void
-gSoundSync (void)
-{
+void gSoundSync (void){
   static int last_sample_pos = 0, current_sample_pos;
 
   // this is the best way (I've found) to handle sound in msdos
@@ -803,9 +748,7 @@ int smpvoice = -1;
 int cursamp = 0;
 int gSoundInited = 0;
 
-void
-gInitSound (void)
-{
+void gInitSound (void){
   int i, j;
   initSoundLog ();
 
@@ -830,8 +773,7 @@ gInitSound (void)
 
 }
 
-byte * gGetSampleBuffer (void)
-{
+byte * gGetSampleBuffer (void){
   byte *ptr;
   if (!gSoundInited)
     return NULL;
@@ -842,9 +784,7 @@ byte * gGetSampleBuffer (void)
 }
 
 
-void
-gPlaySound (void)
-{
+void gPlaySound (void){
   int rv;
   if (!gSoundInited)
     return;
@@ -865,9 +805,7 @@ gPlaySound (void)
 
 }
 
-void
-gSoundSync (void)
-{
+void gSoundSync (void){
   // no need for soundsync, voice_get_position in gPlaySound does the work
 
 }
