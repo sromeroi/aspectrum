@@ -25,7 +25,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/keyboard.h>
-
+#include <allegro5/allegro_primitives.h>
 
 #include "v_alleg.h"
 #include "z80.h"
@@ -57,6 +57,8 @@ extern volatile int last_fps;
 //volatile char *gkey;
 // allegro virtual screen
 ALLEGRO_BITMAP *vscreen;
+ALLEGRO_BITMAP *screen;
+ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *mouseicon;
 extern Z80Regs spectrumZ80;
 unsigned int colors[256];
@@ -135,20 +137,23 @@ void dumpVirtualToScreen(void) {
   extern int v_res;
   //blit (vscreen, screen, 0, 0, 0, 0, 320, v_res);
   al_set_target_bitmap(vscreen);
-  al_draw_bitmap(screen,0,0);
+  al_draw_bitmap(screen,0,0,0);
   al_flip_display();
 }
 
 // draws text in the virtual screen
 void gtextout (char *b, int x, int y, int color){
-  textout (vscreen, font, b, x, y, color);
+//  textout (vscreen, font, b, x, y, color);
+// FIXME perhaps use al_get_text_dimensions to delete background???
+  al_draw_text(font,color,x,y,ALLEGRO_ALIGN_LEFT,b);
 }
 
 // draws text in the virtual screen with no background
 void gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont){
-  text_mode (-1);
-  textout (vscreen, tfont, b, x, y, color);
-  text_mode (0);
+  al_draw_text(font,color,x,y,ALLEGRO_ALIGN_LEFT,b);
+//  text_mode (-1);
+//  textout (vscreen, tfont, b, x, y, color);
+//  text_mode (0);
 }
 
 // sets the "index" colour to the "p" colour in the active palette.
@@ -160,13 +165,13 @@ void gset_color (int index, gRGB * p){
 }
 
 // put platform specific initialization code here
-void init_wrapper (void){
-  gkey = key;
-}
+//void init_wrapper (void){
+// gkey = key;
+//}
 
 // puts a pixel (col) in the virtual screen. look gset_color for more details.
 // col is a "speccy color"
-void gPutPixel (int x, int y, int col){
+void gPutPixel (int x, int y, col){
   al_put_pixel(x, y, col);
 }
 
@@ -305,19 +310,22 @@ vscreen = al_get_backbuffer(display);
 
 // draw filled rectangles
 void gbox (int x1, int y1, int x2, int y2, int color){
-  rectfill (vscreen, x1, y1, x2, y2, color);
+//  rectfill (vscreen, x1, y1, x2, y2, color);
+  al_draw_filledrectangle(x1, y1, x2, y2, color);
 }
 
 // draw rectangles
 void grectangle (int x1, int y1, int x2, int y2, int color){
-  rect (vscreen, x1, y1, x2, y2, color);
+//  rect (vscreen, x1, y1, x2, y2, color);
+al_draw_rectangle(x1,y1,x2,y2,color,0)
 }
 
 // draw hlines
 void ghline (int x1, int y1, int x2, int col){
   int x;
   for (x = x1; x <= x2; x++)
-    PutPixel (vscreen, x, y1, col);
+//    PutPixel (vscreen, x, y1, col);
+al_draw_pixel(x,y1,col);
 //      hline(vscreen,x1,y1,x2,col);
 }
 
