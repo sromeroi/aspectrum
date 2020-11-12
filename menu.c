@@ -59,7 +59,7 @@ int dummy_proc (void)
   if (language == 0)
     galert ("Still unimplemented", NULL, NULL, "Ok", NULL, 0, 0);
   else if (language == 1)
-    galert ("Todavía sin implementar", NULL, NULL, "Ok", NULL, 0, 0);
+    galert ("Todavia sin implementar", NULL, NULL, "Ok", NULL, 0, 0);
   return D_O_K;
 }
 
@@ -129,21 +129,25 @@ int changelang_proc (void)
 
 int referencehelp_proc(void)
 {
-  PALETTE pal,old_pal;
-  BITMAP *image;
+  //PALETTE pal,old_pal;
+  ALLEGRO_BITMAP *image;
   char *archivo;
-  get_palette(old_pal);
+  //get_palette(old_pal);
   archivo=find_file("keys.pcx");
-  image = load_bitmap(archivo, pal);
+  image = al_load_bitmap(archivo);
   free(archivo);
-  set_palette(pal);
-  scare_mouse();
-  rectfill(screen,0,0,screen->w,screen->h,0);
-  blit(image,screen,0,0,0,0,320,200);
-  unscare_mouse();
+  //set_palette(pal);
+  //scare_mouse();
+  //rectfill(screen,0,0,screen->w,screen->h,0);
+  al_clear_to_color(al_map_rgb(0,0,0));
+  //blit(image,screen,0,0,0,0,320,200);
+  //unscare_mouse();
+  al_set_target_bitmap(vscreen);
+  al_draw_bitmap(image,0,0,0);
+  al_flip_display();
   readkey();		
-  destroy_bitmap(image);
-  set_palette(old_pal);
+  al_destroy_bitmap(image);
+  //set_palette(old_pal);
   selected_opt = DIALOG_REFERENCEKEYS;
   return D_CLOSE;
 }
