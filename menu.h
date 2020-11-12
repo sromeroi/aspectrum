@@ -21,6 +21,7 @@
   
 #ifndef _MENU_H_
 #define _MENU_H_
+
 #define D_EXIT 0
 #define D_SELECTED 1
 #define D_O_K 2

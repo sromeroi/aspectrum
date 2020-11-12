@@ -8,7 +8,7 @@ AGUPLIB=$(AGUPDIR)/lib/release/libagup.a
 
 DESTDATPATH = /usr/share/$(EXE)
 LFLAGS = `pkg-config allegro-5 --libs`
-#CFLAGS = -Wall -O3 -mcpu=i686 `allegro-config --cflags` 
+#CFLAGS = -Wall -O3 -mcpu=i686 `pkg-config allegro-5 --cflags` 
 CFLAGS = -W -Wall -O2 -g `pkg-config allegro-5 --cflags` \
         -DVERSION=\"$(VERSION)\" -DDESTDAT=\"$(DESTDATPATH)\" \
         -DSOUND_BY_STREAM -DENABLE_LOGS 

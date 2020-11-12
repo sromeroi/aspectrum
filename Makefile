@@ -1,5 +1,5 @@
 #!/bin/sh
-# ¿lo de arriba esta bien? ¿no deberia ser /bin/make -f $@ o algo asi?
+# ï¿½lo de arriba esta bien? ï¿½no deberia ser /bin/make -f $@ o algo asi?
 
 CC = gcc
 EXE = aspectrum
@@ -33,8 +33,9 @@ DBGDEF = -DMSS -D_DEBUG_
 
 all: aspectrum docs
 
-aspectrum: dep $(AGUPLIB) $(objects)
-	$(CC) $(EXTRA) -o $(EXE) $(objects) $(AGUPLIB) $(LFLAGS) 
+aspectrum: dep $(objects)
+# $(AGUPLIB) 
+	$(CC) $(EXTRA) -o $(EXE) $(objects) $(LFLAGS) 
 
 $(objects): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@

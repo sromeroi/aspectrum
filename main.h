@@ -1,9 +1,10 @@
 #ifndef _MAIN_H
 #define _MAIN_H 1
 
+#define USING_ALLEGRO
+#define NO_USE_MENU
 
-
-#include "v_alleg.h"  // esto no deberia estar aqui.
+//#include "v_alleg.h"  // esto no deberia estar aqui.
 #define GS_HAYMOUSE 0x01
 #define GS_GUNSTICK 0x02
 #define GS_INACTIVE 0x04

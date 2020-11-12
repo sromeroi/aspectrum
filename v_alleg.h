@@ -22,7 +22,7 @@ gRGB;
 
 
 // "borrowed" from allegro
-/*  
+  
 #define gKEY_A ALLEGRO_KEY_A
 #define gKEY_B ALLEGRO_KEY_B
 #define gKEY_C ALLEGRO_KEY_C
@@ -73,7 +73,7 @@ gRGB;
 #define gKEY_F2 ALLEGRO_KEY_F2
 #define gKEY_F3 ALLEGRO_KEY_F3               
 #define gKEY_F4 ALLEGRO_KEY_F4               
-#define gKEY_F5 KALLEGRO_EY_F5               
+#define gKEY_F5 ALLEGRO_KEY_F5               
 #define gKEY_F6 ALLEGRO_KEY_F6               
 #define gKEY_F7 ALLEGRO_KEY_F7               
 #define gKEY_F8 ALLEGRO_KEY_F8               
@@ -81,7 +81,7 @@ gRGB;
 #define gKEY_F10 ALLEGRO_KEY_F10              
 #define gKEY_F11 ALLEGRO_KEY_F11 
 #define gKEY_F12 ALLEGRO_KEY_F12            
-#define gKEY_ESC ALLEGRO_KEY_ESC
+#define gKEY_ESC ALLEGRO_KEY_ESCAPE
 #define gKEY_LSHIFT ALLEGRO_KEY_LSHIFT
 #define gKEY_RSHIFT ALLEGRO_KEY_RSHIFT
 #define gKEY_ENTER ALLEGRO_KEY_ENTER
@@ -94,7 +94,9 @@ gRGB;
 #define gKEY_RCONTROL ALLEGRO_KEY_RCONTROL
 #define gKEY_BACKSPACE ALLEGRO_KEY_BACKSPACE
 #define gKEY_SLASH ALLEGRO_KEY_SLASH
-*/
+#define gKEY_TILDE ALLEGRO_KEY_TILDE
+
+
 
 void gExitEmulator (void);
 
@@ -155,3 +157,8 @@ void init_keyboard(void);
 void UpdateKeyboard (void);
 
 #endif	/* v_alleg.h */ 
+
+int referencehelp_proc(void);
+int mouse_x();
+int mouse_y();
+int mouse_b();

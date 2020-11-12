@@ -4,7 +4,7 @@
 
   Please read documentation files to know how this works :)
 
-  Thanks go to Marat Fayzullin (read z80.h for more info), Raúl Gomez
+  Thanks go to Marat Fayzullin (read z80.h for more info), Raï¿½l Gomez
   (check his great R80 Spectrum emulator!), Philip Kendall (some code
   of this emulator, such as the flags lookup tabled are from his fuse
   Spectrum emulator) and more people I forget to name here ...
@@ -42,6 +42,7 @@
 #include "sound.h"
 #include "snaps.h"
 #include "mem.h"
+#include "v_alleg.h"
 #include "macros.c"
 
 /* RAM variable, debug toggle variable, pressed key and
@@ -255,7 +256,7 @@ Z80Run (Z80Regs * regs, int numcycles)
 	}
 
       /* patch ROM loading routine */
-      // address contributed by Ignacio Burgueño :)
+      // address contributed by Ignacio Burgueï¿½o :)
 //     if( r_PC == 0x0569 )
       if (r_PC >= 0x0556 && r_PC <= 0x056c)
 	Z80Patch (regs);
@@ -424,6 +425,7 @@ Z80InPort (register Z80Regs * regs, register word port)
   extern tipo_emuopt emuopt;
   extern tipo_hwopt hwopt;
   extern int v_border;
+  int mousex, mousey, mouseb;
 
   /* El teclado */
   if (!(port & 0x01))
@@ -449,15 +451,19 @@ Z80InPort (register Z80Regs * regs, register word port)
       if (!(port & 0x1000) && (emuopt.gunstick & GS_GUNSTICK) &&
 	  (emuopt.gunstick & GS_HAYMOUSE))
 	{
+    mousex = mouse_x();
+    mousey = mouse_y();
+    mouseb = mouse_b();
+    
 	  /* disparo de la gunstick con el raton. */
-	  if (mouse_b & 1)
+	  if (mouseb & 1)
 	    code &= (0xFE);
 	  /* Miramos a ver si los atributos son blanco  */
-	  if ((mouse_x > 31) && (mouse_x < 287) &&
-	      (mouse_y > v_border) && (mouse_y < (192 + v_border)))
+	  if ((mousex > 31) && (mousex < 287) &&
+	      (mousey > v_border) && (mousey < (192 + v_border)))
 	    {
-	      x = (mouse_x - 32) / 8;
-	      y = (mouse_y - 1 - v_border) / 8;
+	      x = (mousex - 32) / 8;
+	      y = (mousey - 1 - v_border) / 8;
 	      valor = Z80ReadMem (0x5800 + 32 * y + x);
 	      if (((valor & 0x07) == 0x07) || ((valor & 0x38) == 0x38))
 		code &= 0xFB;

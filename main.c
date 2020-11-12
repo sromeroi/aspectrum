@@ -47,6 +47,7 @@
 #include "monofnt.h"
 #include "graphics.h"
 #include "debugger.h"
+#include "v_alleg.h"
 #include "menu.h"
 
 
@@ -372,7 +373,7 @@ int emuMain (int argc, char *argv[])
       if (keypressed ())
 	     tecla = readkey ();
 	  //printf("tecla=%i\n",tecla);
-      if ((tecla >> 8 == gKEY_ESC) || (tecla >>8 == KEY_TILDE ) )
+      if ((tecla >> 8 == gKEY_ESC) || (tecla >>8 == gKEY_TILDE ) )
 	{
 	  // call the menu and get the selected option
 	  scare_mouse ();

@@ -34,6 +34,13 @@
 #include "snaps.h"
 #include "mem.h"
 
+#ifdef NO_USE_MENU
+int MainMenu (Z80Regs * regs, char *tfont){ return 0; }
+void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor, int fgcolor, int textbgselcolor, char *tfont){ return 0; }
+int FileMenu (char *tfont, char type, char *filename){ return 0; }
+int menuopciones (void){ return 0; }
+int menuhardware (void){ return 0; }
+#else  // def NO_USE_MENU
 
 #ifdef I_HAVE_AGUP
 #include <agup.h>
@@ -127,30 +134,7 @@ int changelang_proc (void)
   return D_CLOSE;
 }
 
-int referencehelp_proc(void)
-{
-  //PALETTE pal,old_pal;
-  ALLEGRO_BITMAP *image;
-  char *archivo;
-  //get_palette(old_pal);
-  archivo=find_file("keys.pcx");
-  image = al_load_bitmap(archivo);
-  free(archivo);
-  //set_palette(pal);
-  //scare_mouse();
-  //rectfill(screen,0,0,screen->w,screen->h,0);
-  al_clear_to_color(al_map_rgb(0,0,0));
-  //blit(image,screen,0,0,0,0,320,200);
-  //unscare_mouse();
-  al_set_target_bitmap(vscreen);
-  al_draw_bitmap(image,0,0,0);
-  al_flip_display();
-  readkey();		
-  al_destroy_bitmap(image);
-  //set_palette(old_pal);
-  selected_opt = DIALOG_REFERENCEKEYS;
-  return D_CLOSE;
-}
+
 
 int about_proc (void)
 {
@@ -457,3 +441,4 @@ menuhardware (void)
     }
   return (0);
 }
+#endif // else - ifdef NO_USE_MENU

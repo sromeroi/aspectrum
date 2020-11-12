@@ -38,6 +38,7 @@
 #include "main.h"
 #include "sound.h"
 #include "mem.h"
+#include "menu.h"
 
 #ifdef I_HAVE_AGUP
 #include <agup.h>
@@ -61,6 +62,8 @@ ALLEGRO_BITMAP *vscreen;
 ALLEGRO_BITMAP *screen;
 ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *mouseicon;
+ALLEGRO_MOUSE_STATE mousestatus;
+
 extern Z80Regs spectrumZ80;
 unsigned int colors[256];
 //static DATAFILE *datafile = NULL;
@@ -199,8 +202,11 @@ void InitSystem (void){
 al_init();
   // inits everything (for allegro)
 //ASprintf("antes graficos \n");
-  InitGraphics ();
-//ASprintf("antes sonido \n");
+  InitGraphics();
+//ASprintf("antes keyboards \n");
+  al_install_keyboard();
+  al_install_mouse();
+//ASprintf("antes sonido \n"); 
   gInitSound ();
 //ASprintf("despues sonido\n");
 }
@@ -211,8 +217,7 @@ void InitGraphics (void){
 //  PALETTE specpal;
   extern int v_res;
   extern int v_border;
-//ASprintf("antes keyboards \n");
-  al_install_keyboard ();
+
 //ASprintf("antes timer \n");
 //  install_timer ();
 
@@ -345,7 +350,7 @@ al_draw_pixel(x,y1,paleta[col]);
 
 // cls with specified color
 void gclear_to_color (int color){
-  clear_to_color (vscreen, paleta[color]);
+  al_clear_to_color (paleta[color]);
 }
 
 // transfers from (x,y) to (x+w,y+h) from the virtual screen to the visible screen
@@ -832,3 +837,40 @@ void gSoundSync (void){
 }
 
 #endif // ifdef SOUND_METHOD_2
+
+int referencehelp_proc(void)
+{
+  //PALETTE pal,old_pal;
+  ALLEGRO_BITMAP *image;
+  char *archivo;
+  //get_palette(old_pal);
+  archivo=find_file("keys.pcx");
+  image = al_load_bitmap(archivo);
+  free(archivo);
+  //set_palette(pal);
+  //scare_mouse();
+  //rectfill(screen,0,0,screen->w,screen->h,0);
+  al_clear_to_color(al_map_rgb(0,0,0));
+  //blit(image,screen,0,0,0,0,320,200);
+  //unscare_mouse();
+  al_set_target_bitmap(vscreen);
+  al_draw_bitmap(image,0,0,0);
+  al_flip_display();
+  readkey();		
+  al_destroy_bitmap(image);
+  //set_palette(old_pal);
+  //PENDING ni idea de para que es: selected_opt = DIALOG_REFERENCEKEYS;
+  return D_CLOSE;
+}
+int mouse_b(void){
+  al_get_mouse_state(&mousestatus);
+  return mousestatus.buttons;
+}
+int mouse_x(void){
+  al_get_mouse_state(&mousestatus);
+  return mousestatus.x;
+}
+int mouse_y(void){
+  al_get_mouse_state(&mousestatus);
+  return mousestatus.y;
+}
