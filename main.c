@@ -121,9 +121,9 @@ int Z80Initialization (void){
 
   printf( STANDAR_COPYRIGHT );
 
-  fp=findopen_file("font.fnt");
-  fread (tfont, 4096, 1, fp);
-  fclose (fp);
+  //fp=findopen_file("font.fnt");
+  //fread (tfont, 4096, 1, fp);
+  //fclose (fp);
 
   if (init_spectrum(hwopt.hw_model,emuopt.romfile)!=0){ 
   printf("Error al inicializar el Hardware Spectrum\n");
@@ -336,9 +336,9 @@ int emuMain (int argc, char *argv[])
 
   // Init all the graphic stuff:
 
-//ASprintf("antes de initsystem\n");
+ASprintf("antes de initsystem\n");
   InitSystem ();
-//ASprintf("despues de initsystem\n");
+ASprintf("despues de initsystem\n");
   v_initmouse ();
   ClearScreen (7);
 

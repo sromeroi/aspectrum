@@ -63,11 +63,11 @@ ALLEGRO_BITMAP *screen;
 ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *mouseicon;
 ALLEGRO_MOUSE_STATE mousestatus;
+ALLEGRO_FONT *font;
 
 extern Z80Regs spectrumZ80;
 unsigned int colors[256];
 //static DATAFILE *datafile = NULL;
-ALLEGRO_FONT *font;
 
 #define NUMCOLORSPALETE 17
 ALLEGRO_COLOR paleta[NUMCOLORSPALETE];
@@ -217,10 +217,10 @@ void InitGraphics (void){
 //  PALETTE specpal;
   extern int v_res;
   extern int v_border;
+  al_init_primitives_addon();
   al_init_font_addon();
   al_init_ttf_addon();
-  al_init_primitives_addon();
-
+  
 
 al_set_new_display_flags(ALLEGRO_WINDOWED);
 al_set_new_display_option(ALLEGRO_COLOR_SIZE,16,ALLEGRO_SUGGEST);
@@ -279,8 +279,13 @@ al_set_window_title (display, "ASpectrum emulator");
 
   //datafile = load_datafile (find_file("font.dat"));
   //font = datafile[0].dat;
-
-  font = al_load_font("DroidFallbackFull.ttf",8,ALLEGRO_TTF_MONOCHROME);
+  const char *font_file = "./font.ttf"; 
+  font = al_load_font(font_file,12,0);
+if (!font) {
+        printf("Error al cargar tipo de letra\n");
+        exit (1);
+  
+    }
 
 //  LOCK_VARIABLE (last_fps);
 //  LOCK_VARIABLE (frame_counter);
@@ -331,7 +336,7 @@ vscreen = al_get_backbuffer(display);
   gui_edit_proc = d_agup_edit_proc;
   gui_text_list_proc = d_agup_text_list_proc;
 #endif
-
+printf("End of InitGraphics()\n");
 }
 
 
@@ -379,7 +384,7 @@ void v_initmouse (void) {
       // dibujar puntero 
       mouseicon = al_create_bitmap (16, 16);
        al_set_target_bitmap(mouseicon);
-      al_clear_to_color (paleta[0]);
+      al_clear_to_color (al_map_rgb (255, 255, 255));
       color_b = al_map_rgb (255, 255, 255);
       color_n = al_map_rgb (0, 0, 0);
       al_draw_circle (8, 8, 7, color_n,0);

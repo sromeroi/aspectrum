@@ -187,9 +187,7 @@ DisplayScanLine (int linea, Z80Regs * regs)
 /*-----------------------------------------------------------------
  Clear the screen with an specified colour (colores[] based).
 ------------------------------------------------------------------*/
-void
-ClearScreen (char color)
-{
+void ClearScreen (int color){
   gclear_to_color (color);
 }
 

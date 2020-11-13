@@ -31,6 +31,7 @@ void GFXprintf (int x, int y, char *sentence, char *font, char fg_color,
 int GFXgets (int x, int y, char *cadena, char *font, int fg_color,
 	      int bg_color, int max);
 void GFXprintf_tovideo (int x, int y, char *sentence, char *font,
+void ClearScreen (int color);
 			 
 char fg_color, char bg_color, char incr);
 
