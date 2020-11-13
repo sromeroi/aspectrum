@@ -348,8 +348,9 @@ GFXprintf_tovideo (int x, int y, char *sentence, char *font,
  enter, etc.).
 ------------------------------------------------------------------*/
 
-int
-GFXgets (int x, int y, char *cadena, char *font,
+//PENDING se necesita esto para algo?
+
+int GFXgets (int x, int y, char *cadena, char *font,
 	 int fg_color, int bg_color, int max)
 {
   char car, tecla = 0;
@@ -360,9 +361,9 @@ GFXgets (int x, int y, char *cadena, char *font,
   gUpdateRect (x + (offs * 8), y, 8, 16);
 
   /* while the user does not press ENTER... */
-  while (tecla != '\r' && tecla != '\n')
+  while (!gkeypressed(gKEY_ENTER))
     {
-      tecla = readkey ();
+      tecla = 0; // PENDING readkey ();
 
       if ((tecla >= ' ' && tecla <= 125) && offs < max - 2)
 	{
@@ -398,7 +399,7 @@ GFXgets (int x, int y, char *cadena, char *font,
       gUpdateRect (x, y, max * 8, 16);
 
       // if the user presses ENTER, end edition
-      if ((tecla == '\n' || tecla == '\r') && offs > 0)
+      if ((gkeypressed(gKEY_ENTER)) && offs > 0)
 	{
 	  cadena[offs + 1] = '\0';
 	  return (offs);

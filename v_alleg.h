@@ -110,7 +110,7 @@ void gtextout (char *b, int x, int y, int color);
 
 void gtextoutb (char *b, int x, int y, int color, ALLEGRO_FONT * tfont);
 
-void init_wrapper (void);
+//void init_wrapper (void);
 
 void gacquire_bitmap (void);
 
@@ -153,8 +153,10 @@ void playMainSample (void);
 void gSoundSync (void);
 
 // keyboard functions
-void init_keyboard(void);
-void UpdateKeyboard (void);
+bool gkeypressed(int tecla);
+void gupdatekeys(void);
+
+
 
 #endif	/* v_alleg.h */ 
 
@@ -162,3 +164,5 @@ int referencehelp_proc(void);
 int mouse_x();
 int mouse_y();
 int mouse_b();
+void v_scaremouse(void);
+void v_unscaremouse(void);

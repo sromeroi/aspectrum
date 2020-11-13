@@ -217,6 +217,15 @@ void InitGraphics (void){
 //  PALETTE specpal;
   extern int v_res;
   extern int v_border;
+  al_init_font_addon();
+  al_init_ttf_addon();
+  al_init_primitives_addon();
+
+
+al_set_new_display_flags(ALLEGRO_WINDOWED);
+al_set_new_display_option(ALLEGRO_COLOR_SIZE,16,ALLEGRO_SUGGEST);
+display = al_create_display(320,240);
+al_set_window_title (display, "ASpectrum emulator");
 
 //ASprintf("antes timer \n");
 //  install_timer ();
@@ -234,6 +243,7 @@ void InitGraphics (void){
 	}
     }
   */
+  
 //  ASprintf("se pedia %i y se obtubo %i\n",v_res,SCREEN_H);
   v_res = al_get_display_height(display);
   v_border = (v_res - 192) / 2;
@@ -269,17 +279,16 @@ void InitGraphics (void){
 
   //datafile = load_datafile (find_file("font.dat"));
   //font = datafile[0].dat;
-  al_init_font_addon();
-  al_init_ttf_addon();
+
   font = al_load_font("DroidFallbackFull.ttf",8,ALLEGRO_TTF_MONOCHROME);
 
-  LOCK_VARIABLE (last_fps);
-  LOCK_VARIABLE (frame_counter);
-  LOCK_VARIABLE (target_cycle);
+//  LOCK_VARIABLE (last_fps);
+//  LOCK_VARIABLE (frame_counter);
+//  LOCK_VARIABLE (target_cycle);
 //   LOCK_FUNCTION(count_frames);
 //   LOCK_FUNCTION(target_incrementor);
-  install_int_ex (count_frames, BPS_TO_TIMER (1));
-  install_int_ex (target_incrementor, BPS_TO_TIMER (50));
+//PENDING  install_int_ex (count_frames, BPS_TO_TIMER (1));
+//PENDING  install_int_ex (target_incrementor, BPS_TO_TIMER (50));
   last_fps = frame_counter = target_cycle = 0;
 
 //ASprintf("creando vscreen\n");
@@ -329,7 +338,7 @@ vscreen = al_get_backbuffer(display);
 // draw filled rectangles
 void gbox (int x1, int y1, int x2, int y2, int color){
 //  rectfill (vscreen, x1, y1, x2, y2, color);
-  al_draw_filledrectangle(x1, y1, x2, y2, paleta[color]);
+  al_draw_filled_rectangle(x1, y1, x2, y2, paleta[color]);
 }
 
 // draw rectangles
@@ -355,36 +364,37 @@ void gclear_to_color (int color){
 
 // transfers from (x,y) to (x+w,y+h) from the virtual screen to the visible screen
 void gUpdateRect (int x, int y, int w, int h){
-  blit (vscreen, screen, x, y, x, y, w, h);
+  al_draw_bitmap_region(vscreen, x, y,  w, h, x, y,0);
 }
 
 
 ALLEGRO_MOUSE_CURSOR *mousecursor;
 void v_initmouse (void) {
   extern tipo_emuopt emuopt;
-  int color_b, color_n;
+  ALLEGRO_COLOR color_b, color_n;
 
   if (al_install_mouse ()){
       emuopt.gunstick |= GS_HAYMOUSE;
 
       // dibujar puntero 
       mouseicon = al_create_bitmap (16, 16);
-      al_clear_bitmap (mouseicon);
-      color_b = al_makecol (255, 255, 255);
-      color_n = al_makecol (0, 0, 0);
-      al_circle (mouseicon, 8, 8, 7, color_n);
-      al_circle (mouseicon, 8, 8, 6, color_b);
-      al_putpixel (mouseicon, 8, 8, color_b);
-      al_putpixel (mouseicon, 7, 8, color_n);
-      al_putpixel (mouseicon, 9, 8, color_n);
-      al_putpixel (mouseicon, 8, 7, color_n);
-      al_putpixel (mouseicon, 8, 9, color_n);
+       al_set_target_bitmap(mouseicon);
+      al_clear_to_color (paleta[0]);
+      color_b = al_map_rgb (255, 255, 255);
+      color_n = al_map_rgb (0, 0, 0);
+      al_draw_circle (8, 8, 7, color_n,0);
+      al_draw_circle (8, 8, 6, color_b,0);
+      al_put_pixel (8, 8, color_b);
+      al_put_pixel (7, 8, color_n);
+      al_put_pixel (9, 8, color_n);
+      al_put_pixel (8, 7, color_n);
+      al_put_pixel (8, 9, color_n);
 
       if ((emuopt.gunstick & GS_GUNSTICK) != 0) {
           mousecursor = al_create_mouse_cursor(mouseicon,8,8);
           //set_mouse_sprite (emuopt.raton_bmp);
           //set_mouse_sprite_focus (8, 8);
-          al_show_mouse_cursor (screen);
+          al_show_mouse_cursor (display);
       }
   }
 
@@ -404,7 +414,7 @@ int galert (const char *s1, const char *s2, const char *s3, const char *b1,
  Move from main.c to v_alleg.c due portability, is much depend of
  allegro and some architectures hasn't keyboard at all :-)
  -------------------------------------------------------------------*/
-
+ALLEGRO_KEYBOARD_STATE estadoteclas;
 /* al principio no habia teclas pulsadas... */
 int fila[5][5];
 void init_keyboard(void){
@@ -419,7 +429,6 @@ void init_keyboard(void){
 void UpdateKeyboard (void)
 {
 /*=== This adds the row/column/data value for each key on spectrum kerb ===*/
-  ALLEGRO_KEYBOARD_STATE estadoteclas;
 #define NUM_KEYB_KEYS 256
   enum SpecKeys
   {
@@ -622,6 +631,13 @@ void UpdateKeyboard (void)
 
 #undef filas
 */
+}
+
+void gupdatekeys(void){
+  al_get_keyboard_state(&estadoteclas);
+}
+bool gkeypressed(int tecla){
+  return al_key_down(&estadoteclas, tecla);
 }
 
 
@@ -856,7 +872,7 @@ int referencehelp_proc(void)
   al_set_target_bitmap(vscreen);
   al_draw_bitmap(image,0,0,0);
   al_flip_display();
-  readkey();		
+  //PENDING readkey();		
   al_destroy_bitmap(image);
   //set_palette(old_pal);
   //PENDING ni idea de para que es: selected_opt = DIALOG_REFERENCEKEYS;
@@ -873,4 +889,11 @@ int mouse_x(void){
 int mouse_y(void){
   al_get_mouse_state(&mousestatus);
   return mousestatus.y;
+}
+
+void v_scaremouse(void){
+  ;
+}
+void v_unscaremouse(void){
+  ;
 }

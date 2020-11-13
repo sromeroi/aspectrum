@@ -47,8 +47,7 @@ GetHexValue (int x, int y, char *str, char *result,
 	     char *font, int fg_color, int bg_color, int max)
 {
   GFXprintf (x, y, str, font, fg_color, bg_color, -1);
-  GFXgets (((strlen (str) + 1) * 7) + x, y, result, font, fg_color, bg_color,
-	   max);
+  GFXgets (((strlen (str) + 1) * 7) + x, y, result, font, fg_color, bg_color, max);
   GFXprintf (x, y, "                                  ", font, fg_color,
 	     bg_color, -1);
 }
@@ -201,7 +200,7 @@ DebuggerHelp (char *tfont)
 					   NUM_DEBUGGER_HELPLINES) + i],
 		       tfont, fgcolor, bgcolor, -1);
   dumpVirtualToScreen ();
-  readkey ();
+  //PENDING readkey ();
 
   return 1;
 }

@@ -69,7 +69,7 @@ LoadSnapshot (Z80Regs * regs, char *fname)
   case TYPE_TZX:		// ojo que no se inicializan.
     ASprintf ("YEPA: cargando una cinta en lugar de un snapshot.\n");
     tapfile = snafp;
-    ret = 1;			// ¿ret=1?
+    ret = 1;			// ï¿½ret=1?
     break;
 
   default:
@@ -418,7 +418,7 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
       tam = tam + (fgetc (fp) << 8);
       pag = fgetc (fp);
       sig = sig + tam + 3;
-      ASprintf (" pagina a cargar es: %i, tamaño:%x\n", pag, tam);
+      ASprintf (" pagina a cargar es: %i, tamaï¿½o:%x\n", pag, tam);
 	switch (hwmodel) {
 		 case SPECMDL_16K:
 		 case SPECMDL_48K:
@@ -512,7 +512,7 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
         outbankm_p31(buffer[86]);
     }
     
-    // aki abria que añadir lo del sonido claro.
+    // aki abria que aï¿½adir lo del sonido claro.
     
   } else {
     ASprintf ("Fichero Z80: Version 1.0\n");
@@ -577,7 +577,7 @@ LoadSP (Z80Regs * regs, FILE * fp)
 {
   unsigned short length, start, sword;
   int f;
-  byte buffer[80];		// ¿por que 80 si leemos 38?
+  byte buffer[80];		// ï¿½por que 80 si leemos 38?
   fread (buffer, 38, 1, fp);
 
   /* load the .SP header: */
@@ -738,7 +738,7 @@ LoadSNA (Z80Regs * regs, FILE * fp)
     regs->SP.B.h = buffer[24];
     regs->IM = buffer[25];
     regs->BorderColor = buffer[26];
-    // ahora pillamos el añadido de los 128K
+    // ahora pillamos el aï¿½adido de los 128K
     fseek (fp, 49179, SEEK_SET);
     regs->PC.B.l = getc (fp);
     regs->PC.B.h = getc (fp);
@@ -785,7 +785,7 @@ SaveSNA (Z80Regs * regs, FILE * fp)
 // SNA solo esta soportado en 48K, 128K y +2
 
   if ((hwopt.hw_model != SPECMDL_48K) && (hwopt.hw_model != SPECMDL_128K)) {
-    alert ("El modelo de Spectrum utilizado",
+    galert ("El modelo de Spectrum utilizado",
 	   "No permite grabar el snapshot en formato SNA",
 	   "Utilize otro tipo de archivo (extension)", "OK", NULL, 13, 27);
     return 1;
@@ -1200,7 +1200,7 @@ LoadTAP (Z80Regs * regs, FILE * fp)
     TZX_loadblock (regs, fp);
     break;
   default:
-    ASprintf ("Cargando algo que ni es TAP ni TZX, ¡¡¡QUE CHUNGO!!!\n");
+    ASprintf ("Cargando algo que ni es TAP ni TZX, ï¿½ï¿½ï¿½QUE CHUNGO!!!\n");
     break;
   }
   return 0;
@@ -1219,7 +1219,7 @@ RewindTAP (Z80Regs * regs, FILE * fp)
     TZX_rewind ();
     break;
   default:
-    ASprintf ("Rebobinando algo que ni es TAP ni TZX, ¡¡¡QUE CHUNGO!!!\n");
+    ASprintf ("Rebobinando algo que ni es TAP ni TZX, ï¿½ï¿½ï¿½QUE CHUNGO!!!\n");
     break;
   }
   return 0;
@@ -1249,7 +1249,7 @@ TAP_loadblock (Z80Regs * regs, FILE * fp)
   where = regs->IX.W;
   load=   (regs->AF.B.l) & C_FLAG ;
   fgetc (fp);			/* read flag type and ignore it */
-	/* FIXME No deberiamos ignorarlo ¿saltar al siguiente? */
+	/* FIXME No deberiamos ignorarlo ï¿½saltar al siguiente? */
   /* determine how many bytes to read. If there are less bytes in
      the tap block than the requested DE bytes, generate the read
      error by setting the C_FLAG on F... */
@@ -1432,13 +1432,13 @@ TZX_loadblock (Z80Regs * regs, FILE * fp)
 	  ASprintf ("Titulo....: ");
 	  break;
 	case 0x01:
-	  ASprintf ("Compañia..: ");
+	  ASprintf ("Compaï¿½ia..: ");
 	  break;
 	case 0x02:
 	  ASprintf ("Autores...: ");
 	  break;
 	case 0x03:
-	  ASprintf ("Año.......: ");
+	  ASprintf ("Aï¿½o.......: ");
 	  break;
 	case 0x04:
 	  ASprintf ("Idioma....: ");
@@ -1489,7 +1489,7 @@ TZX_rewind ()
 char
 TZX_genindex (FILE * fp)
 {
-/* ¿por que genero un indice de los TZX */
+/* ï¿½por que genero un indice de los TZX */
 
 /* para empezar por culpa de los bloques de salto, call y loop
    me ahorran el releer todo el tzx cada vez que encuentro uno
@@ -1501,7 +1501,7 @@ TZX_genindex (FILE * fp)
 Los bloques no validos son ignorados directamente, los validos, son tratados
 por load_block (incluso aunque no tengan efecto).	
 	
-valido id(HEX) descripcion tamaño sin contar el ID
+valido id(HEX) descripcion tamaï¿½o sin contar el ID
 (NO valido significa que no cargara correctamente en aspectrum, Valido significa que PUEDE cargar)
 *	SI 10 standar tap block (2,3)+4
 *	NO 11 turbo tap block  (f,10,11)+12

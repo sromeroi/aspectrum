@@ -100,15 +100,13 @@ extern int gSoundInited;
 extern tipo_mem mem;
 
 #define STANDAR_COPYRIGHT  "ASpectrum GNU pure C Z80 / Spectrum Emulator V " VERSION "\n" \
-	  "(C) 2000-2004 Santiago Romero (NoP/Compiler), Kak & Alvaro Alea.\n" \
+	  "(C) 2000-2020 Santiago Romero (NoP/Compiler), Kak & Alvaro Alea.\n" \
 	  "http://aspectrum.sf.net\n" \
-	  "Powered by Allegro 4 - http://alleg.sf.net\n" \
+	  "Powered by Allegro 5 - https://liballeg.org/\n" \
 	  "Distributed under the terms of GNU Public License V2\n\n" \
 
 
-int
-Z80Initialization (void)
-{
+int Z80Initialization (void){
   FILE *fp;
   /* we get memory and load font, spectrum ROM and
      possible snapshots selected in the command line */
@@ -133,7 +131,7 @@ Z80Initialization (void)
   }
   spectrumZ80.RAM=mem.p; // por compatibilidad
   
-  init_wrapper ();
+  // init_wrapper ();
 
   // COMMENT: Is this needed? -> CreateVideoTables();
   Z80Reset (&spectrumZ80, 69888);
@@ -276,8 +274,7 @@ int emuMain (int argc, char *argv[])
   // AS_printf("Z80 Initialization completed\n");
 
   // check if it's the last arg
-  if ((optind + 1) < argc)
-    {
+  if ((optind + 1) < argc){
       printf("excess of unknow args\n");
       return (-1);
     }
@@ -341,7 +338,6 @@ int emuMain (int argc, char *argv[])
 
 //ASprintf("antes de initsystem\n");
   InitSystem ();
-  set_window_title ("ASpectrum emulator");
 //ASprintf("despues de initsystem\n");
   v_initmouse ();
   ClearScreen (7);
@@ -370,15 +366,12 @@ int emuMain (int argc, char *argv[])
   while (!done)
     {
       // Read a key to interpret if available
-      if (keypressed ())
-	     tecla = readkey ();
-	  //printf("tecla=%i\n",tecla);
-      if ((tecla >> 8 == gKEY_ESC) || (tecla >>8 == gKEY_TILDE ) )
-	{
+	  gupdatekeys();
+      if ( gkeypressed(gKEY_ESC) || gkeypressed(gKEY_TILDE) ){
 	  // call the menu and get the selected option
-	  scare_mouse ();
+	  v_scaremouse ();
 	  option = MainMenu (&spectrumZ80, tfont);
-	  unscare_mouse ();
+	  v_unscaremouse ();
 
 	  // simulate a keypress depending on the choosen option
 	  switch (option)
@@ -423,9 +416,10 @@ int emuMain (int argc, char *argv[])
 		  break;
 		};
 
-	}
-      switch (tecla >> 8)
-	{
+	  } else {
+		//FIXME check key by key 
+	  }
+      switch (tecla >> 8){
 
 	case gKEY_F2:
 	  if (FileMenu (tfont, DIALOG_SNA, fname) != 0)
@@ -517,8 +511,7 @@ int emuMain (int argc, char *argv[])
 	    }
 	};
 
-      if ((tecla >> 8) == gKEY_F1)
-	{
+      if ((tecla >> 8) == gKEY_F1){
 	  if (debug == 0) {
 	      ClearScreen (0);
 	      gclear ();
@@ -602,9 +595,9 @@ int emuMain (int argc, char *argv[])
 	      //Calc FPS
 	      sprintf (b, "%d ", last_fps);
 	      gtextout (b, 4, v_res - 16, 15);
-	      scare_mouse ();
+	      v_scaremouse ();
 	      dumpVirtualToScreen ();
-	      unscare_mouse ();
+	      v_unscaremouse ();
 
 	    }
 	  else
@@ -672,7 +665,7 @@ int emuMain (int argc, char *argv[])
 	      ClearScreen (0);
 	      DisplayScreen (&spectrumZ80);
 	      dumpVirtualToScreen ();
-	      readkey ();
+	      //PENDING readkey ();
 	      ClearScreen (0);
 	      gclear ();
 	      DrawHelp (tfont);
@@ -686,8 +679,8 @@ int emuMain (int argc, char *argv[])
 	    case 't':
 	      GetHexValue (2, 130, lang_runto_t[language], b, tfont, 6, 0, 6);
 	      spectrumZ80.TrapAddress = strtol (b, (char **) NULL, 16);
-	      while (!keypressed () &&
-		     spectrumZ80.PC.W != spectrumZ80.TrapAddress)
+	    //PENDING  while (!keypressed () &&
+		while ( spectrumZ80.PC.W != spectrumZ80.TrapAddress)
 		{
 		  Z80Run (&spectrumZ80, 1);
 		  Z80Dump (&spectrumZ80, tfont);
@@ -724,7 +717,8 @@ int emuMain (int argc, char *argv[])
 	      // Run the emulation until ICount < 100 (near interrupt)
 	    case 'i':
 	      debug = 0;
-	      while (spectrumZ80.ICount > 50 && !keypressed ())
+	    //PENDING  while (spectrumZ80.ICount > 50 && !keypressed ())
+		  while (spectrumZ80.ICount > 50 )
 		{
 		  Z80Run (&spectrumZ80, 1);
 		}
@@ -835,7 +829,7 @@ int emuMain (int argc, char *argv[])
   return (1);
 }
 
-END_OF_MAIN ();
+//END_OF_MAIN ();
 // When compiling under MSDOS you should comment the above line...
 
 
@@ -867,14 +861,12 @@ void CreateVideoTables ( void )
  Used to count the Frames Per Second on the game.
  Do frame_counter++ after each frame draw.
 ------------------------------------------------------------------*/
-void
-count_frames (void)
-{
+void count_frames (void){
   last_fps = frame_counter;
   frame_counter = 0;
 }
 
-END_OF_FUNCTION (count_frames);
+//END_OF_FUNCTION (count_frames);
 /* When compiling under MSDOS you should comment the above line... */
 
 
@@ -889,13 +881,11 @@ END_OF_FUNCTION (count_frames);
           { do_one_game_cycle(); cycle++; }
    } while (!end_game);
 ------------------------------------------------------------------*/
-void
-target_incrementor (void)
-{
+void target_incrementor (void){
   target_cycle++;
 }
 
-END_OF_FUNCTION (target_incrementor);
+//END_OF_FUNCTION (target_incrementor);
 /* When compiling under MSDOS you should comment the above line... */
 
 #ifndef ENABLE_LOGS
