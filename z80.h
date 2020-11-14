@@ -53,7 +53,7 @@
 #define DEBUG_QUIT     0
   
 
-#define video vscreen
+//PENDING esto para que es... #define video vscreen
   
 
 /*=== Some common standard data types: ==============================*/ 

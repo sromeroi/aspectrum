@@ -6,20 +6,10 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/keyboard.h>
 
-typedef struct gRGB 
-{
-  
-unsigned char r, g, b;
-   
-unsigned char filler;
- 
-}
-gRGB; 
-
-
-
-
-
+typedef struct gRGB {
+  unsigned char r, g, b;
+  unsigned char filler;
+ } gRGB; 
 
 // "borrowed" from allegro
   
@@ -134,10 +124,7 @@ void InitSystem (void);
 
 void v_initmouse (void);
 
-int galert (const char *s1, const char *s2, const char *s3, const char 
-*b1,
-	     const char *b2, int c1, int c2);
-
+int galert (const char *s1, const char *s2, const char *s3, const char *b1, const char *b2, int c1, int c2);
 
 // sound functions 
 void gInitSound (void);
@@ -154,15 +141,19 @@ void gSoundSync (void);
 
 // keyboard functions
 bool gkeypressed(int tecla);
+
 void gupdatekeys(void);
 
+int referencehelp_proc(void);
 
+int mouse_x();
+
+int mouse_y();
+
+int mouse_b();
+
+void v_scaremouse(void);
+
+void v_unscaremouse(void);
 
 #endif	/* v_alleg.h */ 
-
-int referencehelp_proc(void);
-int mouse_x();
-int mouse_y();
-int mouse_b();
-void v_scaremouse(void);
-void v_unscaremouse(void);

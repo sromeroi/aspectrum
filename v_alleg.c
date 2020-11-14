@@ -30,14 +30,14 @@
 
 #include "v_alleg.h"
 #include "z80.h"
-#include "snaps.h"
+//#include "snaps.h"
+//#include "main.h"
+//#include "monofnt.h"     //FIXME check if need 
+//#include "graphics.h"
+//#include "debugger.h"
 #include "main.h"
-#include "monofnt.h"     //FIXME check if need 
-#include "graphics.h"
-#include "debugger.h"
-#include "main.h"
-#include "sound.h"
-#include "mem.h"
+//#include "sound.h"
+//#include "mem.h"
 #include "menu.h"
 
 #ifdef I_HAVE_AGUP
@@ -58,8 +58,8 @@ extern volatile int last_fps;
 // generic key handler ( = key using allegro)
 //volatile char *gkey;
 // allegro virtual screen
-ALLEGRO_BITMAP *vscreen;
-ALLEGRO_BITMAP *screen;
+ALLEGRO_BITMAP *vscreen; // This is the screen bitmap
+ALLEGRO_BITMAP *screen;  // This is the work screen to put things
 ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *mouseicon;
 ALLEGRO_MOUSE_STATE mousestatus;
@@ -119,8 +119,8 @@ static int colores[NUMCOLORSPALETE][3] = {
 // function called when you exit from the emulator (unitialization here)
 void ExitEmulator (void){
   //unload_datafile (datafile);
-  if (vscreen != NULL)
-    al_destroy_bitmap (vscreen);
+  if (screen != NULL)
+    al_destroy_bitmap (screen);
 //PENDING  set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
 #ifdef I_HAVE_AGUP
   agup_shutdown ();
@@ -226,6 +226,8 @@ al_set_new_display_flags(ALLEGRO_WINDOWED);
 al_set_new_display_option(ALLEGRO_COLOR_SIZE,16,ALLEGRO_SUGGEST);
 display = al_create_display(320,240);
 al_set_window_title (display, "ASpectrum emulator");
+//ASprintf("creando vscreen\n");
+vscreen = al_get_backbuffer(display);
 
 //ASprintf("antes timer \n");
 //  install_timer ();
@@ -245,8 +247,11 @@ al_set_window_title (display, "ASpectrum emulator");
   */
   
 //  ASprintf("se pedia %i y se obtubo %i\n",v_res,SCREEN_H);
-  v_res = al_get_display_height(display);
+// FIXME screeen must be 512x384, the real spectrum resolution, and then cut & copy to vscreen when need.
+  //v_res = al_get_display_height(display);
+  v_res=240;
   v_border = (v_res - 192) / 2;
+  screen=al_create_bitmap(320,240);
 
   // if we're on windowed mode, update color conversion tables...
 /*
@@ -296,10 +301,7 @@ if (!font) {
 //PENDING  install_int_ex (target_incrementor, BPS_TO_TIMER (50));
   last_fps = frame_counter = target_cycle = 0;
 
-//ASprintf("creando vscreen\n");
 
-//  vscreen = create_bitmap (320, v_res);
-vscreen = al_get_backbuffer(display);
 /*
   if (vscreen == NULL)
     {
@@ -475,7 +477,6 @@ void UpdateKeyboard (void)
 
   /* change row and column signals according to pressed key */
   al_get_keyboard_state(&estadoteclas);
-  
 
   if (al_key_down(&estadoteclas,ALLEGRO_KEY_Z))
     fila[4][1] &= (0xFD);
