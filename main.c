@@ -340,12 +340,14 @@ ASprintf("antes de initsystem\n");
   InitSystem ();
 ASprintf("despues de initsystem\n");
   v_initmouse ();
+ASprintf("despues de v_initmouse\n");
   ClearScreen (7);
 
   // Init main variables:
   hay_tecla = main_tecla = 0;
 
   init_keyboard();
+  ASprintf("despues de init keyboard\n");
 
   // If we start on debug mode we need to update the debugger screen:
   if (debug)
@@ -361,6 +363,7 @@ ASprintf("despues de initsystem\n");
 
   initSoundLog ();		// first sound log initialization
 //ASprintf("entrando en el bucle\n");
+  ASprintf("despues de initSoundLog, start main loop...\n");
 
   // MAIN LOOP
   while (!done)
@@ -536,10 +539,11 @@ ASprintf("despues de initsystem\n");
 	  if (f_flash2 >= 32)
 	    f_flash2 = 0;
 	  f_flash = (f_flash2 < 16 ? 0 : 1);
-
+ASprintf("P\n");
 	  // if there is enough time, draw frame:
 	  if (target_cycle < 2 || frame_counter == 0)
 	    {
+ASprintf("1\n");
 	      // no visible upper border
 	      target_tstate =
 		      (hwopt.ts_line * (hwopt.line_upbo + hwopt.line_poin - v_border)) - hwopt.ts_lebo;
@@ -548,6 +552,7 @@ ASprintf("despues de initsystem\n");
           if (hwopt.int_type==NORMAL) spectrumZ80.petint=1;
 	      Z80Run (&spectrumZ80, target_tstate - current_tstate);
 	      // visible upper border         
+ASprintf("2\n");
 	      for (scanl = 0; scanl < v_border; scanl++) {
 		     target_tstate += hwopt.ts_line;
 		     current_tstate = spectrumZ80.IPeriod - spectrumZ80.ICount;
@@ -556,6 +561,7 @@ ASprintf("despues de initsystem\n");
 		  }
 
 	      // Now run the emulator for all the real screen (192 lines)
+ASprintf("3\n");
           if (hwopt.int_type==INVES) spectrumZ80.petint=1;
 	      for (scanl = 0; scanl < 192; scanl++) {
 		     // left border
@@ -580,6 +586,7 @@ ASprintf("despues de initsystem\n");
 		  }
 
 	      // visible bottom border
+ASprintf("4\n");
 	      hwopt.port_ff &= 0xF0;
 	      for (scanl = 192 + v_border; scanl < v_res; scanl++) {
 		  target_tstate += hwopt.ts_line;
@@ -587,21 +594,19 @@ ASprintf("despues de initsystem\n");
 		  Z80Run (&spectrumZ80, target_tstate - current_tstate);
 		  displayborderscanline (scanl);
 		  }
-
+ASprintf("5\n");
 	      // the last lines (56+16 lines - border)
 	      // Run it for 56 lines covering bottom border and ray return
 	      Z80Run (&spectrumZ80, spectrumZ80.ICount);
-
+ASprintf("6\n");
 	      //Calc FPS
 	      sprintf (b, "%d ", last_fps);
 	      gtextout (b, 4, v_res - 16, 15);
 	      v_scaremouse ();
 	      dumpVirtualToScreen ();
 	      v_unscaremouse ();
-
-	    }
-	  else
-	    {
+ASprintf("7\n");
+	    } else {
 	      // If we have not enough time, don't draw the screen,
 	      // only emulate
 
@@ -638,8 +643,9 @@ ASprintf("despues de initsystem\n");
 	      hwopt.port_ff &= 0xF0;
 	      Z80Run (&spectrumZ80, spectrumZ80.ICount);
 	    }
-
+ASprintf("8\n");
 	  // Speed control without sound
+/*
 	  if (!gSoundInited)
 	    while (target_cycle == 0);
 	  else
@@ -648,7 +654,8 @@ ASprintf("despues de initsystem\n");
 	      soundDump ();
 	      target_cycle = 0;
 	    }
-
+*/
+ASprintf("9\n");
 	  target_cycle--;
 	  frame_counter++;
 	  UpdateKeyboard ();
@@ -825,7 +832,7 @@ ASprintf("despues de initsystem\n");
 
 
     }				// while (!done)
-
+   ASprintf("9\n");
   return (1);
 }
 

@@ -146,6 +146,7 @@ void dumpVirtualToScreen(void) {
   al_set_target_bitmap(vscreen);
   al_draw_bitmap(screen,0,0,0);
   al_flip_display();
+  al_set_target_bitmap(screen);
 }
 
 // draws text in the virtual screen
@@ -186,7 +187,7 @@ void gPutPixel (int x, int y, int col){
 // generic acquire bitmap function
 void gacquire_bitmap (void){
   //acquire_bitmap (vscreen);
-  al_set_target_bitmap(vscreen);
+  al_set_target_bitmap(screen);
 }
 
 // generic release bitmap function
@@ -252,7 +253,7 @@ vscreen = al_get_backbuffer(display);
   v_res=240;
   v_border = (v_res - 192) / 2;
   screen=al_create_bitmap(320,240);
-
+  al_set_target_bitmap(screen);
   // if we're on windowed mode, update color conversion tables...
 /*
   if ((depth = desktop_color_depth ()) > 8){
@@ -371,7 +372,9 @@ void gclear_to_color (int color){
 
 // transfers from (x,y) to (x+w,y+h) from the virtual screen to the visible screen
 void gUpdateRect (int x, int y, int w, int h){
-  al_draw_bitmap_region(vscreen, x, y,  w, h, x, y,0);
+  al_set_target_bitmap(vscreen);
+  al_draw_bitmap_region(screen, x, y,  w, h, x, y,0);
+  al_set_target_bitmap(screen);
 }
 
 
@@ -878,6 +881,7 @@ int referencehelp_proc(void)
   al_set_target_bitmap(vscreen);
   al_draw_bitmap(image,0,0,0);
   al_flip_display();
+  al_set_target_bitmap(screen);
   //PENDING readkey();		
   al_destroy_bitmap(image);
   //set_palette(old_pal);

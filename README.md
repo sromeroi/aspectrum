@@ -32,12 +32,12 @@ ASPECTRUM
  
  For a resume of aspectrum command line args use "./aspectrum --help"
 
- You'll need Allegro 4.x to run this program.
+ You'll need Allegro 5.x to run this program.
  The font.* files MUST be located at the same directory where you
  run the aspectrum binary, or in /usr/share/aspectrum
 
- spectrum.rom MUST be in the same directory, in /usr/share/aspectrum
- or specified the ROM file by command line args.
+ spectrum.rom and other .rom files MUST be in the same directory, 
+ in /usr/share/aspectrum or specified the ROM file by command line args.
 
  You can also specific a dump of a Interface 2 Cardtrige. 
 
@@ -47,7 +47,6 @@ ASPECTRUM
 
  One time you start the gunstick emulation can avoid the "888"s locating
  the mouse in the border of the screen.
-
  You can emulate several version of Spectrum using de -m param, but
  the snapshots feature is only full functional on 48K.  see the help message
  to more information about what versions are avalible.
