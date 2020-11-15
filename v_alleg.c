@@ -73,23 +73,23 @@ unsigned int colors[256];
 ALLEGRO_COLOR paleta[NUMCOLORSPALETE];
 
 static int colores[NUMCOLORSPALETE][3] = { 
-  {  0 / 4,   0 / 4,   0 / 4}, 
-  {  0 / 4,   0 / 4, 192 / 4}, 
-  {192 / 4,   0 / 4,   0 / 4}, 
-  {192 / 4,   0 / 4, 192 / 4}, 
-  {  0 / 4, 192 / 4,   0 / 4}, 
-  {  0 / 4, 192 / 4, 192 / 4}, 
-  {192 / 4, 192 / 4,   0 / 4}, 
-  {192 / 4, 192 / 4, 192 / 4}, 
-  {  0 / 4,   0 / 4,   0 / 4}, 
-  {  0 / 4,   0 / 4, 255 / 4}, 
-  {255 / 4,   0 / 4,   0 / 4}, 
-  {255 / 4,   0 / 4, 255 / 4}, 
-  {  0 / 4, 255 / 4,   0 / 4}, 
-  {  0 / 4, 255 / 4, 255 / 4}, 
-  {255 / 4, 255 / 4, 0   / 4}, 
-  {255 / 4, 255 / 4, 255 / 4},
-  {255 / 4,   0 / 4,   0 / 4} 
+  {  0 ,   0 ,   0 }, 
+  {  0 ,   0 , 192 }, 
+  {192 ,   0 ,   0 }, 
+  {192 ,   0 , 192 }, 
+  {  0 , 192 ,   0 }, 
+  {  0 , 192 , 192 }, 
+  {192 , 192 ,   0 }, 
+  {192 , 192 , 192 }, 
+  {  0 ,   0 ,   0 }, 
+  {  0 ,   0 , 255 }, 
+  {255 ,   0 ,   0 }, 
+  {255 ,   0 , 255 }, 
+  {  0 , 255 ,   0 }, 
+  {  0 , 255 , 255 }, 
+  {255 , 255 , 0   }, 
+  {255 , 255 , 255 },
+  {255 ,   0 ,   0 } 
 /*
   Old colour palette:
   
@@ -252,6 +252,7 @@ vscreen = al_get_backbuffer(display);
   //v_res = al_get_display_height(display);
   v_res=240;
   v_border = (v_res - 192) / 2;
+  al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);  //optimized for pixel-acess
   screen=al_create_bitmap(320,240);
   al_set_target_bitmap(screen);
   // if we're on windowed mode, update color conversion tables...

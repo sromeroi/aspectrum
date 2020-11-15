@@ -106,24 +106,20 @@ displayscanline2 (int y, int f_flash, Z80Regs * regs)
 
   row = y + v_border;		// 4 & 32 = graphical screen offset
   col = 32;			// 32+256+32=320  4+192+4=200  (res=320x200)
-
+//ASprintf("*---\n");
   ghline (0, row, 31, spectrumZ80.BorderColor);
+//ASprintf("---*\n");
   ghline (288, row, 319, spectrumZ80.BorderColor);
-
-#ifdef MODE128K
-
-  dir_p = ((y & 0xC0) << 5) + ((y & 0x7) << 8) + ((y & 0x38) << 2);
+//ASprintf("-***-\n");
+  dir_p = ((y & 0xC0) << 5) + ((y & 0x07) << 8) + ((y & 0x38) << 2);
   dir_a = 0x1800 + (32 * (y >> 3));
-
-  if (!regs->shadow_screen)
-    {
+#ifdef MODE128K
+  if (!regs->shadow_screen) {
       pixel_ptr = spectrumZ80.RAMbank[5];
       pixel_ptr += dir_p;
       attr_ptr = spectrumZ80.RAMbank[5];
       attr_ptr += dir_a;
-    }
-  else
-    {
+    } else {
       pixel_ptr = spectrumZ80.RAMbank[7];
       pixel_ptr += dir_p;
       attr_ptr = spectrumZ80.RAMbank[7];
@@ -134,32 +130,22 @@ displayscanline2 (int y, int f_flash, Z80Regs * regs)
     {
       pixeles = regs->RAM[dir_p++];
       atributos = regs->RAM[dir_a++];
-
 #else
-
-  dir_p = ((y & 0xC0) << 5) + ((y & 0x07) << 8) + ((y & 0x38) << 2);
-  dir_a = 0x1800 + (32 * (y >> 3));
-  
   for (x = 0; x < 32; x++)
     {
-      pixeles=  readvmem(dir_p++,hwopt.videopage);  // el valor de 0 debe variar en los modos 128K
+      pixeles=  readvmem(dir_p++,hwopt.videopage);  
       atributos=readvmem(dir_a++,hwopt.videopage);
 //      pixeles=  *(mem.p+mem.vo[0]+dir_p++);  // el valor de 0 debe variar en los modos 128K
 //      atributos=*(mem.p+mem.vo[0]+dir_a++);
-
 #endif
 
-      if (((atributos & 0x80) == 0) || (f_flash == 0))
-	{
-	  tinta = (atributos & 0x07) + ((atributos & 0x40) >> 3);
-	  papel = (atributos & 0x78) >> 3;
-	}
-      else
-	{
-	  papel = (atributos & 0x07) + ((atributos & 0x40) >> 3);
-	  tinta = (atributos & 0x78) >> 3;
-	}
-
+      if (((atributos & 0x80) == 0) || (f_flash == 0)) {
+	      tinta = (atributos & 0x07) + ((atributos & 0x40) >> 3);
+	      papel = (atributos & 0x78) >> 3;
+	    } else {
+	      papel = (atributos & 0x07) + ((atributos & 0x40) >> 3);
+	      tinta = (atributos & 0x78) >> 3;
+	    }
       gPutPixel (col++, row, ((pixeles & 0x80) ? tinta : papel));
       gPutPixel (col++, row, ((pixeles & 0x40) ? tinta : papel));
       gPutPixel (col++, row, ((pixeles & 0x20) ? tinta : papel));
