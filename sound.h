@@ -19,8 +19,11 @@
  Copyright (c) 2000 Santiago Romero Iglesias.
  Email: sromero@escomposlinux.org
  ======================================================================*/  
-void initSoundLog (void);
-void logSound (int state);
-void soundDump (void);
-void clearSoundBuffer (void);
-
+
+void initSoundLog (void);
+
+void logSound (int state);
+
+void soundDump (void);
+
+void clearSoundBuffer (void);

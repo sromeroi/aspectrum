@@ -65,6 +65,7 @@ int v_border = 24;
 
 // generic wrapper
 extern volatile char *gkey;
+extern int gSoundInited;
 
 /* Some global variables used in the emulator */
 Z80Regs spectrumZ80;
@@ -75,7 +76,7 @@ volatile int last_fps, frame_counter;
 volatile int target_cycle;
 
 /*----------------------------------------------------------------*/
-int debug = 0, main_tecla, hay_tecla, scanl = 0, quit_thread = 0;
+int debug = 0, main_tecla, scanl = 0, quit_thread = 0; // hay_tecla,
 
 
 /* 0 = english
@@ -91,17 +92,17 @@ void target_incrementor (void);
 void count_frames (void);
 
 
-// now global
+// now global PENDING -> check that is this. used in line 359
 char tfont[4096];
 
 // to know if sound is ok
-extern int gSoundInited;
+//extern int gSoundInited;
 
 extern tipo_mem mem;
 
 #define STANDAR_COPYRIGHT  "ASpectrum GNU pure C Z80 / Spectrum Emulator V " VERSION "\n" \
 	  "(C) 2000-2020 Santiago Romero (NoP/Compiler), Kak & Alvaro Alea.\n" \
-	  "http://aspectrum.sf.net\n" \
+	  "http://aspectrum.sf.net & https://github.com/alvaroalea/aspectrum\n" \
 	  "Powered by Allegro 5 - https://liballeg.org/\n" \
 	  "Distributed under the terms of GNU Public License V2\n\n" \
 
@@ -336,18 +337,21 @@ int emuMain (int argc, char *argv[])
 
   // Init all the graphic stuff:
 
-ASprintf("antes de initsystem\n");
+//ASprintf("antes de initsystem\n");
   InitSystem ();
-ASprintf("despues de initsystem\n");
+//ASprintf("despues de initsystem\n");
   v_initmouse ();
-ASprintf("despues de v_initmouse\n");
+//ASprintf("despues de v_initmouse\n");
   ClearScreen (7);
 
   // Init main variables:
-  hay_tecla = main_tecla = 0;
+  //hay_tecla = main_tecla = 0;
 
   init_keyboard();
-  ASprintf("despues de init keyboard\n");
+//ASprintf("despues de init keyboard\n");
+
+  initSoundLog ();		// first sound log initialization
+//  ASprintf("despues de initSoundLog\n");
 
   // If we start on debug mode we need to update the debugger screen:
   if (debug)
@@ -361,160 +365,166 @@ ASprintf("despues de v_initmouse\n");
       tecla = '.';
     }
 
-  initSoundLog ();		// first sound log initialization
-//ASprintf("entrando en el bucle\n");
-  ASprintf("despues de initSoundLog, start main loop...\n");
-
+ASprintf("entrando en el bucle\n");
+  
   // MAIN LOOP
-  while (!done)
-    {
-      // Read a key to interpret if available
-	  gupdatekeys();
-      if ( gkeypressed(gKEY_ESC) || gkeypressed(gKEY_TILDE) ){
+  while (!done) {
+	tecla = 0;
+
+    // Read a key to interpret if available
+	gupdatekeys();
+    if ( gkeypressed(gKEY_ESC) || gkeypressed(gKEY_TILDE) ){
 	  // call the menu and get the selected option
 	  v_scaremouse ();
 	  option = MainMenu (&spectrumZ80, tfont);
 	  v_unscaremouse ();
 
-	  // simulate a keypress depending on the choosen option
-	  switch (option)
-	    {
+      // simulate a keypress depending on the choosen option
+	  switch (option) {
 	    case DIALOG_DEBUGGER_0:
-	      tecla = gKEY_F1 << 8;
+	      tecla = gKEY_F1;
 	      debug = 0;
 	      break;
 	    case DIALOG_DEBUGGER_1:
-	      tecla = gKEY_F1 << 8;
+	      tecla = gKEY_F1;
 	      debug = 1;
 	      break;
 	    case DIALOG_SNAP_SAVE:
-	      tecla = gKEY_F2 << 8;
+	      tecla = gKEY_F2;
 	      break;
 	    case DIALOG_SNAP_LOAD:
-	      tecla = gKEY_F3 << 8;
+	      tecla = gKEY_F3;
 	      break;
 	    case DIALOG_SAVE_SCR:
-	      tecla = gKEY_F4 << 8;
+	      tecla = gKEY_F4;
 	      break;
 	    case DIALOG_RESET:
-	      tecla = gKEY_F5 << 8;
+	      tecla = gKEY_F5;
 	      break;
 	    case DIALOG_OPEN_TAPE:
-	      tecla = gKEY_F6 << 8;
+	      tecla = gKEY_F6;
 	      break;
 	    case DIALOG_OPTIONS:
-		  tecla = gKEY_F7  << 8 ; 
+		  tecla = gKEY_F7; 
 		  break;
 		case DIALOG_HARDWARE:
-		  tecla = gKEY_F9 << 8 ;
+		  tecla = gKEY_F9;
 		  break;		
 	    case DIALOG_CHANGE_LANG:
-	      tecla = gKEY_F8 << 8;
+	      tecla = gKEY_F8;
 	      break;
 	    case DIALOG_QUIT:
-	      tecla = gKEY_F10 << 8;
+	      tecla = gKEY_F10;
 	      break;
 	    case DIALOG_REWIND_TAPE:
 		  RewindTAP (&spectrumZ80, tapfile);
 		  break;
-		};
+	  };
+	} else {
+		//FIXME check key by key
+		if (gkeypressed(gKEY_F1)) { tecla=gKEY_F1; }
+		else if (gkeypressed(gKEY_F2)) { tecla=gKEY_F2; }
+		else if (gkeypressed(gKEY_F3)) { tecla=gKEY_F3; }
+		else if (gkeypressed(gKEY_F4)) { tecla=gKEY_F4; }
+		else if (gkeypressed(gKEY_F5)) { tecla=gKEY_F5; }
+		else if (gkeypressed(gKEY_F6)) { tecla=gKEY_F6; }
+		else if (gkeypressed(gKEY_F7)) { tecla=gKEY_F7; }
+		else if (gkeypressed(gKEY_F8)) { tecla=gKEY_F8; }
+		else if (gkeypressed(gKEY_F9)) { tecla=gKEY_F9; }
+		else if (gkeypressed(gKEY_F10)) { tecla=gKEY_F10; }
+		else if (gkeypressed(gKEY_F11)) { tecla=gKEY_F11; }
+		else if (gkeypressed(gKEY_F12)) { tecla=gKEY_F12; }
+	}
+    switch (tecla){
 
-	  } else {
-		//FIXME check key by key 
-	  }
-      switch (tecla >> 8){
+	  case gKEY_F2:
+	    if (FileMenu (tfont, DIALOG_SNA, fname) != 0)
+	      SaveSnapshot (&spectrumZ80, fname);
+	    tecla = gKEY_ESC;
+	    //debug = 1 - debug;
+	    break;
 
-	case gKEY_F2:
-	  if (FileMenu (tfont, DIALOG_SNA, fname) != 0)
-	    SaveSnapshot (&spectrumZ80, fname);
-	  tecla = gKEY_ESC << 8;
-	  //debug = 1 - debug;
-	  break;
+	  case gKEY_F3:
+		if (FileMenu (tfont, DIALOG_SNAyC, fname) != 0)
+			LoadSnapshot (&spectrumZ80, fname);
+		tecla = gKEY_ESC;
+		//debug = 1 - debug;
+		break;
 
-	case gKEY_F3:
-	  if (FileMenu (tfont, DIALOG_SNAyC, fname) != 0)
-	    LoadSnapshot (&spectrumZ80, fname);
-	  tecla = gKEY_ESC << 8;
-	  //debug = 1 - debug;
-	  break;
+	  case gKEY_F4:
+		if (FileMenu (tfont, DIALOG_SCR, fname) != 0)
+			SaveScreenshot (&spectrumZ80, fname);
+		tecla = gKEY_ESC;
+		//debug = 1 - debug;
+		break;
 
-	case gKEY_F4:
-	  if (FileMenu (tfont, DIALOG_SCR, fname) != 0)
-	    SaveScreenshot (&spectrumZ80, fname);
-	  tecla = gKEY_ESC << 8;
-	  //debug = 1 - debug;
-	  break;
+	  case gKEY_F5:
+		reset_spectrum();
+		Z80Reset (&spectrumZ80, 69888);
+		tecla = gKEY_ESC;
+		//debug = 1 - debug;
+		break;
 
-	case gKEY_F5:
-	  reset_spectrum();
-	  Z80Reset (&spectrumZ80, 69888);
-	  tecla = gKEY_ESC << 8;
-	  //debug = 1 - debug;
-	  break;
+	  case gKEY_F6:
+		if (FileMenu (tfont, DIALOG_TAP, fname) != 0)
+			{
+				if (emuopt.tapefile[0] != 0)
+					fclose (fp);
+				strncpy (emuopt.tapefile, fname, 255);
+				if ((fp=InitTape(fp))!= NULL)
+					{
+						ASprintf("Using tape file %s.\n", emuopt.tapefile);
+						tapfile = fp;
+					}
+			}
+		tecla = gKEY_ESC;
+		//debug = 1 - debug;
+		break;
 
-	case gKEY_F6:
-	  if (FileMenu (tfont, DIALOG_TAP, fname) != 0)
-		  {
-			if (emuopt.tapefile[0] != 0)
-				fclose (fp);
-	      	strncpy (emuopt.tapefile, fname, 255);
-	      	if ((fp=InitTape(fp))!= NULL)
-				{
-		  			ASprintf("Using tape file %s.\n", emuopt.tapefile);
-		  			tapfile = fp;
-				}
-	    }
-	  tecla = gKEY_ESC << 8;
-	  //debug = 1 - debug;
-	  break;
+	  case gKEY_F7:
+		tecla = gKEY_ESC;
+		menuopciones ();
+		//debug = 1 - debug;
+		break;
 
-	case gKEY_F7:
-	  tecla = gKEY_ESC << 8;
-	  menuopciones ();
-	  //debug = 1 - debug;
-	  break;
+	  case gKEY_F8:
+		if (language < LANGUAGES - 1)
+			language++;
+		else
+			language = 0;
+		tecla = gKEY_ESC;
+		//debug = 1 - debug;
+		break;
 
-	case gKEY_F8:
-	  if (language < LANGUAGES - 1)
-	    language++;
-	  else
-	    language = 0;
-	  tecla = gKEY_ESC << 8;
-	  //debug = 1 - debug;
-	  break;
+	  case gKEY_F9:
+		tecla = gKEY_ESC;
+		menuhardware();
+		//debug = 1 - debug;
+		break;
 
-	case gKEY_F9:
-	  tecla = gKEY_ESC << 8;
-	  menuhardware();
-	  //debug = 1 - debug;
-	  break;
+		
+	  case gKEY_F12:
+		DebuggerHelp (tfont);
+		tecla = gKEY_ESC << 8;
+		//debug = 1 - debug;
+		break;
 
-	  
-	case gKEY_F12:
-	  DebuggerHelp (tfont);
-	  tecla = gKEY_ESC << 8;
-	  //debug = 1 - debug;
-	  break;
-
-	case gKEY_F10:
-	  if (language == 1)
-	    {
-	      if (galert ("Esto cerrara Aspectrum.", "",
-			  "Confirme que desea cerrar el programa.", "Si",
-			  "No", 13, 27) == 1)
-		done = 1;
-	      break;
-	    }
-	  else
-	    {
-	      if (galert ("This will close Aspectrum", "",
-			  "Are you sure?", "Yes", "No", 13, 27) == 1)
-		done = 1;
-	      break;
-	    }
+	  case gKEY_F10:
+		if (language == 1){
+			if (galert ("Esto cerrara Aspectrum.", "",
+				"Confirme que desea cerrar el programa.", "Si",
+				"No", 13, 27) == 1)
+			done = 1;
+			break;
+		} else {
+			if (galert ("This will close Aspectrum", "",
+				"Are you sure?", "Yes", "No", 13, 27) == 1)
+			done = 1;
+			break;
+		}
 	};
 
-      if ((tecla >> 8) == gKEY_F1){
+    if ((tecla) == gKEY_F1){
 	  if (debug == 0) {
 	      ClearScreen (0);
 	      gclear ();
@@ -524,16 +534,15 @@ ASprintf("despues de v_initmouse\n");
 	      DrawHelp (tfont);
 	      tecla = '.';
 	      debug = 1;
-	    } else {
+	  } else {
 	      debug = target_cycle = 0;
 	      ClearScreen (0);
 	      DisplayScreen (&spectrumZ80);
-	    }
+	  }
 	}
 
       // the meaning of the keyb depends on being or not in debug mode:
-    switch (debug)
-	{
+    switch (debug){
 	case 0: 	  // emulation mode
 	  f_flash2++;
 	  if (f_flash2 >= 32)
@@ -600,12 +609,9 @@ ASprintf("despues de v_initmouse\n");
 	      // Run it for 56 lines covering bottom border and ray return
 	      Z80Run (&spectrumZ80, spectrumZ80.ICount);
 //ASprintf("6\n");
-	      //Calc FPS
-	      sprintf (b, "%d ", last_fps);
-	      gtextout (b, 4, v_res - 16, 15);
-	      v_scaremouse ();
+
 	      dumpVirtualToScreen ();
-	      v_unscaremouse ();
+
 //ASprintf("7\n");
 	    } else {
 	      // If we have not enough time, don't draw the screen,
@@ -646,8 +652,11 @@ ASprintf("despues de v_initmouse\n");
 	    }
 //ASprintf("8\n");
 	  // Speed control without sound
+
+	  if (gSoundInited){
+	    soundDump();
+	  }
 /*
-	  if (!gSoundInited)
 	    while (target_cycle == 0);
 	  else
 	    {
@@ -657,8 +666,9 @@ ASprintf("despues de v_initmouse\n");
 	    }
 */
 //ASprintf("9\n");
-	  target_cycle--;
-	  frame_counter++;
+	  //target_cycle--;
+	  //frame_counter++;
+	  v_framecheck();
 	  UpdateKeyboard ();
 	  break;
 
@@ -828,12 +838,9 @@ ASprintf("despues de v_initmouse\n");
 	      break;
 	    }
 	  break;
-	}
-      tecla = 0;
-
+  }
 
     }				// while (!done)
-   ASprintf("9\n");
   return (1);
 }
 
@@ -869,10 +876,10 @@ void CreateVideoTables ( void )
  Used to count the Frames Per Second on the game.
  Do frame_counter++ after each frame draw.
 ------------------------------------------------------------------*/
-void count_frames (void){
-  last_fps = frame_counter;
-  frame_counter = 0;
-}
+//void count_frames (void){
+// last_fps = frame_counter;
+//  frame_counter = 0;
+//}
 
 //END_OF_FUNCTION (count_frames);
 /* When compiling under MSDOS you should comment the above line... */
@@ -889,19 +896,16 @@ void count_frames (void){
           { do_one_game_cycle(); cycle++; }
    } while (!end_game);
 ------------------------------------------------------------------*/
-void target_incrementor (void){
-  target_cycle++;
-}
+//void target_incrementor (void){
+//  target_cycle++;
+//}
 
 //END_OF_FUNCTION (target_incrementor);
 /* When compiling under MSDOS you should comment the above line... */
 
+// Check Main.h for #ifdef ENABLE_LOGS
 #ifndef ENABLE_LOGS
-void ASprintf(char *string, ...)
-{
-
-}
+void ASprintf(char *string, ...){ } // ignore if no logs.
 #endif
-
 
 // End Of Code :)

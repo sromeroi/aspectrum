@@ -156,4 +156,6 @@ void v_scaremouse(void);
 
 void v_unscaremouse(void);
 
+int v_framecheck(void);
+
 #endif	/* v_alleg.h */ 

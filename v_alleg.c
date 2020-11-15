@@ -48,12 +48,15 @@
 //#include <aase.h>
 #endif
 
-extern void target_incrementor (void);
-extern void count_frames (void);
+//extern void target_incrementor (void);
+//extern void count_frames (void);
 
-extern volatile int frame_counter;
-extern volatile int target_cycle;
-extern volatile int last_fps;
+//extern volatile int frame_counter;
+//extern volatile int target_cycle;
+//extern volatile int last_fps;
+int fps;
+int framecounter;
+ALLEGRO_TIMER *emuclock;
 
 // generic key handler ( = key using allegro)
 //volatile char *gkey;
@@ -64,13 +67,17 @@ ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *mouseicon;
 ALLEGRO_MOUSE_STATE mousestatus;
 ALLEGRO_FONT *font;
+int v_res;
+
+ALLEGRO_VOICE *voces;
+ALLEGRO_MIXER *mixer;
 
 extern Z80Regs spectrumZ80;
 unsigned int colors[256];
 //static DATAFILE *datafile = NULL;
 
 #define NUMCOLORSPALETE 17
-ALLEGRO_COLOR paleta[NUMCOLORSPALETE];
+ALLEGRO_COLOR paleta[NUMCOLORSPALETE];  //no idea why have a red color on pos #17
 
 static int colores[NUMCOLORSPALETE][3] = { 
   {  0 ,   0 ,   0 }, 
@@ -139,14 +146,25 @@ void gclear (void){
 
 
 // dumps memory from the virtual screen to the visible screen
-// it CAN be a flip_screen   ( but you'll have to swap the screen and vscreen pointers)
 void dumpVirtualToScreen(void) {
-  extern int v_res;
-  //blit (vscreen, screen, 0, 0, 0, 0, 320, v_res);
+  char b[64];
+  v_scaremouse ();
+  sprintf (b, "%d ", fps);
+  //ASprintf(b); ASprintf("\n");
+  al_hold_bitmap_drawing(true);
+  al_draw_text(font, paleta[0], 4, v_res-17, 0, b);
+  al_draw_text(font, paleta[0], 5, v_res-16, 0, b);
+  al_draw_text(font, paleta[15],4, v_res-16, 0, b);
+  al_hold_bitmap_drawing(false);
+	//gtextout (b, 4, v_res - 17, 0);
+	//gtextout (b, 5, v_res - 16, 0);
+	//gtextout (b, 4, v_res - 16, 15);
   al_set_target_bitmap(vscreen);
-  al_draw_bitmap(screen,0,0,0);
+//  al_draw_bitmap(screen,0,0,0);
+  al_draw_scaled_bitmap(screen,0,0,320,240,0,0,640,480,0);
   al_flip_display();
   al_set_target_bitmap(screen);
+  v_unscaremouse ();
 }
 
 // draws text in the virtual screen
@@ -204,6 +222,49 @@ al_init();
   // inits everything (for allegro)
 //ASprintf("antes graficos \n");
   InitGraphics();
+
+  // Timer inicialization for sync and FPS calculus  
+//ASprintf("antes timer \n");
+//  install_timer ();
+//  LOCK_VARIABLE (last_fps);
+//  LOCK_VARIABLE (frame_counter);
+//  LOCK_VARIABLE (target_cycle);
+//   LOCK_FUNCTION(count_frames);
+//   LOCK_FUNCTION(target_incrementor);
+//PENDING  install_int_ex (count_frames, BPS_TO_TIMER (1));
+//PENDING  install_int_ex (target_incrementor, BPS_TO_TIMER (50));
+//last_fps = frame_counter = target_cycle = 0;
+emuclock = al_create_timer(1.0/50.0);
+al_start_timer(emuclock);
+
+
+  // Inizialite the GUI
+#ifdef I_HAVE_AGUP
+  /* estaria bien crear 16 tonos de gris en una parte de la paleta no 
+     usada para mejorar como se ven los engines 
+
+     for (i = 0; i <16; i++)
+     if( (depth=desktop_color_depth()) > 8 )
+     {
+     colors[250+i] = makecol( i*16, i*16, i*16 );
+     } else {
+     gRGB colorin;
+     colorin.r=i*16;
+     colorin.g=i*16;
+     colorin.b=i*16;
+     gset_color(i,&colorin);
+     }
+   */
+  //init de theme GUI
+  agup_init (aphoton_theme);
+  gui_fg_color = agup_fg_color;
+  gui_bg_color = agup_bg_color;
+  gui_shadow_box_proc = d_agup_shadow_box_proc;
+  gui_button_proc = d_agup_button_proc;
+  gui_edit_proc = d_agup_edit_proc;
+  gui_text_list_proc = d_agup_text_list_proc;
+#endif
+
 //ASprintf("antes keyboards \n");
   al_install_keyboard();
   al_install_mouse();
@@ -212,27 +273,36 @@ al_init();
 //ASprintf("despues sonido\n");
 }
 
+int v_framecheck(void){
+  int n;
+  framecounter++;
+  n=al_get_timer_count(emuclock);
+  while (framecounter>n) {
+    n=al_get_timer_count(emuclock);
+  }
+
+  if (al_get_timer_count(emuclock)>=50){
+    fps=framecounter;
+    framecounter=0;
+    al_set_timer_count(emuclock,0);
+  }
+}
+
 void InitGraphics (void){
   int i, depth;
 //  FILE *archivo;
 //  PALETTE specpal;
-  extern int v_res;
   extern int v_border;
   al_init_primitives_addon();
   al_init_font_addon();
   al_init_ttf_addon();
   
-
-al_set_new_display_flags(ALLEGRO_WINDOWED);
-al_set_new_display_option(ALLEGRO_COLOR_SIZE,16,ALLEGRO_SUGGEST);
-display = al_create_display(320,240);
-al_set_window_title (display, "ASpectrum emulator");
+  al_set_new_display_flags(ALLEGRO_WINDOWED);
+  al_set_new_display_option(ALLEGRO_COLOR_SIZE,16,ALLEGRO_SUGGEST);
+  display = al_create_display(640,480);
+  al_set_window_title (display, "ASpectrum emulator");
 //ASprintf("creando vscreen\n");
-vscreen = al_get_backbuffer(display);
-
-//ASprintf("antes timer \n");
-//  install_timer ();
-
+  vscreen = al_get_backbuffer(display);
   /*
   set_color_depth (8);
   if (set_gfx_mode (GFX_AUTODETECT, 320, v_res, 0, 0) != 0)
@@ -286,24 +356,15 @@ vscreen = al_get_backbuffer(display);
 
   //datafile = load_datafile (find_file("font.dat"));
   //font = datafile[0].dat;
+  font = al_create_builtin_font();
+  /*
   const char *font_file = "./font.ttf"; 
-  font = al_load_font(font_file,12,0);
-if (!font) {
-        printf("Error al cargar tipo de letra\n");
-        exit (1);
-  
-    }
-
-//  LOCK_VARIABLE (last_fps);
-//  LOCK_VARIABLE (frame_counter);
-//  LOCK_VARIABLE (target_cycle);
-//   LOCK_FUNCTION(count_frames);
-//   LOCK_FUNCTION(target_incrementor);
-//PENDING  install_int_ex (count_frames, BPS_TO_TIMER (1));
-//PENDING  install_int_ex (target_incrementor, BPS_TO_TIMER (50));
-  last_fps = frame_counter = target_cycle = 0;
-
-
+  font = al_load_font(font_file,8,0);
+  if (!font) {
+    printf("Error al cargar tipo de letra\n");
+    exit (1);
+  } 
+  */
 /*
   if (vscreen == NULL)
     {
@@ -315,32 +376,7 @@ if (!font) {
   ASprintf("Working at %d bpp\n", bitmap_color_depth (screen));
   clear (vscreen);
 */
-#ifdef I_HAVE_AGUP
-  /* estaria bien crear 16 tonos de gris en una parte de la paleta no 
-     usada para mejorar como se ven los engines 
-
-     for (i = 0; i <16; i++)
-     if( (depth=desktop_color_depth()) > 8 )
-     {
-     colors[250+i] = makecol( i*16, i*16, i*16 );
-     } else {
-     gRGB colorin;
-     colorin.r=i*16;
-     colorin.g=i*16;
-     colorin.b=i*16;
-     gset_color(i,&colorin);
-     }
-   */
-  //init de theme GUI
-  agup_init (aphoton_theme);
-  gui_fg_color = agup_fg_color;
-  gui_bg_color = agup_bg_color;
-  gui_shadow_box_proc = d_agup_shadow_box_proc;
-  gui_button_proc = d_agup_button_proc;
-  gui_edit_proc = d_agup_edit_proc;
-  gui_text_list_proc = d_agup_text_list_proc;
-#endif
-printf("End of InitGraphics()\n");
+ASprintf("End of InitGraphics()\n");
 }
 
 
@@ -652,30 +688,45 @@ bool gkeypressed(int tecla){
 
 
 
-
+#define  SOUND_BY_STREAM
 #ifdef SOUND_BY_STREAM
-// ******************** WIN32 - WAY **********************
+// ******************** GOOD WAY **********************
 // audiostreams
 
 int gSoundInited = 0; 
 ALLEGRO_AUDIO_STREAM *audioStream;
 
 void gInitSound (void){
-// PENDING  initSoundLog ();
+  initSoundLog ();
 
 // PENDING reserve_voices (3, -1);
 //  if (install_sound (DIGI_AUTODETECT, MIDI_NONE, NULL) < 0)
-  if (!al_install_audio ())
-    {
-      printf("Sound error\n");
+  if (!al_install_audio ()){
+      ASprintf("Sound init error\n");
+      return;
+  }
+  voces = al_create_voice(44100, ALLEGRO_AUDIO_DEPTH_INT16,ALLEGRO_CHANNEL_CONF_2);
+  if (!voces) {
+      ASprintf("Could not create ALLEGRO_VOICE.\n");
+      return;
+  }
+  //if (!al_reserve_samples(1)) {  //check, must be 7 for 128K? beeper+3sound chanel + 3 noise chanel??
+  //    ASprintf("Sound sample error\n");
+  //    return;
+  //  }
+  //mixer = al_get_default_mixer();
+  mixer = al_create_mixer(44100, ALLEGRO_AUDIO_DEPTH_INT16, ALLEGRO_CHANNEL_CONF_2);
+  if (!al_attach_mixer_to_voice(mixer, voces)) {
+      ASprintf("error atando mixer a voz\n");
+      return;
+  }
+  audioStream = al_create_audio_stream (2,882, 44100, ALLEGRO_AUDIO_DEPTH_UINT8, ALLEGRO_CHANNEL_CONF_1); //PENDING ¿this sound on both speakers?
+  if (!al_attach_audio_stream_to_mixer(audioStream,mixer)) {  //check, must be 7 for 128K? beeper+3sound chanel + 3 noise chanel??
+      ASprintf("Stream attach error\n");
       return;
     }
-  al_reserve_samples(0);
-  printf("Sonido Iniciado correctamente\n");
-  audioStream = al_create_audio_stream (2,882, 44100, ALLEGRO_AUDIO_DEPTH_INT8, ALLEGRO_CHANNEL_CONF_1);
+  ASprintf("Sonido Iniciado correctamente\n");
   gSoundInited = 1;
-
-
 }
 
 byte * gGetSampleBuffer (void){

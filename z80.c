@@ -533,7 +533,7 @@ Z80OutPort (register Z80Regs * regs, register word port, register byte value)
   extern tipo_mem mem;
   extern tipo_hwopt hwopt;
 
-/* INVES "Feature" emulation 
+/* INVES "Feature" emulation PENDING esto esta mal casi seguro.
  * basicamente cuando se escribe un puerto tambien se lee de la pagina 0 de ram
  * ante el comflicto se hace un and logico entre ellas
  */
