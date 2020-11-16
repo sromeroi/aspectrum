@@ -46,18 +46,20 @@ int menuopciones (void){ return 0; }
 int menuhardware (void){ return 0; }
 
 int v_alertYesNo (const char *Title, const char *Head, const char *Text){
-int ret;
-al_set_audio_stream_playing(audioStream,false);
-ret = al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_YES_NO);
-al_set_audio_stream_playing(audioStream,true);
-return (ret);  
+  int ret;
+  al_set_audio_stream_playing(audioStream,false);
+  ret = al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_YES_NO);
+  al_set_audio_stream_playing(audioStream,true);
+  v_cleankeys();
+  return (ret);  
 }
 int v_alertErrOK (const char *Title, const char *Head, const char *Text){
-int ret;
-al_set_audio_stream_playing(audioStream,false);
-ret = al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_ERROR);
-al_set_audio_stream_playing(audioStream,true);
-return (ret);  
+  int ret;
+  al_set_audio_stream_playing(audioStream,false);
+  ret = al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_ERROR);
+  al_set_audio_stream_playing(audioStream,true);
+  v_cleankeys();
+  return (ret);  
 }
 
 /*---------------------------------------------------------------------------
@@ -70,11 +72,11 @@ int FileMenu (char type, char *filename){
   ALLEGRO_FILECHOOSER *dialogo;
   int ret;
 
-  const char extensions[FILEBOX_TYPES][5*9] = {
-    ".SNA;.SP;.Z80;.SCR;.sna;.sp;.z80;.scr",  //carga
-    ".SCR",
-    "SNA;SP;Z80;SCR;sna;sp;z80;scr",  //graba
-    "TAP;TZX;tap;tzx"          //cintas
+  const char extensions[FILEBOX_TYPES][7*9] = {
+    "*.SNA;*.SP;*.Z80;*.SCR;*.sna;*.sp;*.z80;*.scr",  //carga
+    "*.SNA;*.sna"
+    "*.SCR;*.scr",
+    "*.TAP;*.TZX;*.tap;*.tzx"          //cintas
   };
   const int mode[FILEBOX_TYPES]={
     ALLEGRO_FILECHOOSER_FILE_MUST_EXIST,
@@ -87,12 +89,12 @@ int FileMenu (char type, char *filename){
     set_mouse_sprite (NULL);
   */
   al_set_audio_stream_playing(audioStream,false);
-  ASprintf("Creando dialogo\n");
+  //ASprintf("Creando dialogo\n");
   dialogo = al_create_native_file_dialog(NULL,lang_filemenu[(language * FILEBOX_TYPES) + type],extensions[type],mode[type]);
   ret =  al_show_native_file_dialog(display, dialogo);
   al_destroy_native_file_dialog(dialogo);
   al_set_audio_stream_playing(audioStream,true);
-  ASprintf("Destruyendo dialogo\n");
+  //ASprintf("Destruyendo dialogo\n");
   
   //ret = file_select_ex (lang_filemenu[(language * FILEBOX_TYPES) + type], filename, extensions[type] ,512, 290, 170);
 
@@ -103,6 +105,7 @@ int FileMenu (char type, char *filename){
       set_mouse_sprite_focus (8, 8);
   }
   */
+  v_cleankeys();
   return (0);
 }
 

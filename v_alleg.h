@@ -145,6 +145,8 @@ bool gkeypressed(int tecla);
 
 void gupdatekeys(void);
 
+void v_cleankeys(void);
+
 int referencehelp_proc(void);
 
 int mouse_x();

@@ -691,7 +691,10 @@ bool gkeypressed(int tecla){
   return al_key_down(&estadoteclas, tecla);
 }
 
-
+void v_cleankeys(void){
+  al_clear_keyboard_state(display);
+  al_get_keyboard_state(&estadoteclas);
+}
 
 #define  SOUND_BY_STREAM
 #ifdef SOUND_BY_STREAM

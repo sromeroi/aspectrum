@@ -1,7 +1,7 @@
 
 sound.o: sound.c stdafx.h z80.h v_alleg.h sound.h
 v_alleg.o: v_alleg.c stdafx.h v_alleg.h z80.h main.h menu.h
-snaps.o: snaps.c stdafx.h main.h z80.h mem.h snaps.h
+snaps.o: snaps.c stdafx.h main.h z80.h mem.h snaps.h menu.h
 graphics.o: graphics.c stdafx.h v_alleg.h z80.h mem.h main.h graphics.h
 menu.o: menu.c v_alleg.h z80.h langs.h menu.h monofnt.h main.h snaps.h \
  mem.h

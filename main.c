@@ -435,7 +435,7 @@ ASprintf("entrando en el bucle\n");
 		else if (gkeypressed(gKEY_F11)) { tecla=gKEY_F11; }
 		else if (gkeypressed(gKEY_F12)) { tecla=gKEY_F12; }
 	}
-	ASprintf("tecla=%i\n",tecla);
+	//ASprintf("tecla=%i\n",tecla);
     switch (tecla){
 
 	  case gKEY_F2:

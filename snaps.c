@@ -27,13 +27,14 @@
 #ifdef _DEBUG_
 #include <mss.h>
 #endif
-
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
 #include "z80.h"
 #include "mem.h"
 #include "snaps.h"
+#include "menu.h"
 
 // extern byte *RAM;
 extern FILE *tapfile;
@@ -1079,6 +1080,7 @@ return (0);
 char
 LoadSCR (Z80Regs * regs, FILE * fp)
 {
+  // FIXME : This will fail on some 128K, like in all ram
   int i;
   for (i = 0; i < 6912; i++)
     Z80MemWrite (16384 + i, fgetc (fp), regs);
