@@ -7,9 +7,9 @@ AGUPLIB=$(AGUPDIR)/lib/release/libagup.a
 
 
 DESTDATPATH = /usr/share/$(EXE)
-LFLAGS = `pkg-config allegro-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_video-5 allegro_color-5 allegro_primitives-5 --libs`
+LFLAGS = `pkg-config allegro-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_video-5 allegro_color-5 allegro_primitives-5 allegro_dialog-5 --libs`
 #CFLAGS = -Wall -O3 -mcpu=i686 `pkg-config allegro-5 --cflags` 
-CFLAGS = -W -Wall -O2 -g `pkg-config allegro-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_video-5  allegro_color-5 allegro_primitives-5 --cflags` \
+CFLAGS = -W -Wall -O2 -g `pkg-config allegro-5 --cflags` \
         -DVERSION=\"$(VERSION)\" -DDESTDAT=\"$(DESTDATPATH)\" \
         -DSOUND_BY_STREAM -DENABLE_LOGS 
 #-DI_HAVE_AGUP -I$(AGUPDIR)

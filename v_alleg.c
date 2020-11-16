@@ -27,6 +27,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_native_dialog.h>
 
 #include "v_alleg.h"
 #include "z80.h"
@@ -218,8 +219,12 @@ void grelease_bitmap (void){
 void InitSystem (void){
 //ASprintf("antes allegro \n");
 //  allegro_init ();
-al_init();
-  // inits everything (for allegro)
+  al_init();
+//ASprintf("antes keyboards \n");
+  al_install_keyboard();
+  al_install_mouse();
+  al_init_native_dialog_addon();
+// inits everything (for allegro)
 //ASprintf("antes graficos \n");
   InitGraphics();
 
@@ -265,9 +270,6 @@ al_start_timer(emuclock);
   gui_text_list_proc = d_agup_text_list_proc;
 #endif
 
-//ASprintf("antes keyboards \n");
-  al_install_keyboard();
-  al_install_mouse();
 //ASprintf("antes sonido \n"); 
   gInitSound ();
 //ASprintf("despues sonido\n");
@@ -275,17 +277,19 @@ al_start_timer(emuclock);
 
 int v_framecheck(void){
   int n;
+  int ret=0;
   framecounter++;
   n=al_get_timer_count(emuclock);
   while (framecounter>n) {
     n=al_get_timer_count(emuclock);
   }
-
-  if (al_get_timer_count(emuclock)>=50){
+  if (framecounter<n) ret=1;  //if we are 2 delayed, frameskip.
+  if (n>=50){
     fps=framecounter;
     framecounter=0;
     al_set_timer_count(emuclock,0);
   }
+  return ret;
 }
 
 void InitGraphics (void){
@@ -446,7 +450,7 @@ void v_initmouse (void) {
   }
 
 }
-
+/*
 int galert (const char *s1, const char *s2, const char *s3, const char *b1,
 	const char *b2, int c1, int c2) {
   int a;
@@ -454,7 +458,14 @@ int galert (const char *s1, const char *s2, const char *s3, const char *b1,
 //    gui_bg_color = 7;
 //PENDING  a = alert (s1, s2, s3, b1, b2, c1, c2);
   return a;
+}*/
+int v_alertYesNo (const char *Title, const char *Head, const char *Text){
+return al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_YES_NO);
 }
+int v_alertErrOK (const char *Title, const char *Head, const char *Text){
+return al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_ERROR);
+}
+
 
 /*-------------------------------------------------------------------
  Keyboard Routines

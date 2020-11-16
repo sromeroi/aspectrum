@@ -177,7 +177,7 @@ int emuMain (int argc, char *argv[])
   FILE *fp;
   int c, tecla = 0;
   static int f_flash = 1, f_flash2 = 0;
-
+  static int frameskip = 0;
   extern char *optarg;
   extern int optind, opterr, optopt;
   static struct option long_options[] = {
@@ -438,21 +438,21 @@ ASprintf("entrando en el bucle\n");
     switch (tecla){
 
 	  case gKEY_F2:
-	    if (FileMenu (tfont, DIALOG_SNA, fname) != 0)
+	    if (FileMenu (DIALOG_SNA, fname) != 0)
 	      SaveSnapshot (&spectrumZ80, fname);
 	    tecla = gKEY_ESC;
 	    //debug = 1 - debug;
 	    break;
 
 	  case gKEY_F3:
-		if (FileMenu (tfont, DIALOG_SNAyC, fname) != 0)
+		if (FileMenu (DIALOG_SNAyC, fname) != 0)
 			LoadSnapshot (&spectrumZ80, fname);
 		tecla = gKEY_ESC;
 		//debug = 1 - debug;
 		break;
 
 	  case gKEY_F4:
-		if (FileMenu (tfont, DIALOG_SCR, fname) != 0)
+		if (FileMenu (DIALOG_SCR, fname) != 0)
 			SaveScreenshot (&spectrumZ80, fname);
 		tecla = gKEY_ESC;
 		//debug = 1 - debug;
@@ -466,7 +466,7 @@ ASprintf("entrando en el bucle\n");
 		break;
 
 	  case gKEY_F6:
-		if (FileMenu (tfont, DIALOG_TAP, fname) != 0)
+		if (FileMenu (DIALOG_TAP, fname) != 0)
 			{
 				if (emuopt.tapefile[0] != 0)
 					fclose (fp);
@@ -510,17 +510,16 @@ ASprintf("entrando en el bucle\n");
 		break;
 
 	  case gKEY_F10:
+	    // PENDING - LOCALIZE THIS.
+		tecla = NULL;
 		if (language == 1){
-			if (galert ("Esto cerrara Aspectrum.", "",
-				"Confirme que desea cerrar el programa.", "Si",
-				"No", 13, 27) == 1)
-			done = 1;
-			break;
+			if (v_alertYesNo ("Cerrar Aspectrum?","Esto cerrara el emulador.", "Confirme que desea cerrar el programa.") == 1)
+				done = 1;
+		break;
 		} else {
-			if (galert ("This will close Aspectrum", "",
-				"Are you sure?", "Yes", "No", 13, 27) == 1)
-			done = 1;
-			break;
+			if (v_alertYesNo ("Close Aspectrum?","This will close the emulator.", "Please, Confirm to close.") == 1)
+				done = 1;
+		break;
 		}
 	};
 
@@ -550,8 +549,7 @@ ASprintf("entrando en el bucle\n");
 	  f_flash = (f_flash2 < 16 ? 0 : 1);
 //ASprintf("P\n");
 	  // if there is enough time, draw frame:
-	  if (target_cycle < 2 || frame_counter == 0)
-	    {
+	  if (!frameskip) {
 //ASprintf("1\n");
 	      // no visible upper border
 	      target_tstate =

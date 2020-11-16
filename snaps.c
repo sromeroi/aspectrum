@@ -442,39 +442,36 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
 		 case SPECMDL_128K:
 		 case SPECMDL_PLUS2:
 		 case SPECMDL_PLUS3:
-			 switch (pag) {
+			  switch (pag) {
 				  case 3:
-					ini = 0x0000;
-					break;
+            ini = 0x0000;
+            break;
 				  case 4:
-					ini = 0x4000;
-					break;
+            ini = 0x4000;
+            break;
 				  case 5:
-					ini = 0x8000;
-					break;
+            ini = 0x8000;
+            break;
 				  case 6:
-					ini = 0xc000;
-					break;
+            ini = 0xc000;
+            break;
 				  case 7:
-					ini = 0x10000;
-					break;
+            ini = 0x10000;
+            break;
 				  case 8:
-					ini = 0x14000;
-					break;
+            ini = 0x14000;
+            break;
 				  case 9:
-					ini = 0x18000;
-					break;
+            ini = 0x18000;
+            break;
 				  case 10:
-					ini = 0x1c000;
-					break;
+            ini = 0x1c000;
+            break;
 				  default:
-                                        ini = 0x4000;
-                                        ASprintf("Algo raro pasa con ese Snapshot,"
-					         " remitalo al autor para debug\n");
-			                break;
-																				
-						
-			  }			      
+            ini = 0x4000;
+            ASprintf("Algo raro pasa con ese Snapshot, remitalo al autor para debug\n");
+			      break;
+        }			      
 			 break;
 		 case SPECMDL_INVES:
 			  switch (pag) {
@@ -491,9 +488,8 @@ LoadZ80 (Z80Regs * regs, FILE * fp)
 					ini = 0x10000;
 					break;
 				  default:
-                                        ini = 0x4000;
-                                        ASprintf ("Algo raro pasa con ese Snapshot, "
-						"remitalo al autor para debug\n");
+            ini = 0x4000;
+            ASprintf ("Algo raro pasa con ese Snapshot, remitalo al autor para debug\n");
 					break;
 				  }
 			 break;
@@ -783,11 +779,9 @@ SaveSNA (Z80Regs * regs, FILE * fp)
 //  int c;
 
 // SNA solo esta soportado en 48K, 128K y +2
-
+// PENDING Localize this
   if ((hwopt.hw_model != SPECMDL_48K) && (hwopt.hw_model != SPECMDL_128K)) {
-    galert ("El modelo de Spectrum utilizado",
-	   "No permite grabar el snapshot en formato SNA",
-	   "Utilize otro tipo de archivo (extension)", "OK", NULL, 13, 27);
+    v_alertErrOK ("Error Saving","El modelo de Spectrum utilizado no permite grabar el snapshot en formato SNA", "Utilize otro tipo de archivo (extension)");
     return 1;
   }
 

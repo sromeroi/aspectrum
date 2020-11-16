@@ -24,8 +24,9 @@
 #include <mss.h>
 #endif
 
-#include "v_alleg.h"
 #include <stdio.h>
+#include "v_alleg.h"
+#include <allegro5/allegro_native_dialog.h>
 #include "z80.h"
 #include "langs.h"
 #include "menu.h"
@@ -33,13 +34,61 @@
 #include "main.h"
 #include "snaps.h"
 #include "mem.h"
+extern ALLEGRO_DISPLAY *display;
+extern int language;
 
 #ifdef NO_USE_MENU
 int MainMenu (Z80Regs * regs, char *tfont){ return 0; }
 void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor, int fgcolor, int textbgselcolor, char *tfont){ return 0; }
-int FileMenu (char *tfont, char type, char *filename){ return 0; }
 int menuopciones (void){ return 0; }
 int menuhardware (void){ return 0; }
+
+
+/*---------------------------------------------------------------------------
+// Filebox selection popup :-), it receives the Type of popup (Load SNA,
+// Save SNA, Save SCR...) and returns the selected filename.
+*--------------------------------------------------------------------------*/
+//int FileMenu (char *tfont, char type, char *filename){ return 0; }
+int FileMenu (char type, char *filename){
+  extern tipo_emuopt emuopt;
+  int ret;
+  ALLEGRO_FILECHOOSER *dialogo;
+
+  const char extensions[FILEBOX_TYPES][80] = {
+    "SNA;SP;Z80;SCR",  //carga
+    "SCR",
+    "SNA;SP;Z80;SCR",  //graba
+    "TAP;TZX"          //cintas
+  };
+  const int mode[FILEBOX_TYPES]={
+    ALLEGRO_FILECHOOSER_FILE_MUST_EXIST,
+    ALLEGRO_FILECHOOSER_SAVE,
+    ALLEGRO_FILECHOOSER_SAVE,
+    0
+  };
+  /*
+  if (emuopt.gunstick & GS_GUNSTICK)
+    set_mouse_sprite (NULL);
+  */
+  ASprintf("Creando dialogo\n");
+  dialogo = al_create_native_file_dialog(NULL,lang_filemenu[(language * FILEBOX_TYPES) + type],extensions[type],mode[type]);
+  ret =  al_show_native_file_dialog(display, dialogo);
+  al_destroy_native_file_dialog(dialogo);
+  ASprintf("Destruyendo dialogo\n");
+  
+  //ret = file_select_ex (lang_filemenu[(language * FILEBOX_TYPES) + type], filename, extensions[type] ,512, 290, 170);
+
+  // si usamos gunstick volvemos a poner el punto de mira 
+  /*
+  if (emuopt.gunstick & GS_GUNSTICK){
+      set_mouse_sprite (emuopt.raton_bmp);
+      set_mouse_sprite_focus (8, 8);
+  }
+  */
+  return (ret);
+}
+
+
 #else  // def NO_USE_MENU
 
 #ifdef I_HAVE_AGUP
@@ -268,61 +317,7 @@ DrawSelected (int x1, int y1, int x2, int y2, char *text, int fgcolor,
 }
 
 
-/*---------------------------------------------------------------------------
-// Filebox selection popup :-), it receives the Type of popup (Load SNA,
-// Save SNA, Save SCR...) and returns the selected filename.
-*--------------------------------------------------------------------------*/
 
-int
-FileMenu (char *tfont, char type, char *filename)
-{
-  extern tipo_emuopt emuopt;
-//    int i, current=0, end = 0, selected = 0, keypress;
-//    int fontw = 8, fonth=12;
-//    int menux = 18, menuy = 70, menuw = 284, menuh = 50;
-//    int bgcolor = 15; 
-//    int titlecolor=14;
-//    int bgselcolor = 11, textbgselcolor=13;
-//    int fgcolor = 0;
-  int ret;
-
-  char extensions[FILEBOX_TYPES][80] = {
-    "SNA;SP;Z80;SCR",  //carga
-    "SNA;SP;Z80;SCR",  //graba
-    "SCR",
-    "TAP;TZX"          //cintas
-  };
-
-  gui_fg_color = 0;
-  gui_bg_color = 7;
-
-  if (emuopt.gunstick & GS_GUNSTICK)
-    set_mouse_sprite (NULL);
-
-  ret = file_select_ex (lang_filemenu[(language * FILEBOX_TYPES) + type],
-			filename, extensions[type] ,512, 290, 170);
-
-  /* si usamos gunstick volvemos a poner el punto de mira
-   */
-  if (emuopt.gunstick & GS_GUNSTICK)
-    {
-      set_mouse_sprite (emuopt.raton_bmp);
-      set_mouse_sprite_focus (8, 8);
-    }
-
-  return (ret);
-/*
-    gbox( menux, menuy, menux+menuw, menuy+menuh, bgcolor );
-    grectangle( menux+1, menuy+1, menux+menuw-1, menuy+menuh-1, fgcolor );
-    gbox( menux+1, menuy+1, menux+menuw-1, menuy+1+fonth, fgcolor );
-    GFXprintf_tovideo( menux+7, menuy+4, 
-           lang_filemenu[(language*FILEBOX_TYPES)+type], tfont,
-           titlecolor, fgcolor, 0);
-   
-    dumpVirtualToScreen();  
-    GFXgets( menux+4, menuy+25, filename, tfont, 0, 15, 36 );
-*/
-}
 
 /*
 char *lista_joys(int index int *list_size)

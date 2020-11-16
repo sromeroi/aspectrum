@@ -33,7 +33,7 @@ void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor,
 		    
 int fgcolor, int textbgselcolor, char *tfont);
 
-int FileMenu (char *tfont, char type, char *filename);
+int FileMenu (char type, char *filename);
 
 int menuopciones (void);
 int menuhardware (void);
