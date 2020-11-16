@@ -125,9 +125,7 @@ void InitSystem (void);
 void v_initmouse (void);
 
 //int galert (const char *s1, const char *s2, const char *s3, const char *b1, const char *b2, int c1, int c2);
-int v_alertYesNo (const char *Title, const char *Head, const char *Text);
 
-int v_alertErrOK (const char *Title, const char *Head, const char *Text);
 
 // sound functions 
 void gInitSound (void);

@@ -422,7 +422,7 @@ ASprintf("entrando en el bucle\n");
 	  };
 	} else {
 		//FIXME check key by key
-		if (gkeypressed(gKEY_F1)) { tecla=gKEY_F1; }
+		     if (gkeypressed(gKEY_F1)) { tecla=gKEY_F1; }
 		else if (gkeypressed(gKEY_F2)) { tecla=gKEY_F2; }
 		else if (gkeypressed(gKEY_F3)) { tecla=gKEY_F3; }
 		else if (gkeypressed(gKEY_F4)) { tecla=gKEY_F4; }
@@ -435,49 +435,49 @@ ASprintf("entrando en el bucle\n");
 		else if (gkeypressed(gKEY_F11)) { tecla=gKEY_F11; }
 		else if (gkeypressed(gKEY_F12)) { tecla=gKEY_F12; }
 	}
+	ASprintf("tecla=%i\n",tecla);
     switch (tecla){
 
 	  case gKEY_F2:
 	    if (FileMenu (DIALOG_SNA, fname) != 0)
 	      SaveSnapshot (&spectrumZ80, fname);
-	    tecla = gKEY_ESC;
+	    tecla = 0;
 	    //debug = 1 - debug;
 	    break;
 
 	  case gKEY_F3:
+	    ASprintf("lanzando dialogo...\n");
 		if (FileMenu (DIALOG_SNAyC, fname) != 0)
 			LoadSnapshot (&spectrumZ80, fname);
-		tecla = gKEY_ESC;
+		tecla = 0;
 		//debug = 1 - debug;
 		break;
 
 	  case gKEY_F4:
 		if (FileMenu (DIALOG_SCR, fname) != 0)
 			SaveScreenshot (&spectrumZ80, fname);
-		tecla = gKEY_ESC;
+		tecla = 0;
 		//debug = 1 - debug;
 		break;
 
 	  case gKEY_F5:
 		reset_spectrum();
 		Z80Reset (&spectrumZ80, 69888);
-		tecla = gKEY_ESC;
+		tecla = 0;
 		//debug = 1 - debug;
 		break;
 
 	  case gKEY_F6:
-		if (FileMenu (DIALOG_TAP, fname) != 0)
-			{
-				if (emuopt.tapefile[0] != 0)
-					fclose (fp);
-				strncpy (emuopt.tapefile, fname, 255);
-				if ((fp=InitTape(fp))!= NULL)
-					{
-						ASprintf("Using tape file %s.\n", emuopt.tapefile);
-						tapfile = fp;
-					}
+		if (FileMenu (DIALOG_TAP, fname) != 0){
+			if (emuopt.tapefile[0] != 0)
+				fclose (fp);
+			strncpy (emuopt.tapefile, fname, 255);
+			if ((fp=InitTape(fp))!= NULL){
+				ASprintf("Using tape file %s.\n", emuopt.tapefile);
+				tapfile = fp;
 			}
-		tecla = gKEY_ESC;
+		}
+		tecla = 0;
 		//debug = 1 - debug;
 		break;
 

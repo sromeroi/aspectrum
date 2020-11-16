@@ -459,12 +459,7 @@ int galert (const char *s1, const char *s2, const char *s3, const char *b1,
 //PENDING  a = alert (s1, s2, s3, b1, b2, c1, c2);
   return a;
 }*/
-int v_alertYesNo (const char *Title, const char *Head, const char *Text){
-return al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_YES_NO);
-}
-int v_alertErrOK (const char *Title, const char *Head, const char *Text){
-return al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_ERROR);
-}
+
 
 
 /*-------------------------------------------------------------------
@@ -484,8 +479,7 @@ void init_keyboard(void){
  UpdateKeyboard( void );
  Updates the keyboard variables used on the return of IN function.
 ------------------------------------------------------------------*/
-void UpdateKeyboard (void)
-{
+void UpdateKeyboard (void){
 /*=== This adds the row/column/data value for each key on spectrum kerb ===*/
 #define NUM_KEYB_KEYS 256
   enum SpecKeys

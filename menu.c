@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include "v_alleg.h"
 #include <allegro5/allegro_native_dialog.h>
+#include <allegro5/allegro_audio.h>
 #include "z80.h"
 #include "langs.h"
 #include "menu.h"
@@ -35,6 +36,7 @@
 #include "snaps.h"
 #include "mem.h"
 extern ALLEGRO_DISPLAY *display;
+extern ALLEGRO_AUDIO_STREAM *audioStream;
 extern int language;
 
 #ifdef NO_USE_MENU
@@ -43,6 +45,20 @@ void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor, int 
 int menuopciones (void){ return 0; }
 int menuhardware (void){ return 0; }
 
+int v_alertYesNo (const char *Title, const char *Head, const char *Text){
+int ret;
+al_set_audio_stream_playing(audioStream,false);
+ret = al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_YES_NO);
+al_set_audio_stream_playing(audioStream,true);
+return (ret);  
+}
+int v_alertErrOK (const char *Title, const char *Head, const char *Text){
+int ret;
+al_set_audio_stream_playing(audioStream,false);
+ret = al_show_native_message_box(display, Title, Head, Text, NULL, ALLEGRO_MESSAGEBOX_ERROR);
+al_set_audio_stream_playing(audioStream,true);
+return (ret);  
+}
 
 /*---------------------------------------------------------------------------
 // Filebox selection popup :-), it receives the Type of popup (Load SNA,
@@ -51,14 +67,14 @@ int menuhardware (void){ return 0; }
 //int FileMenu (char *tfont, char type, char *filename){ return 0; }
 int FileMenu (char type, char *filename){
   extern tipo_emuopt emuopt;
-  int ret;
   ALLEGRO_FILECHOOSER *dialogo;
+  int ret;
 
-  const char extensions[FILEBOX_TYPES][80] = {
-    "SNA;SP;Z80;SCR",  //carga
-    "SCR",
-    "SNA;SP;Z80;SCR",  //graba
-    "TAP;TZX"          //cintas
+  const char extensions[FILEBOX_TYPES][5*9] = {
+    ".SNA;.SP;.Z80;.SCR;.sna;.sp;.z80;.scr",  //carga
+    ".SCR",
+    "SNA;SP;Z80;SCR;sna;sp;z80;scr",  //graba
+    "TAP;TZX;tap;tzx"          //cintas
   };
   const int mode[FILEBOX_TYPES]={
     ALLEGRO_FILECHOOSER_FILE_MUST_EXIST,
@@ -70,10 +86,12 @@ int FileMenu (char type, char *filename){
   if (emuopt.gunstick & GS_GUNSTICK)
     set_mouse_sprite (NULL);
   */
+  al_set_audio_stream_playing(audioStream,false);
   ASprintf("Creando dialogo\n");
   dialogo = al_create_native_file_dialog(NULL,lang_filemenu[(language * FILEBOX_TYPES) + type],extensions[type],mode[type]);
   ret =  al_show_native_file_dialog(display, dialogo);
   al_destroy_native_file_dialog(dialogo);
+  al_set_audio_stream_playing(audioStream,true);
   ASprintf("Destruyendo dialogo\n");
   
   //ret = file_select_ex (lang_filemenu[(language * FILEBOX_TYPES) + type], filename, extensions[type] ,512, 290, 170);
@@ -85,7 +103,7 @@ int FileMenu (char type, char *filename){
       set_mouse_sprite_focus (8, 8);
   }
   */
-  return (ret);
+  return (0);
 }
 
 

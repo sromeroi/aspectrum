@@ -21,6 +21,7 @@
 #define MAXSOUNDBUFFER 68192
 
 #include <stdio.h>
+#include <allegro5/allegro_audio.h>
 #include "z80.h"
 #include "v_alleg.h"
 
