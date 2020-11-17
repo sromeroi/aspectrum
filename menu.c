@@ -74,9 +74,9 @@ int FileMenu (char type, char *filename){
 
   const char extensions[FILEBOX_TYPES][7*9] = {
     "*.SNA;*.SP;*.Z80;*.SCR;*.sna;*.sp;*.z80;*.scr",  //carga
-    "*.SNA;*.sna"
+    "*.SNA;*.sna",
     "*.SCR;*.scr",
-    "*.TAP;*.TZX;*.tap;*.tzx"          //cintas
+   "*.TAP;*.TZX;*.tap;*.tzx"          //cintas
   };
   const int mode[FILEBOX_TYPES]={
     ALLEGRO_FILECHOOSER_FILE_MUST_EXIST,
@@ -92,6 +92,10 @@ int FileMenu (char type, char *filename){
   //ASprintf("Creando dialogo\n");
   dialogo = al_create_native_file_dialog(NULL,lang_filemenu[(language * FILEBOX_TYPES) + type],extensions[type],mode[type]);
   ret =  al_show_native_file_dialog(display, dialogo);
+  ASprintf("r:%i      --- file: $v=";ret,);
+  if (al_get_native_file_dialog_count(dialogo)==1){
+    filename = al_get_native_file_dialog_path(dialogo,1);
+  }
   al_destroy_native_file_dialog(dialogo);
   al_set_audio_stream_playing(audioStream,true);
   //ASprintf("Destruyendo dialogo\n");
@@ -106,7 +110,7 @@ int FileMenu (char type, char *filename){
   }
   */
   v_cleankeys();
-  return (0);
+  return (ret);
 }
 
 

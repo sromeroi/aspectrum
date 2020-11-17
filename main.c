@@ -447,8 +447,10 @@ ASprintf("entrando en el bucle\n");
 
 	  case gKEY_F3:
 	    ASprintf("lanzando dialogo...\n");
-		if (FileMenu (DIALOG_SNAyC, fname) != 0)
+		if (FileMenu (DIALOG_SNAyC, fname) != 0){
+			ASprintf ("F:%s",fname);
 			LoadSnapshot (&spectrumZ80, fname);
+		}
 		tecla = 0;
 		//debug = 1 - debug;
 		break;
