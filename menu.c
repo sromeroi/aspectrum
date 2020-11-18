@@ -40,7 +40,6 @@ extern ALLEGRO_AUDIO_STREAM *audioStream;
 extern int language;
 
 #ifdef NO_USE_MENU
-int MainMenu (Z80Regs * regs, char *tfont){ return 0; }
 void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor, int fgcolor, int textbgselcolor, char *tfont){ return 0; }
 int menuopciones (void){ return 0; }
 int menuhardware (void){ return 0; }
@@ -117,6 +116,31 @@ int FileMenu (char type, char *filename){
   return (ret);
 }
 
+
+int about_proc (void){
+  //FIXME Location of dialog.
+  v_alertErrOK("Acerca de...","Aspectrum Version: "VERSION,"(C) 2000-2003 Santiago Romero, Kak y Alvaro Alea\nDistribuido bajo licencia GPL V2");
+   return D_CLOSE;
+}
+
+int MainMenu (Z80Regs * regs, char *tfont){
+  ALLEGRO_MENU_INFO mainmenuinfo[] = {
+    ALLEGRO_START_OF_MENU("&File", 1),
+        { "&Open", 2, 0, NULL },
+        ALLEGRO_START_OF_MENU("Open &Recent...", 3),
+          { "Recent 1", 4, 0, NULL },
+          { "Recent 2", 5, 0, NULL },
+          ALLEGRO_END_OF_MENU,
+        ALLEGRO_MENU_SEPARATOR,
+        { "E&xit", 6, 0, NULL },
+        ALLEGRO_END_OF_MENU,
+    ALLEGRO_START_OF_MENU("&Help", 7),
+        {"&About", 8, 0, NULL },
+        ALLEGRO_END_OF_MENU,
+    ALLEGRO_END_OF_MENU
+  };
+
+}
 
 #else  // def NO_USE_MENU
 
