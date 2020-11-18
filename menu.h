@@ -34,7 +34,7 @@ enum dialogconst { DIALOG_DEBUGGER_0=0, DIALOG_DEBUGGER_1, DIALOG_SNAP_SAVE,
 	    DIALOG_OPEN_TAPE, DIALOG_CHANGE_LANG, DIALOG_REWIND_TAPE, 
 	    DIALOG_REFERENCEKEYS, DIALOG_ABOUT, DIALOG_OPTIONS, DIALOG_HARDWARE} ;
 
-int MainMenu (Z80Regs * regs, char *tfont);
+void MainMenu ();
 
 void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor,int fgcolor, int textbgselcolor, char *tfont);
 

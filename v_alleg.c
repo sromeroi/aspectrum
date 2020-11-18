@@ -273,6 +273,7 @@ al_start_timer(emuclock);
 //ASprintf("antes sonido \n"); 
   gInitSound ();
 //ASprintf("despues sonido\n");
+  MainMenu();
 }
 
 int v_framecheck(void){

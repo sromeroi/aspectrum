@@ -373,6 +373,8 @@ ASprintf("entrando en el bucle\n");
 
     // Read a key to interpret if available
 	gupdatekeys();
+	if(1==2){
+	/*
     if ( gkeypressed(gKEY_ESC) || gkeypressed(gKEY_TILDE) ){
 	  // call the menu and get the selected option
 	  v_scaremouse ();
@@ -420,6 +422,7 @@ ASprintf("entrando en el bucle\n");
 		  RewindTAP (&spectrumZ80, tapfile);
 		  break;
 	  };
+	  */
 	} else {
 		//FIXME check key by key
 		     if (gkeypressed(gKEY_F1)) { tecla=gKEY_F1; }
