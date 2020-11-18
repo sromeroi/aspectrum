@@ -124,21 +124,48 @@ int about_proc (void){
 }
 
 int MainMenu (Z80Regs * regs, char *tfont){
-  ALLEGRO_MENU_INFO mainmenuinfo[] = {
-    ALLEGRO_START_OF_MENU("&File", 1),
-        { "&Open", 2, 0, NULL },
-        ALLEGRO_START_OF_MENU("Open &Recent...", 3),
-          { "Recent 1", 4, 0, NULL },
-          { "Recent 2", 5, 0, NULL },
-          ALLEGRO_END_OF_MENU,
-        ALLEGRO_MENU_SEPARATOR,
-        { "E&xit", 6, 0, NULL },
-        ALLEGRO_END_OF_MENU,
-    ALLEGRO_START_OF_MENU("&Help", 7),
-        {"&About", 8, 0, NULL },
-        ALLEGRO_END_OF_MENU,
-    ALLEGRO_END_OF_MENU
-  };
+ALLEGRO_MENU_INFO menu_info[] = {
+	ALLEGRO_START_OF_MENU("Archivo", 1),
+		{ "Cargar Snapshot...", 10, 0, NULL },
+		{ "Guardar Snapshot...", 11, 0, NULL },
+		{ "Guardar Imagen de Pantalla...", 12, 0, NULL },
+		ALLEGRO_MENU_SEPARATOR,
+		{ "Salir", 13, 0, NULL },
+		ALLEGRO_END_OF_MENU,
+	ALLEGRO_START_OF_MENU("Opciones", 2),
+		{ "Snapshots...", 21, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Cintas...", 22, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Video...", 23, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Opciones", 24, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Grabaciones", 25, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Cambiar Idioma", 26, 0, NULL },
+		ALLEGRO_END_OF_MENU,
+	ALLEGRO_START_OF_MENU("Maquina", 3),
+		{ "Reset", 31, 0, NULL },
+		{ "NMI", 32, 0, NULL },
+		{ "Ejecutar Debbuger", 33, 0, NULL },
+		ALLEGRO_START_OF_MENU("Seleccionar Hardware", 34),
+			{ "16K", 341, ALLEGRO_MENU_ITEM_CHECKBOX, NULL },
+			{ "48K", 342, ALLEGRO_MENU_ITEM_CHECKED, NULL },
+			{ "Inves 48K", 343, ALLEGRO_MENU_ITEM_CHECKBOX, NULL },
+			{ "128K", 344, ALLEGRO_MENU_ITEM_CHECKBOX, NULL },
+			{ "+2", 345, ALLEGRO_MENU_ITEM_CHECKBOX, NULL },
+			{ "+2A", 346, ALLEGRO_MENU_ITEM_CHECKBOX, NULL },
+			ALLEGRO_END_OF_MENU,
+		ALLEGRO_END_OF_MENU,
+	ALLEGRO_START_OF_MENU("Cinta", 4),
+		{ "Abrir Cinta...", 41, 0, NULL },
+		{ "Ver Cinta", 42, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Rebobinar Cinta", 43, 0, NULL },
+		{ "Play", 44, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Stop", 45, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		{ "Grabar", 46, ALLEGRO_MENU_ITEM_DISABLED, NULL },
+		ALLEGRO_END_OF_MENU,
+	ALLEGRO_START_OF_MENU("Ayuda", 5),
+		{ "Chuleta de Teclado", 51, 0, NULL },
+		{ "Acerca de...", 52, 0, NULL },
+		ALLEGRO_END_OF_MENU,
+};
 
 }
 
