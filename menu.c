@@ -71,6 +71,7 @@ int FileMenu (char type, char *filename){
   extern tipo_emuopt emuopt;
   ALLEGRO_FILECHOOSER *dialogo;
   int ret;
+  char *tmpname;
 
   const char extensions[FILEBOX_TYPES][7*9] = {
     "*.SNA;*.SP;*.Z80;*.SCR;*.sna;*.sp;*.z80;*.scr",  //carga
@@ -92,11 +93,14 @@ int FileMenu (char type, char *filename){
   //ASprintf("Creando dialogo\n");
   dialogo = al_create_native_file_dialog(NULL,lang_filemenu[(language * FILEBOX_TYPES) + type],extensions[type],mode[type]);
   ret =  al_show_native_file_dialog(display, dialogo);
-  ASprintf("r:%i      --- file: $v=";ret,);
   if (al_get_native_file_dialog_count(dialogo)==1){
-    filename = al_get_native_file_dialog_path(dialogo,1);
+    tmpname = al_get_native_file_dialog_path(dialogo,0);
+    strcpy(filename, tmpname);
   }
+  //ASprintf("r:%i      --- file=%s\n",ret,filename);
+  
   al_destroy_native_file_dialog(dialogo);
+  //ASprintf("r:%i      --- file=%s\n",ret,filename);
   al_set_audio_stream_playing(audioStream,true);
   //ASprintf("Destruyendo dialogo\n");
   
