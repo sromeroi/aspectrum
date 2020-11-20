@@ -68,6 +68,8 @@ ALLEGRO_DISPLAY *display;
 ALLEGRO_BITMAP *mouseicon;
 ALLEGRO_MOUSE_STATE mousestatus;
 ALLEGRO_FONT *font;
+//ALLEGRO_MENU *menuprinc;
+
 int v_res;
 
 ALLEGRO_VOICE *voces;
@@ -227,7 +229,9 @@ void InitSystem (void){
 // inits everything (for allegro)
 //ASprintf("antes graficos \n");
   InitGraphics();
-
+//ASprintf("antes de menu\n");
+  MainMenu();
+//ASprintf("despues de graficos \n");
   // Timer inicialization for sync and FPS calculus  
 //ASprintf("antes timer \n");
 //  install_timer ();
@@ -302,7 +306,7 @@ void InitGraphics (void){
   al_init_font_addon();
   al_init_ttf_addon();
   
-  al_set_new_display_flags(ALLEGRO_WINDOWED);
+  al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_GTK_TOPLEVEL );
   al_set_new_display_option(ALLEGRO_COLOR_SIZE,16,ALLEGRO_SUGGEST);
   display = al_create_display(640,480);
   al_set_window_title (display, "ASpectrum emulator");

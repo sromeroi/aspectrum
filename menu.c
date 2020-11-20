@@ -37,6 +37,8 @@
 #include "mem.h"
 extern ALLEGRO_DISPLAY *display;
 extern ALLEGRO_AUDIO_STREAM *audioStream;
+//extern 
+ALLEGRO_MENU *menuprinc;
 extern int language;
 
 #ifdef NO_USE_MENU
@@ -122,15 +124,14 @@ int about_proc (void){
   v_alertErrOK("Acerca de...","Aspectrum Version: "VERSION,"(C) 2000-2003 Santiago Romero, Kak y Alvaro Alea\nDistribuido bajo licencia GPL V2");
    return D_CLOSE;
 }
-ALLEGRO_MENU *menuprinc;
-int MainMenu (){
+void MainMenu (void){
   ALLEGRO_MENU_INFO menu_info[] = {   
     ALLEGRO_START_OF_MENU("Archivo", 1),
-      { "Cargar Snapshot...", 10, 0, NULL },
-      { "Guardar Snapshot...", 11, 0, NULL },
-      { "Guardar Imagen de Pantalla...", 12, 0, NULL },
+      { "Cargar Snapshot...   F3", 10, 0, NULL },
+      { "Guardar Snapshot...   F2", 11, 0, NULL },
+      { "Guardar Imagen de Pantalla...   F4", 12, 0, NULL },
       ALLEGRO_MENU_SEPARATOR,
-      { "Salir", 13, 0, NULL },
+      { "Salir   F11", 13, 0, NULL },
       ALLEGRO_END_OF_MENU,
     ALLEGRO_START_OF_MENU("Opciones", 2),
       { "Snapshots...", 21, ALLEGRO_MENU_ITEM_DISABLED, NULL },
@@ -138,12 +139,12 @@ int MainMenu (){
       { "Video...", 23, ALLEGRO_MENU_ITEM_DISABLED, NULL },
       { "Opciones", 24, ALLEGRO_MENU_ITEM_DISABLED, NULL },
       { "Grabaciones", 25, ALLEGRO_MENU_ITEM_DISABLED, NULL },
-      { "Cambiar Idioma", 26, 0, NULL },
+      { "Cambiar Idioma    F8", 26, 0, NULL },
       ALLEGRO_END_OF_MENU,
     ALLEGRO_START_OF_MENU("Maquina", 3),
-      { "Reset", 31, 0, NULL },
+      { "Reset    F5", 31, 0, NULL },
       { "NMI", 32, 0, NULL },
-      { "Ejecutar Debbuger", 33, 0, NULL },
+      { "Ejecutar Debbuger   F1", 33, 0, NULL },
       ALLEGRO_START_OF_MENU("Seleccionar Hardware", 34),
         { "16K", 341, ALLEGRO_MENU_ITEM_CHECKBOX, NULL },
         { "48K", 342, ALLEGRO_MENU_ITEM_CHECKED, NULL },
@@ -154,7 +155,7 @@ int MainMenu (){
         ALLEGRO_END_OF_MENU,
       ALLEGRO_END_OF_MENU,
     ALLEGRO_START_OF_MENU("Cinta", 4),
-      { "Abrir Cinta...", 41, 0, NULL },
+      { "Abrir Cinta...   F6", 41, 0, NULL },
       { "Ver Cinta", 42, ALLEGRO_MENU_ITEM_DISABLED, NULL },
       { "Rebobinar Cinta", 43, 0, NULL },
       { "Play", 44, ALLEGRO_MENU_ITEM_DISABLED, NULL },
@@ -162,12 +163,24 @@ int MainMenu (){
       { "Grabar", 46, ALLEGRO_MENU_ITEM_DISABLED, NULL },
       ALLEGRO_END_OF_MENU,
     ALLEGRO_START_OF_MENU("Ayuda", 5),
-      { "Chuleta de Teclado", 51, 0, NULL },
-      { "Acerca de...", 52, 0, NULL },
-      ALLEGRO_END_OF_MENU,
+      { "Ayuda Teclado", 51, 0, NULL },
+      { "Ayuda Debbuger  F12", 52, 0, NULL },
+      { "Acerca de...", 53, 0, NULL },
+      ALLEGRO_END_OF_MENU,  
+  ALLEGRO_END_OF_MENU, 
   };
+
+//ASprintf("antes de crear\n");
 menuprinc = al_build_menu(menu_info);
-al_set_display_menu(display,menuprinc);
+//ASprintf("antes de asignar\n");
+if (!al_set_display_menu(display, menuprinc)) {
+ // pmenu = al_clone_menu_for_popup(menu);
+ // al_destroy_menu(menu);
+ // menu = pmenu;
+ ASprintf("pues fallo el menu...\n");
+}
+
+//ASprintf("asigno\n");
 }
 
 #else  // def NO_USE_MENU

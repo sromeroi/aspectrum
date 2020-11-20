@@ -514,7 +514,7 @@ ASprintf("entrando en el bucle\n");
 		//debug = 1 - debug;
 		break;
 
-	  case gKEY_F10:
+	  case gKEY_F11:
 	    // PENDING - LOCALIZE THIS.
 		tecla = NULL;
 		if (language == 1){
