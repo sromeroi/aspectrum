@@ -36,13 +36,16 @@ enum dialogconst { DIALOG_DEBUGGER_0=0, DIALOG_DEBUGGER_1, DIALOG_SNAP_SAVE,
 
 void MainMenu (void);
 
+int MainMenuClick (void);
+void MainMenuUpdateModel(int model);
+
 void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor,int fgcolor, int textbgselcolor, char *tfont);
 
 int FileMenu (char type, char *filename);
 
 int menuopciones (void);
 
-int menuhardware (void);
+int menuhardware (int model);
 
 int v_alertYesNo (const char *Title, const char *Head, const char *Text);
 

@@ -41,9 +41,9 @@ byte readvmem(word offset, int page){
 
 /* por que estas rutinas y no paginar directamente sobre los arrais???
  * Supon la arquitectura del +2 y la del +2 con el pokeador automatico de MH
- * en el primero el tamaño de la pagina es de 16K mientras que en el segundo es de 2K
+ * en el primero el tamaï¿½o de la pagina es de 16K mientras que en el segundo es de 2K
  * Con esto deberiamos poder aprobechar la rutina de paginacion del 128 en los dos casos
- * ya que esta rutina tiene en cuenta el tamaño de pagina con el que trabajamos y hace los
+ * ya que esta rutina tiene en cuenta el tamaï¿½o de pagina con el que trabajamos y hace los
  * ajustes necesarios
  */
 void pagein(int size, int block, int page, int ro, int issystem){
@@ -112,6 +112,7 @@ int init_spectrum(int model,char *romfile){
 			ret=1;
 			break;
 		}
+	MainMenuUpdateModel(model);	
 	return ret;
 }
 

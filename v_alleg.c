@@ -70,7 +70,7 @@ ALLEGRO_MOUSE_STATE mousestatus;
 ALLEGRO_FONT *font;
 //ALLEGRO_MENU *menuprinc;
 
-int v_res;
+extern int v_res;
 
 ALLEGRO_VOICE *voces;
 ALLEGRO_MIXER *mixer;
@@ -689,7 +689,7 @@ void UpdateKeyboard (void){
 */
 }
 
-void gupdatekeys(void){
+void gupdatekeys(void){ 
   al_get_keyboard_state(&estadoteclas);
 }
 bool gkeypressed(int tecla){

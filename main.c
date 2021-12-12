@@ -204,75 +204,76 @@ int emuMain (int argc, char *argv[])
 #ifdef NO_GETOPTLONG
   while ((c = getopt (argc, argv, "r:s:t:hVdj:m:")) != -1)
 #else
-  while ((c =
-	  getopt_long (argc, argv, "r:s:t:hVdj:m:", long_options, NULL)) != -1)
+  while ((c = getopt_long (argc, argv, "r:s:t:hVdj:m:", long_options, NULL)) != -1)
 #endif
     {
-      switch (c)
-	{
-	case 'r':
-	  strncpy (emuopt.romfile, optarg, 255);
-	  break;
-	case 's':
-	  strncpy (emuopt.snapfile, optarg, 255);
-	  break;
-	case 't':
-	  strncpy (emuopt.tapefile, optarg, 255);
-	  break;
-	case 'V':
-	  ASprintf("ASpectrum Version " VERSION "\n");
-	  done = 1;
-	  break;
-	case 'd':
-	  debug = 1;
-	  break;
-	case 'j':
-	  if (strstr (optarg, "G") != NULL)
-	    emuopt.gunstick |= GS_GUNSTICK;
-	  if (strstr (optarg, "k") != NULL)
-	    ;
-	  break;
-	case 'm':
-	  hwopt.hw_model=optarg[0] -0x30 ;
-	  break;
-	case ':':
-	  printf("Lack of parameters\n");
-	case 'h':
-	case '?':
-	  printf( STANDAR_COPYRIGHT 
-		  "Use of Aspectrum:\n"
-		  "   aspectrum [options] [snapshot or tape file]\n\n"
-		  "Options can be:\n"
-		  "   -r --rom romfile  use romfile instead own romfile.\n"
-		  "   -s --snap file    load snapshot at startup\n"
-		  "                     suported snapshot files are .SP .SNA .Z80\n"
-		  "   -t --tape file    use file as tape for load routines.\n"
-		  "   -d --debug        start the emulator paused in debug mode.\n"
-		  "   -V --version      echo the version of the emulator.\n"
-		  "   -h --help         this help.\n"
-		  "   -j --joy def      enable joystick, def is a string of caracter\n"
-		  "	                 for each joystick, see doc for more help.\n"
-		  "   -m --model num    select the model of spectrum to emulate:\n"
-		  "                     num=1 => ZX Spectrum 16K\n"
-		  "                     num=2 => ZX Spectrum 48K\n"
-		  "                     num=3 => Inves ZX Spectrum+ 48K\n"
-		  "                     num=4 => ZX Spectrum 128K\n"
-		  "                     num=5 => ZX Spectrum +2\n"
-		  "                     num=6 => ZX Spectrum +2A/+3\n"
-		  "                     num=7 => ZX Spectrum 48K w/ Interface I (NO YET)\n"
-		  "                     num=8 => ZX Spectrum 48K w/ Multiface (NO YET)\n"
-		  "");
-	  done = 1;
-	  break;
-	};
+      switch (c){
+		case 'r':
+		strncpy (emuopt.romfile, optarg, 255);
+		break;
+		case 's':
+		strncpy (emuopt.snapfile, optarg, 255);
+		break;
+		case 't':
+		strncpy (emuopt.tapefile, optarg, 255);
+		break;
+		case 'V':
+		ASprintf("ASpectrum Version " VERSION "\n");
+		done = 1;
+		break;
+		case 'd':
+		debug = 1;
+		break;
+		case 'j':
+		if (strstr (optarg, "G") != NULL)
+			emuopt.gunstick |= GS_GUNSTICK;
+		if (strstr (optarg, "k") != NULL)
+			;
+		break;
+		case 'm':
+		hwopt.hw_model=optarg[0] -0x30 ;
+		break;
+		case ':':
+		printf("Lack of parameters\n");
+		case 'h':
+		case '?':
+		printf( STANDAR_COPYRIGHT 
+			"Use of Aspectrum:\n"
+			"   aspectrum [options] [snapshot or tape file]\n\n"
+			"Options can be:\n"
+			"   -r --rom romfile  use romfile instead own romfile.\n"
+			"   -s --snap file    load snapshot at startup\n"
+			"                     suported snapshot files are .SP .SNA .Z80\n"
+			"   -t --tape file    use file as tape for load routines.\n"
+			"   -d --debug        start the emulator paused in debug mode.\n"
+			"   -V --version      echo the version of the emulator.\n"
+			"   -h --help         this help.\n"
+			"   -j --joy def      enable joystick, def is a string of caracter\n"
+			"	                 for each joystick, see doc for more help.\n"
+			"   -m --model num    select the model of spectrum to emulate:\n"
+			"                     num=1 => ZX Spectrum 16K\n"
+			"                     num=2 => ZX Spectrum 48K\n"
+			"                     num=3 => Inves ZX Spectrum+ 48K\n"
+			"                     num=4 => ZX Spectrum 128K\n"
+			"                     num=5 => ZX Spectrum +2\n"
+			"                     num=6 => ZX Spectrum +2A/+3\n"
+			"                     num=7 => ZX Spectrum 48K w/ Interface I (NO YET)\n"
+			"                     num=8 => ZX Spectrum 48K w/ Multiface (NO YET)\n"
+			"");
+		done = 1;
+		break;
+		};
     };
   if (done != 0)
     return (0);
   // parameter error = direct exit 
 #endif // ZXDEB endif
 
+//ASprintf("antes de initsystem\n");
+  InitSystem ();
+
   Z80Initialization ();
-  // AS_printf("Z80 Initialization completed\n");
+// AS_printf("Z80 Initialization completed\n");
 
   // check if it's the last arg
   if ((optind + 1) < argc){
@@ -294,10 +295,10 @@ int emuMain (int argc, char *argv[])
 	       strstr (argv[optind], ".TZX") != NULL)
 	strncpy (emuopt.tapefile, argv[optind], 255);
       else
-	{
-	  printf("Args unknow\n");
-	  return (-1);
-	}
+		{
+		printf("Args unknow\n");
+		return (-1);
+		}
     }
   // AS_printf("Posible argumento indentificado.\n");
 	
@@ -337,8 +338,6 @@ int emuMain (int argc, char *argv[])
 
   // Init all the graphic stuff:
 
-//ASprintf("antes de initsystem\n");
-  InitSystem ();
 //ASprintf("despues de initsystem\n");
   v_initmouse ();
 //ASprintf("despues de v_initmouse\n");
@@ -369,7 +368,8 @@ ASprintf("entrando en el bucle\n");
   
   // MAIN LOOP
   while (!done) {
-	tecla = 0;
+	//tecla = 0;  
+	tecla = MainMenuClick();
 
     // Read a key to interpret if available
 	gupdatekeys();
@@ -503,7 +503,7 @@ ASprintf("entrando en el bucle\n");
 
 	  case gKEY_F9:
 		tecla = gKEY_ESC;
-		menuhardware();
+		menuhardware(0);
 		//debug = 1 - debug;
 		break;
 

@@ -38,13 +38,13 @@
 extern ALLEGRO_DISPLAY *display;
 extern ALLEGRO_AUDIO_STREAM *audioStream;
 //extern 
-ALLEGRO_MENU *menuprinc;
+ALLEGRO_MENU *menuprinc = NULL;
+ALLEGRO_EVENT_QUEUE *cola = NULL;
 extern int language;
 
 #ifdef NO_USE_MENU
-void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor, int fgcolor, int textbgselcolor, char *tfont){ return 0; }
+void DrawSelected (int x1, int y1, int x2, int y2, char *text, int bgcolor, int fgcolor, int textbgselcolor, char *tfont){ ; }
 int menuopciones (void){ return 0; }
-int menuhardware (void){ return 0; }
 
 int v_alertYesNo (const char *Title, const char *Head, const char *Text){
   int ret;
@@ -179,8 +179,89 @@ if (!al_set_display_menu(display, menuprinc)) {
  // menu = pmenu;
  ASprintf("pues fallo el menu...\n");
 }
+cola=al_create_event_queue();
+al_register_event_source(cola, al_enable_menu_event_source(menuprinc));
 
 //ASprintf("asigno\n");
+}
+
+int MainMenuClick (void){
+  int ret=0;
+  ALLEGRO_EVENT evento;
+  if (al_peek_next_event(cola, &evento)) {
+    if (evento.type==ALLEGRO_EVENT_MENU_CLICK) {
+      switch (evento.user.data1){
+      case (33): //F1
+        ret = gKEY_F1;
+        break;
+      case (11): //F2
+        ret = gKEY_F2;
+        break;
+      case (10): //F3
+        ret = gKEY_F3;
+        break;
+      case (12): //F4
+        ret = gKEY_F4;
+        break;
+      case (31): //F5
+        ret = gKEY_F5;
+        break;
+      case (41): //F6
+        ret = gKEY_F6;
+        break;
+      case (13): //F11
+        ret = gKEY_F11;
+        break;
+      case (51): //F12
+        ret = gKEY_F12;
+        break;
+      case (341):
+        menuhardware(SPECMDL_16K);
+        break;
+      case (342):
+        menuhardware(SPECMDL_48K);
+        break;
+      case (343):
+        menuhardware(SPECMDL_INVES);
+        break;
+      case (344):
+        menuhardware(SPECMDL_128K);
+        break;
+      case (345):
+        menuhardware(SPECMDL_PLUS2);
+        break;
+      case (346):
+        menuhardware(SPECMDL_PLUS3);
+        break;
+      }
+    al_drop_next_event(cola);  
+    }
+  }
+  return ret;
+}
+
+int menuhardware (int model){
+  extern tipo_hwopt hwopt;
+  extern Z80Regs spectrumZ80;
+  if (model!=0) {
+    if (hwopt.hw_model!=model){
+      if (v_alertYesNo ("Cambiar Modelo Hardware","Esto reseteara el emulador.", "Confirme que desea cambiar.") == 1){
+        end_spectrum();
+        init_spectrum(model,"");
+        //printf("Inicio %i\n",c-2);
+        Z80Reset (&spectrumZ80, 69888);
+      }
+    } 
+  }
+}
+
+void MainMenuUpdateModel(int model){
+  al_set_menu_item_flags(menuprinc,341,model==SPECMDL_16K?ALLEGRO_MENU_ITEM_CHECKED:NULL);
+  al_set_menu_item_flags(menuprinc,342,model==SPECMDL_48K?ALLEGRO_MENU_ITEM_CHECKED:NULL);
+  al_set_menu_item_flags(menuprinc,343,model==SPECMDL_INVES?ALLEGRO_MENU_ITEM_CHECKED:NULL);
+  al_set_menu_item_flags(menuprinc,344,model==SPECMDL_128K?ALLEGRO_MENU_ITEM_CHECKED:NULL);
+  al_set_menu_item_flags(menuprinc,345,model==SPECMDL_PLUS2?ALLEGRO_MENU_ITEM_CHECKED:NULL);
+  al_set_menu_item_flags(menuprinc,346,model==SPECMDL_PLUS3?ALLEGRO_MENU_ITEM_CHECKED:NULL);
 }
 
 #else  // def NO_USE_MENU
@@ -492,7 +573,7 @@ menuopciones (void)
 
 
 int
-menuhardware (void)
+menuhardware (int model)
 {
   extern tipo_hwopt hwopt;
   extern Z80Regs spectrumZ80;	
