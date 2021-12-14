@@ -37,9 +37,9 @@
 #include "mem.h"
 extern ALLEGRO_DISPLAY *display;
 extern ALLEGRO_AUDIO_STREAM *audioStream;
-//extern 
+extern ALLEGRO_EVENT_QUEUE *colaD;
+extern ALLEGRO_EVENT_QUEUE *colaM; 
 ALLEGRO_MENU *menuprinc = NULL;
-ALLEGRO_EVENT_QUEUE *cola = NULL;
 extern int language;
 
 #ifdef NO_USE_MENU
@@ -179,8 +179,7 @@ if (!al_set_display_menu(display, menuprinc)) {
  // menu = pmenu;
  ASprintf("pues fallo el menu...\n");
 }
-cola=al_create_event_queue();
-al_register_event_source(cola, al_enable_menu_event_source(menuprinc));
+al_register_event_source(colaM, al_enable_menu_event_source(menuprinc));
 
 //ASprintf("asigno\n");
 }
@@ -188,7 +187,15 @@ al_register_event_source(cola, al_enable_menu_event_source(menuprinc));
 int MainMenuClick (void){
   int ret=0;
   ALLEGRO_EVENT evento;
-  if (al_peek_next_event(cola, &evento)) {
+  if (al_peek_next_event(colaD, &evento)) {
+    //ASprintf ("%i\n",evento.type);
+    if (evento.type==ALLEGRO_EVENT_DISPLAY_CLOSE) {
+        ret = gKEY_F11;  
+    }
+    al_drop_next_event(colaD); 
+  }
+
+  if (al_peek_next_event(colaM, &evento)) {
     if (evento.type==ALLEGRO_EVENT_MENU_CLICK) {
       switch (evento.user.data1){
       case (33): //F1
@@ -234,7 +241,7 @@ int MainMenuClick (void){
         menuhardware(SPECMDL_PLUS3);
         break;
       }
-    al_drop_next_event(cola);  
+    al_drop_next_event(colaM);  
     }
   }
   return ret;

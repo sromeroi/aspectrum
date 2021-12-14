@@ -19,6 +19,13 @@
  Copyright (c) 2000 Santiago Romero Iglesias.
  Email: sromero@escomposlinux.org
  ======================================================================*/  
+#ifndef _SOUND_H
+#define _SOUND_H 1
+
+#include <stdint.h>
+#include "ayemu_8912.h"
+
+void initSound (void);
 
 void initSoundLog (void);
 
@@ -27,3 +34,13 @@ void logSound (int state);
 void soundDump (void);
 
 void clearSoundBuffer (void);
+
+void ay8912_outFF(uint8_t reg);
+
+void ay8912_outBF(uint8_t val);
+
+uint8_t ay8912_inFF(void);
+
+void ay8912_reset(void);
+
+#endif	/* _SOUND_H */

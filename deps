@@ -1,5 +1,5 @@
 
-sound.o: sound.c stdafx.h z80.h v_alleg.h sound.h
+sound.o: sound.c stdafx.h z80.h v_alleg.h sound.h ayemu_8912.h
 v_alleg.o: v_alleg.c stdafx.h v_alleg.h z80.h main.h menu.h
 snaps.o: snaps.c stdafx.h main.h z80.h mem.h snaps.h menu.h
 graphics.o: graphics.c stdafx.h v_alleg.h z80.h mem.h main.h graphics.h
@@ -7,11 +7,12 @@ menu.o: menu.c v_alleg.h z80.h langs.h menu.h monofnt.h main.h snaps.h \
  mem.h
 debugger.o: debugger.c stdafx.h z80.h langs.h v_alleg.h graphics.h \
  disasm.h debugger.h
-main.o: main.c stdafx.h main.h sound.h langs.h z80.h snaps.h mem.h \
- monofnt.h graphics.h debugger.h v_alleg.h menu.h
+main.o: main.c stdafx.h main.h sound.h ayemu_8912.h langs.h z80.h snaps.h \
+ mem.h monofnt.h graphics.h debugger.h v_alleg.h menu.h
 z80.o: z80.c stdafx.h tables.h z80.h graphics.h monofnt.h menu.h main.h \
- sound.h snaps.h mem.h v_alleg.h macros.c opcodes.c op_cb.c op_ed.c \
- op_dd_fd.c opddfdcb.c
+ sound.h ayemu_8912.h snaps.h mem.h v_alleg.h macros.c opcodes.c op_cb.c \
+ op_ed.c op_dd_fd.c opddfdcb.c
 disasm.o: disasm.c stdafx.h z80.h mem.h disasm.h macros.c
-mem.o: mem.c z80.h snaps.h main.h mem.h
+mem.o: mem.c z80.h snaps.h main.h mem.h sound.h ayemu_8912.h
 langs.o: langs.c
+ay8912.o: ay8912.c ayemu_8912.h

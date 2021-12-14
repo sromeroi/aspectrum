@@ -51,6 +51,7 @@
 #include "menu.h"
 
 
+
 tipo_emuopt emuopt = {"\0","\0","\0",GS_INACTIVE, NULL,'n',{'o', 'p', 'q', 'a', ' '} };
 
 // hardware definitions for spectrum 48K
@@ -66,7 +67,6 @@ int v_border = 24;
 // generic wrapper
 extern volatile char *gkey;
 extern int gSoundInited;
-
 /* Some global variables used in the emulator */
 Z80Regs spectrumZ80;
 FILE *tapfile;
@@ -74,6 +74,7 @@ char fname[512];
 char *argvzero;
 volatile int last_fps, frame_counter;
 volatile int target_cycle;
+
 
 /*----------------------------------------------------------------*/
 int debug = 0, main_tecla, scanl = 0, quit_thread = 0; // hay_tecla,
@@ -347,8 +348,7 @@ int emuMain (int argc, char *argv[])
   //hay_tecla = main_tecla = 0;
 
   init_keyboard();
-//ASprintf("despues de init keyboard\n");
-
+ASprintf("despues de init keyboard\n");
   initSoundLog ();		// first sound log initialization
 //  ASprintf("despues de initSoundLog\n");
 

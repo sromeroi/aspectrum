@@ -551,6 +551,8 @@ switch (hwopt.hw_model){
 		if ((port & 0xF002)==0x1000) outbankm_p31(value); // 0x1ffd
 		break;
 	}
+if ((port & 0xC002)==0xC000) ay8912_outFF(value); // 0x7ffd 11xx xxxx xxxx xx0x
+if ((port & 0xC002)==0x8000) ay8912_outBF(value); // 0xbffd 10xx xxxx xxxx xx0x
 
 /* change border colour */
   if (!(port & 0x01)) {

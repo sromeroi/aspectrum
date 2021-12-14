@@ -17,7 +17,9 @@
 #include "snaps.h"
 #include "main.h"
 #include "mem.h"
+#include "sound.h"
 
+extern ayemu_ay_t ay8912; 
 tipo_mem mem;
 
 byte readmem(word dir){
@@ -142,6 +144,7 @@ int reset_spectrum(void){
 			ret=1;
 			break;
 		}
+	ay8912_reset();
 	return ret;
 }
 

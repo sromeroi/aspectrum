@@ -56,7 +56,7 @@
 //extern volatile int target_cycle;
 //extern volatile int last_fps;
 int fps;
-int framecounter;
+int framecounter=0;
 ALLEGRO_TIMER *emuclock;
 
 // generic key handler ( = key using allegro)
@@ -69,6 +69,10 @@ ALLEGRO_BITMAP *mouseicon;
 ALLEGRO_MOUSE_STATE mousestatus;
 ALLEGRO_FONT *font;
 //ALLEGRO_MENU *menuprinc;
+
+ALLEGRO_EVENT_QUEUE *colaM = NULL;
+ALLEGRO_EVENT_QUEUE *colaD = NULL;
+
 
 extern int v_res;
 
@@ -204,7 +208,6 @@ void gPutPixel (int x, int y, int col){
   al_put_pixel(x, y, paleta[col]);
 }
 
-
 // generic acquire bitmap function
 void gacquire_bitmap (void){
   //acquire_bitmap (vscreen);
@@ -216,8 +219,6 @@ void grelease_bitmap (void){
 //  release_bitmap (vscreen);
 }
 
-
-
 void InitSystem (void){
 //ASprintf("antes allegro \n");
 //  allegro_init ();
@@ -228,6 +229,8 @@ void InitSystem (void){
   al_init_native_dialog_addon();
 // inits everything (for allegro)
 //ASprintf("antes graficos \n");
+  colaM=al_create_event_queue();
+  colaD=al_create_event_queue();
   InitGraphics();
 //ASprintf("antes de menu\n");
   MainMenu();
@@ -281,7 +284,7 @@ al_start_timer(emuclock);
 }
 
 int v_framecheck(void){
-  int n;
+  int64_t n;
   int ret=0;
   framecounter++;
   n=al_get_timer_count(emuclock);
@@ -310,6 +313,8 @@ void InitGraphics (void){
   al_set_new_display_option(ALLEGRO_COLOR_SIZE,16,ALLEGRO_SUGGEST);
   display = al_create_display(640,480);
   al_set_window_title (display, "ASpectrum emulator");
+  al_register_event_source(colaD, al_get_display_event_source (display));
+
 //ASprintf("creando vscreen\n");
   vscreen = al_get_backbuffer(display);
   /*
@@ -707,10 +712,10 @@ void v_cleankeys(void){
 // audiostreams
 
 int gSoundInited = 0; 
-ALLEGRO_AUDIO_STREAM *audioStream;
+ALLEGRO_AUDIO_STREAM *audioStream, *PSGStream;
 
 void gInitSound (void){
-  initSoundLog ();
+  initSound ();
 
 // PENDING reserve_voices (3, -1);
 //  if (install_sound (DIGI_AUTODETECT, MIDI_NONE, NULL) < 0)
@@ -733,15 +738,20 @@ void gInitSound (void){
       ASprintf("error atando mixer a voz\n");
       return;
   }
-  audioStream = al_create_audio_stream (2,882, 44100, ALLEGRO_AUDIO_DEPTH_UINT8, ALLEGRO_CHANNEL_CONF_1); //PENDING ¿this sound on both speakers?
-  if (!al_attach_audio_stream_to_mixer(audioStream,mixer)) {  //check, must be 7 for 128K? beeper+3sound chanel + 3 noise chanel??
-      ASprintf("Stream attach error\n");
+  audioStream = al_create_audio_stream (3,882, 44100, ALLEGRO_AUDIO_DEPTH_UINT8, ALLEGRO_CHANNEL_CONF_1); 
+  if (!al_attach_audio_stream_to_mixer(audioStream,mixer)) {  
+      ASprintf("Stream (beeper) attach error\n");
+      return;
+    }
+    PSGStream = al_create_audio_stream (3,882, 44100, ALLEGRO_AUDIO_DEPTH_UINT16, ALLEGRO_CHANNEL_CONF_2); 
+  if (!al_attach_audio_stream_to_mixer(PSGStream,mixer)) {  
+      ASprintf("Stream (PSG) attach error\n");
       return;
     }
   ASprintf("Sonido Iniciado correctamente\n");
   gSoundInited = 1;
 }
-
+/*
 byte * gGetSampleBuffer (void){
   byte *ptr;
   if (!al_is_audio_installed())
@@ -755,7 +765,7 @@ byte * gGetSampleBuffer (void){
     }
   return ptr;
 }
-
+*/
 
 void gPlaySound (void){
   if (!gSoundInited)

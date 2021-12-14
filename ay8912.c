@@ -11,7 +11,7 @@
 
 char *ayemu_err;
 
-static const char VERSION[] = "libayemu 0.9";
+// static const char VERSION[] = "libayemu 0.9";
 
 const int MAGIC1 = 0xcdef;	/* for check ayemu_t structure inited */
 
@@ -428,6 +428,64 @@ void ayemu_set_reg(ayemu_ay_t *ay, int reg, unsigned char value)
 	}
 }
 
+// PENDING TO BE IMPLEMENTED CORRECTLY
+unsigned char ayemu_get_reg(ayemu_ay_t *ay, int reg)
+{
+	if (!check_magic(ay)) return 0;
+
+	switch (reg) {
+		case 0:
+			return (ay->regs.tone_a & 0x0FF);
+			break;
+		case 1:
+			return ((ay->regs.tone_a & 0x0F00) >> 8);
+			break;
+		case 2:
+			return (ay->regs.tone_b & 0x0FF);
+			break;
+		case 3:
+			return ((ay->regs.tone_b & 0x0F00) >> 8);
+			break;
+		case 4:
+			return (ay->regs.tone_c & 0x0FF);
+			break;
+		case 5:
+			return ((ay->regs.tone_c & 0x0F00) >> 8);
+			break;
+		case 6:
+			return ay->regs.noise ;
+			break;
+		case 7:
+			return (ay->regs.R7_tone_a  & 0x01) + (ay->regs.R7_tone_b  & 0x01)<<1 +
+				   (ay->regs.R7_tone_c  & 0x01)<<2 + (ay->regs.R7_noise_a & 0x01)<<3 +
+				   (ay->regs.R7_noise_b & 0x01)<<4 + (ay->regs.R7_noise_c & 0x01)<<5;
+			break;
+		case 8:
+			return ((ay->regs.vol_a & 0x0f) + (ay->regs.env_a & 0x10));
+			break;
+		case 9:
+			return ((ay->regs.vol_b & 0x0f) + (ay->regs.env_b & 0x10));
+			break;
+		case 10:
+			return ((ay->regs.vol_c & 0x0f) + (ay->regs.env_c & 0x10));
+			break;
+		case 11:
+			return (ay->regs.env_freq & 0x00FF);
+			break;
+		case 12:
+			return ((ay->regs.env_freq & 0xFF00) >> 8);
+			break;
+		case 13:
+			return 0; //ay->regs.env_style = value & 0x0f;
+			//ay->env_pos = ay->cnt_e = 0;
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
+
 
 static void prepare_generation(ayemu_ay_t *ay)
 {
@@ -455,10 +513,10 @@ static void prepare_generation(ayemu_ay_t *ay)
 		}
 	}
 
-	/* динамическая настройка глобального коэффициента усиления
-		 подразумевается, что в vols [x][31] лежит самая большая громкость
-		 TODO: Сделать проверку на это ;-)
-	*/
+/* dynamically adjusting the global gain
+ * assumes that vols [x] [31] has the highest volume
+ * TODO: Check it out ;-)
+ */
 	max_l = ay->vols[0][31] + ay->vols[2][31] + ay->vols[3][31];
 	max_r = ay->vols[1][31] + ay->vols[3][31] + ay->vols[5][31];
 	vol = (max_l > max_r) ? max_l : max_r;  // =157283 on all defaults

@@ -19,9 +19,9 @@ MAKE=make
 
 # fuentes y objetos para linux. 
 files = sound.c v_alleg.c snaps.c graphics.c menu.c debugger.c \
-main.c z80.c disasm.c mem.c langs.c 
+main.c z80.c disasm.c mem.c langs.c ay8912.c
 objects=sound.o v_alleg.o snaps.o graphics.o menu.o debugger.o \
-main.o z80.o disasm.o mem.o langs.o
+main.o z80.o disasm.o mem.o langs.o ay8912.o
 
 #linux dep
 dep:
