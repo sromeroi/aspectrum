@@ -145,5 +145,9 @@ ASPECTRUM
  * Aspectrum use AGUP library, see http://agup.sourceforge.net and the source 
    code of Aspectrum for more information.
 
+ * Aspectrum use a modified libayemu, https://github.com/gasman/libayemu from Matt Westcott, 
+   that is derived from https://asashnov.github.io/libayemu.html of Sashnov Alexander
+
+
   Santiago Romero AkA NoP/Compiler.
   sromero@escomposlinux.org
