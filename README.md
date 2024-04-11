@@ -1,9 +1,8 @@
 ASPECTRUM
 =========
-*POWERED BY Linux*
 
   Copyright (c) 2000
-  Santiago Romero Iglesias  -  sromero@escomposlinux.org
+  Santiago Romero Iglesias  -  sromero@gmail.com
 
 
   WHAT IS THIS PROGRAM FOR
