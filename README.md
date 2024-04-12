@@ -2,15 +2,18 @@ ASPECTRUM
 =========
 
   Copyright (c) 2000
-  Santiago Romero Iglesias  -  sromero@gmail.com
+  Santiago Romero Iglesias <sromero@gmail.com>
+
+  With great contributions from Alvaro Alea Fernandez <alvaroalea@gmail.com>
+  (128K and Gunstick support, different machine types, and many other features)
 
 
   WHAT IS THIS PROGRAM FOR
 -----------------------------------------------------------------------
 
  ASpectrum Emulator: This is our contribution to the Spectrum World.
- We're trying to release our simple, useable and portable Spectrum
- emulator, always thinking in the GNU/Linux community.
+ I just wanted to see if I was able to write an Spectrum emulator
+ written in pure C, as a simple proof-of-concept, and for fun.
 
 
   HOW TO USE THIS PROGRAM
@@ -126,9 +129,6 @@ ASPECTRUM
      Philip Kendall: Fuse emulator (Spectrum).
      Ignacio Burguer: GLECK emulator (Spectrum).
      Z80user, Kak, Hylian, Kel: From #spectrum on IRC-Hispano.
-
- * Alvaro Alea, for submitting the first Aspectrum patch giving support
-   to load Z80 snapshot files on the emulator.
 
  * Gines Flores, for trying to help me on the emulator.
 
