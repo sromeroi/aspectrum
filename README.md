@@ -2,9 +2,11 @@ ASPECTRUM
 =========
 
   Copyright (c) 2000
+  
   Santiago Romero Iglesias <sromero@gmail.com>
 
   With great contributions from Alvaro Alea Fernandez <alvaroalea@gmail.com>
+  
   (128K and Gunstick support, different machine types, and many other features)
 
 
